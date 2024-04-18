@@ -3,13 +3,13 @@ import { ComponentProps, FC, useEffect, useState } from "react";
 
 import { useVisualizer } from "./context";
 
-import Component from ".";
+import { CoreVisualizer } from ".";
 
 export default {
-  component: Component,
+  component: CoreVisualizer,
 } as Meta;
 
-type Story = StoryObj<typeof Component>;
+type Story = StoryObj<typeof CoreVisualizer>;
 
 export const Cesium: Story = {
   args: {
@@ -56,12 +56,12 @@ const Content: FC<{ ready?: boolean }> = ({ ready }) => {
   return null;
 };
 
-const VisualizerWrapper: FC<ComponentProps<typeof Component>> = props => {
+const VisualizerWrapper: FC<ComponentProps<typeof CoreVisualizer>> = props => {
   const [ready, setReady] = useState(false);
   return (
-    <Component {...props} onMount={() => setReady(true)}>
+    <CoreVisualizer {...props} onMount={() => setReady(true)}>
       <Content ready={ready} />
-    </Component>
+    </CoreVisualizer>
   );
 };
 

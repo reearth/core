@@ -3,7 +3,7 @@ import { Ref, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useS
 
 import type { ComputedFeature, Feature, LatLng, SelectedFeatureInfo } from "../mantle";
 import type {
-  Ref as MapRef,
+  MapRef,
   LayerSelectionReason,
   Camera,
   ComputedLayer,

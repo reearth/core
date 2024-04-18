@@ -624,7 +624,7 @@ export default function useHooks({
     color,
     disableShadow,
     enableRelativeHeight,
-  };
+  } as any;
 }
 
 function hasDuplicate(

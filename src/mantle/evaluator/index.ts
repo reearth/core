@@ -10,7 +10,7 @@ import {
 
 import { evalSimpleLayerFeature, evalSimpleLayer } from "./simple";
 
-export { clearAllExpressionCaches } from "./simple";
+export { clearAllExpressionCaches, evalExpression } from "./simple";
 
 export type EvalContext = {
   getFeatures: (d: Data, r?: DataRange) => Promise<Feature[] | undefined>;

@@ -1,19 +1,26 @@
-import { Visualizer } from "../../src/index";
+import { CoreVisualizer } from "@reearth/core";
 
 function App() {
   return (
-    <Visualizer
-      ready={true}
-      engine="cesium"
-      sceneProperty={{
-        tiles: [
-          {
-            id: "default",
-            tile_type: "default",
-          },
-        ],
-      }}
-    />
+    <div style={{
+      position: "relative",
+      width: "100vw",
+      height: '100vh',
+    }}>
+      <CoreVisualizer
+        ready={true}
+        engine="cesium"
+        sceneProperty={{
+          tiles: [
+            {
+              id: "default",
+              tile_type: "default",
+            },
+          ],
+        }}
+      />
+    </div>
+    
   );
 }
 

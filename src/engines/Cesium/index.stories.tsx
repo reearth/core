@@ -1,15 +1,15 @@
 import { Meta, StoryFn } from "@storybook/react";
 
-import Component, { Props } from "../../Map";
+import { Map, Props } from "../../Map";
 
 import { engine } from ".";
 
 export default {
-  component: Component,
+  component: Map,
   parameters: { actions: { argTypesRegex: "^on.*" } },
 } as Meta;
 
-const Template: StoryFn<Props> = args => <Component {...args} />;
+const Template: StoryFn<Props> = args => <Map {...args} />;
 
 export const Default = Template.bind([]);
 Default.args = {

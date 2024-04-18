@@ -24,7 +24,10 @@ export type {
   OverriddenLayer,
 } from "./Layers";
 
-export type { MapRef as Ref } from "./hooks";
+export * from "./Sketch";
+export type { TimelineCommitter, TimelineManagerRef } from "./useTimelineManager";
+
+export type { MapRef } from "./hooks";
 
 export type CursorType = "auto" | "grab" | "crosshair";
 
@@ -40,7 +43,7 @@ export type Props = {
     cursor?: CursorType;
   };
 
-function Map(
+function MapFn(
   {
     engines,
     engine,
@@ -141,4 +144,4 @@ function Map(
   ) : null;
 }
 
-export default forwardRef(Map);
+export const Map = forwardRef(MapFn);

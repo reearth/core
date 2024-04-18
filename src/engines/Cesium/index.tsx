@@ -116,8 +116,8 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
       onUpdate={handleUpdate}
       className={className}
       requestRenderMode={true}
-      animation
-      timeline
+      animation={false}
+      timeline={false}
       // NOTE: We need to update cesium ion token dynamically.
       // To replace old imagery provider, we need to remove old imagery provider.
       baseLayer={false}

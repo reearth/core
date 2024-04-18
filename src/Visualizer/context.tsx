@@ -1,6 +1,6 @@
 import { FC, PropsWithChildren, RefObject, createContext, useContext, useMemo } from "react";
 
-import { Ref as MapRef } from "../Map";
+import { MapRef } from "../Map";
 
 const context = createContext<RefObject<MapRef> | undefined>(undefined);
 

@@ -44,4 +44,4 @@ type CoreContext = {
 
 const coreContext = createContext<CoreContext>({});
 
-export default coreContext;
+export { coreContext };

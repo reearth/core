@@ -12,6 +12,8 @@ import { EngineRef, Feature, LayerSelectionReason, LayersRef, SketchRef } from "
 import useHooks from "./hooks";
 import { SketchEventProps, SketchFeature, SketchType } from "./types";
 
+export * from "./types";
+
 export type SketchComponentType = ComponentType<SketchComponentProps>;
 
 type GeometryOptions = {

@@ -11,12 +11,32 @@ import svgr from "vite-plugin-svgr";
 import { configDefaults } from "vitest/config";
 // https://vitejs.dev/config/
 export default defineConfig(() => ({
-  plugins: [svgr(), react(), cesium(), dts({ rollupTypes: true })],
+  plugins: [svgr(), react(), cesium({ rebuildCesium: true }), dts({ rollupTypes: true })],
   build: {
     lib: {
       entry: resolve(__dirname, "src/index.ts"),
       name: "@reearth/core",
     },
+    // rollupOptions: {
+    //   external: ["cesium"],
+    //   output: {
+    //     globals: {
+    //       cesium: "Cesium",
+    //     },
+    //   },
+    // },
+    rollupOptions: {
+      external: ["react", "react-dom"],
+      output: {
+        globals: {
+          react: "React",
+          "react-dom": "ReactDOM",
+        },
+      },
+    },
+  },
+  resolve: {
+    alias: [{ find: "csv-parse", replacement: "csv-parse/browser/esm" }],
   },
   test: {
     environment: "jsdom",
@@ -30,6 +50,4 @@ export default defineConfig(() => ({
     },
     alias: [{ find: "csv-parse", replacement: "csv-parse" }],
   },
-  // https://github.com/storybookjs/storybook/issues/25256
-  assetsInclude: ["/sb-preview/runtime.js"],
 }));

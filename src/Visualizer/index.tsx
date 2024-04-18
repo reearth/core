@@ -2,8 +2,9 @@ import { memo, forwardRef, CSSProperties, type Ref, type PropsWithChildren } fro
 import { ErrorBoundary } from "react-error-boundary";
 
 import { ComputedFeature } from "../mantle";
-import Map, {
-  Ref as MapRef,
+import {
+  Map,
+  type MapRef,
   type SceneProperty,
   type Layer,
   type LayerSelectionReason,
@@ -15,17 +16,19 @@ import Map, {
 import { SketchFeature, SketchType } from "../Map/Sketch/types";
 
 import { VisualizerProvider } from "./context";
-import coreContext from "./coreContext";
+import { coreContext } from "./coreContext";
 // import DropHolder from "./DropHolder";
 import { engines, type EngineType } from "./engines";
 import Err from "./Error";
 import useHooks from "./hooks";
 import type { InteractionModeType } from "./interactionMode";
 
-export type { EngineType } from "./engines";
-export type { Viewport } from "./useViewport";
-
 export { useVisualizer, type Context as VisualizerContext } from "./context";
+export * from "./engines";
+export * from "./useViewport";
+export * from "./coreContext";
+export * from "./featureFlags";
+export * from "./interactionMode";
 
 export type CoreVisualizerProps = {
   engine?: EngineType;
@@ -59,7 +62,7 @@ export type CoreVisualizerProps = {
   onInteractionModeChange?: (mode: InteractionModeType) => void;
 };
 
-const CoreVisualizer = memo(
+export const CoreVisualizer = memo(
   forwardRef<MapRef, PropsWithChildren<CoreVisualizerProps>>(
     (
       {
@@ -189,5 +192,3 @@ const CoreVisualizer = memo(
     },
   ),
 );
-
-export default CoreVisualizer;
