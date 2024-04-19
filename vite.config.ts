@@ -17,20 +17,13 @@ export default defineConfig(() => ({
       entry: resolve(__dirname, "src/index.ts"),
       name: "@reearth/core",
     },
-    // rollupOptions: {
-    //   external: ["cesium"],
-    //   output: {
-    //     globals: {
-    //       cesium: "Cesium",
-    //     },
-    //   },
-    // },
     rollupOptions: {
-      external: ["react", "react-dom"],
+      external: ["react", "react-dom", "cesium"],
       output: {
         globals: {
           react: "React",
           "react-dom": "ReactDOM",
+          cesium: "Cesium",
         },
       },
     },
