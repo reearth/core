@@ -19,7 +19,6 @@ import type {
 import { useOverriddenProperty } from "../Map";
 import { SketchEventCallback, SketchEventProps, SketchType } from "../Map/Sketch/types";
 import { TimelineManagerRef } from "../Map/useTimelineManager";
-// import { type DropOptions, useDrop } from "../utils/use-dnd";
 
 import type { InteractionModeType } from "./interactionMode";
 import { INTERACTION_MODES } from "./interactionMode";
@@ -30,8 +29,6 @@ export default function useHooks(
     camera: initialCamera,
     interactionMode: initialInteractionMode,
     sceneProperty,
-    // isEditable,
-    // rootLayerId,
     zoomedLayerId,
     onLayerSelect,
     onCameraChange,
@@ -42,8 +39,6 @@ export default function useHooks(
   }: {
     camera?: Camera;
     interactionMode?: InteractionModeType;
-    // isEditable?: boolean;
-    // rootLayerId?: string;
     sceneProperty?: SceneProperty;
     zoomedLayerId?: string;
     onLayerSelect?: (
@@ -65,28 +60,6 @@ export default function useHooks(
   useImperativeHandle(ref, () => mapRef.current, []);
 
   const wrapperRef = useRef<HTMLDivElement>(null);
-
-  // const { ref: dropRef, isDroppable } = useDrop(
-  //   useMemo(
-  //     (): DropOptions => ({
-  //       accept: ["primitive"],
-  //       drop(_item, context) {
-  //         if (!rootLayerId || !isEditable) return;
-  //         const loc = context.position
-  //           ? mapRef.current?.engine.getLocationFromScreen(context.position.x, context.position.y)
-  //           : undefined;
-  //         return {
-  //           type: "earth",
-  //           layerId: rootLayerId,
-  //           position: loc ? { lat: loc.lat, lng: loc.lng, height: loc.height } : undefined,
-  //         };
-  //       },
-  //       wrapperRef,
-  //     }),
-  //     [rootLayerId, isEditable],
-  //   ),
-  // );
-  // dropRef(wrapperRef);
 
   const viewport = useViewport({
     wrapperRef,
@@ -383,7 +356,6 @@ export default function useHooks(
     camera,
     featureFlags,
     overriddenSceneProperty,
-    // isDroppable,
     isLayerDragging,
     timelineManagerRef,
     cursor,

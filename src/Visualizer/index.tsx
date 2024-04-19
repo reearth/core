@@ -17,7 +17,6 @@ import { SketchFeature, SketchType } from "../Map/Sketch/types";
 
 import { VisualizerProvider } from "./context";
 import { coreContext } from "./coreContext";
-// import DropHolder from "./DropHolder";
 import { engines, type EngineType } from "./engines";
 import Err from "./Error";
 import useHooks from "./hooks";
@@ -34,7 +33,6 @@ export type CoreVisualizerProps = {
   engine?: EngineType;
   isBuilt?: boolean;
   isEditable?: boolean;
-  // rootLayerId?: string;
   sceneProperty?: SceneProperty;
   layers?: Layer[];
   clusters?: Cluster[]; // TODO: remove completely from beta core
@@ -69,7 +67,6 @@ export const CoreVisualizer = memo(
         engine,
         isBuilt,
         isEditable,
-        // rootLayerId,
         sceneProperty,
         layers,
         clusters,
@@ -101,7 +98,6 @@ export const CoreVisualizer = memo(
         camera,
         featureFlags,
         overriddenSceneProperty,
-        // isDroppable,
         isLayerDragging,
         timelineManagerRef,
         cursor,
@@ -123,8 +119,6 @@ export const CoreVisualizer = memo(
         handleLayerSelectWithRectEnd,
       } = useHooks(
         {
-          // rootLayerId,
-          // isEditable,
           camera: initialCamera,
           interactionMode,
           sceneProperty,
@@ -143,7 +137,6 @@ export const CoreVisualizer = memo(
         <ErrorBoundary FallbackComponent={Err}>
           <VisualizerProvider mapRef={mapRef}>
             <div ref={wrapperRef} style={containerStyle}>
-              {/* {isDroppable && <DropHolder />} */}
               <Map
                 ref={mapRef}
                 isBuilt={isBuilt}
