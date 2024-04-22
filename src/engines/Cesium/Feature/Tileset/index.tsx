@@ -33,7 +33,8 @@ function Tileset({
   onLayerFetch,
   ...props
 }: Props): JSX.Element | null {
-  const { shadows, colorBlendMode, pbr, showWireframe, showBoundingVolume } = property ?? {};
+  const { shadows, colorBlendMode, pbr, showWireframe, showBoundingVolume, cacheBytes } =
+    property ?? {};
   const boxId = `${layer?.id}_box`;
   const {
     tilesetUrl,
@@ -77,9 +78,10 @@ function Tileset({
           pbr === false
             ? NonPBRLightingShader
             : pbr === "withTexture"
-            ? NonPBRWithTextureLightingShader
-            : undefined
+              ? NonPBRWithTextureLightingShader
+              : undefined
         }
+        cacheBytes={cacheBytes}
         style={style}
         shadows={shadowMode(shadows)}
         clippingPlanes={clippingPlanes}
