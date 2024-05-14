@@ -1,0 +1,9 @@
+bug:
+  - "bug"
+  - "fix"
+enhancement:
+  - "enhancement"
+  - "feature"
+documentation:
+  - "docs"
+  - "documentation"
