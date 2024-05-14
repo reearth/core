@@ -11,7 +11,6 @@ declare module "@cesium/engine" {
   // (...args: Parameter<Listener>[]).
   // This cannot be fixed by augmentation but by overloading.
   export interface Event<Listener extends (...args: any[]) => void = (...args: any[]) => void> {
-    // eslint-disable-next-line @typescript-eslint/method-signature-style
     raiseEvent(...arguments: Parameters<Listener>): void;
   }
 

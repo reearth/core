@@ -24,7 +24,7 @@ const handler = (xmlDataStr: string) => {
 const parseGPX = (gpxSource: string) => {
   const parseMethod = (gpxSource: string): Document | null => {
     // Verify that we are in a browser
-    if (typeof document == undefined) return null;
+    if (typeof document === "undefined") return null;
 
     const domParser = new window.DOMParser();
     return domParser.parseFromString(gpxSource, "text/xml");
