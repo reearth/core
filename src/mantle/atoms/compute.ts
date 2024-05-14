@@ -178,8 +178,8 @@ export function computeAtom(cache?: typeof globalDataFeaturesCache) {
             ...("properties" in value
               ? { properties: value.properties }
               : l && "properties" in l
-              ? { properties: l.properties }
-              : {}),
+                ? { properties: l.properties }
+                : {}),
           }
         : undefined,
     );
