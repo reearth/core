@@ -21,8 +21,8 @@ export function convertGeometryToPositionsArray(
     geometry.type === "LineString"
       ? coordinatesToPositionsArray([geometry.coordinates])
       : geometry.type === "Polygon"
-      ? coordinatesToPositionsArray(geometry.coordinates)
-      : geometry.coordinates.flatMap(coordinates => coordinatesToPositionsArray(coordinates))
+        ? coordinatesToPositionsArray(geometry.coordinates)
+        : geometry.coordinates.flatMap(coordinates => coordinatesToPositionsArray(coordinates))
   ).filter(({ length }) => length > 0);
 }
 

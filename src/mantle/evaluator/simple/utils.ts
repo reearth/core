@@ -7,7 +7,6 @@ export const generateRandomString = (len: number): string => {
     .toLowerCase();
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const recursiveJSONParse = (obj: any): any => {
   if (typeof obj !== "object" || obj === null) {
     return obj;
