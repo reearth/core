@@ -15,7 +15,7 @@ export default defineConfig(() => ({
     svgr(),
     react(),
     cesium({ rebuildCesium: true }),
-    dts({ rollupTypes: true, exclude: ["./src/env.d.ts"] }),
+    dts({ rollupTypes: true }),
   ],
   build: {
     lib: {
