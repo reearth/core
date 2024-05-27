@@ -22,4 +22,4 @@ By defining these context as the interface, we can understand which API for the 
 You have several way to develop this library.
 1. You can use storybook: `yarn storybook`
 2. You can use example project: `yarn dev`
-3. You can also use different project with this library: `yarn build && yarn link`, then `cd ../other-project && yarn link ../core`
+3. You can also use different project with this library: `yarn build && yarn link`, then `cd ../other-project && yarn link @reearth/core`
