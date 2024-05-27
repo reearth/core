@@ -14,6 +14,9 @@
     "noEmit": true,
     "sourceMap": true,
     "jsx": "react-jsx",
+    "paths": {
+      "@reearth/core": ["./src/index.ts"]
+    },
 
     /* Linting */
     "strict": true,
@@ -22,6 +25,6 @@
     "noFallthroughCasesInSwitch": true,
     "pretty": true
   },
-  "include": ["src"],
+  "include": ["src", "example"],
   "references": [{ "path": "./tsconfig.node.json" }],
 }
