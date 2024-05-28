@@ -11,6 +11,7 @@ function App() {
     setIsReady(true);
   }, []);
 
+  // TODO: use onLayerSelect props (core should export a type for selection).
   const handleSelect = useCallback(() => {
     console.log("Selected feature: ", ref.current?.layers.selectedFeature());
   }, []);

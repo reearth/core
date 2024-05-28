@@ -372,10 +372,14 @@ export default ({
     | GroundPrimitive
     | ImageryLayer
   >();
+  const prevSelectedImageryFeatureId = useRef<string | undefined>();
+
   // manage layer selection
   useEffect(() => {
     const viewer = cesium.current?.cesiumElement;
     if (!viewer || viewer.isDestroyed()) return;
+
+    if (prevSelectedImageryFeatureId.current === selectedLayerId?.featureId) return;
 
     const prevTag = getTag(prevSelectedEntity.current);
     if (
@@ -571,6 +575,8 @@ export default ({
       const viewer = cesium.current?.cesiumElement;
       if (!viewer || viewer.isDestroyed()) return;
 
+      prevSelectedImageryFeatureId.current = undefined;
+
       const entity =
         findEntity(viewer, undefined, selectedLayerId?.featureId) ||
         findEntity(viewer, selectedLayerId?.layerId);
@@ -710,6 +716,7 @@ export default ({
               viewer.clock.currentTime ?? new JulianDate(),
               tag?.layerId ? layer?.infobox?.property?.defaultContent : undefined,
             );
+            prevSelectedImageryFeatureId.current = f.data.featureId;
             onLayerSelect?.(
               f.data.layerId,
               f.data.featureId,
