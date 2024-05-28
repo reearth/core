@@ -1,6 +1,20 @@
-import { CoreVisualizer } from "@reearth/core";
+import { useCallback, useRef, useState } from "react";
+
+import { CoreVisualizer, MapRef } from "@reearth/core";
+
+import { TEST_LAYERS } from "./testLayers";
 
 function App() {
+  const ref = useRef<MapRef>(null);
+  const [isReady, setIsReady] = useState(false);
+  const handleMount = useCallback(() => {
+    setIsReady(true);
+  }, []);
+
+  const handleSelect = useCallback(() => {
+    console.log("Selected feature: ", ref.current?.layers.selectedFeature());
+  }, []);
+
   return (
     <div
       style={{
@@ -9,7 +23,10 @@ function App() {
         height: "100vh",
       }}>
       <CoreVisualizer
-        ready={true}
+        ref={ref}
+        ready={isReady}
+        onMount={handleMount}
+        onLayerSelect={handleSelect}
         engine="cesium"
         sceneProperty={{
           tiles: [
@@ -73,6 +90,7 @@ function App() {
               },
             },
           },
+          ...TEST_LAYERS,
         ]}
       />
     </div>

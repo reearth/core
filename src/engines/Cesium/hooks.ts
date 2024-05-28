@@ -571,12 +571,6 @@ export default ({
       const viewer = cesium.current?.cesiumElement;
       if (!viewer || viewer.isDestroyed()) return;
 
-      if (!target || typeof target === "undefined" || !("id" in target && target.id)) {
-        viewer.selectedEntity = undefined;
-        onLayerSelect?.();
-        return;
-      }
-
       const entity =
         findEntity(viewer, undefined, selectedLayerId?.featureId) ||
         findEntity(viewer, selectedLayerId?.layerId);
@@ -685,63 +679,59 @@ export default ({
           const l = await scene.imageryLayers.pickImageryLayerFeatures(pickRay, scene);
 
           // NOTE: For now we only send the first selected feature to onLayerSelect instead of sending all of them: @pyshx
-          if (!l) return;
-          const f = l[0];
+          const f = l?.[0];
 
-          const appearanceType = f.data?.appearanceType;
-          if (appearanceType && f.data?.feature?.[appearanceType]?.show === false) {
+          const appearanceType = f?.data?.appearanceType;
+
+          if (appearanceType && f?.data?.feature?.[appearanceType]?.show !== false) {
+            const tag = getTag(f.imageryLayer);
+
+            const pos = f.position;
+            if (pos) {
+              // NOTE: Instantiate temporal Cesium.Entity to display indicator.
+              // Although we want to use `viewer.selectionIndicator.viewModel.position` and `animateAppear`, Cesium reset selection position if `viewer.selectedEntity` is not set.
+              // ref: https://github.com/CesiumGS/cesium/blob/9295450e64c3077d96ad579012068ea05f97842c/packages/widgets/Source/Viewer/Viewer.js#L1843-L1876
+              // issue: https://github.com/CesiumGS/cesium/issues/7965
+              requestAnimationFrame(() => {
+                if (!tag?.hideIndicator) {
+                  viewer.selectedEntity = new Entity({
+                    position: Cartographic.toCartesian(pos),
+                  });
+                }
+              });
+            }
+
+            const layer = tag?.layerId
+              ? layersRef?.current?.overriddenLayers().find(l => l.id === tag.layerId) ??
+                layersRef?.current?.findById(tag.layerId)
+              : undefined;
+            const content = getEntityContent(
+              f.data.feature ?? f,
+              viewer.clock.currentTime ?? new JulianDate(),
+              tag?.layerId ? layer?.infobox?.property?.defaultContent : undefined,
+            );
+            onLayerSelect?.(
+              f.data.layerId,
+              f.data.featureId,
+              content.value.length
+                ? {
+                    defaultInfobox: {
+                      title: layer?.title ?? f.name,
+                      content,
+                    },
+                  }
+                : undefined,
+              {
+                feature: f.data.feature,
+              },
+            );
+
             return;
           }
-
-          const tag = getTag(f.imageryLayer);
-
-          const pos = f.position;
-          if (pos) {
-            // NOTE: Instantiate temporal Cesium.Entity to display indicator.
-            // Although we want to use `viewer.selectionIndicator.viewModel.position` and `animateAppear`, Cesium reset selection position if `viewer.selectedEntity` is not set.
-            // ref: https://github.com/CesiumGS/cesium/blob/9295450e64c3077d96ad579012068ea05f97842c/packages/widgets/Source/Viewer/Viewer.js#L1843-L1876
-            // issue: https://github.com/CesiumGS/cesium/issues/7965
-            requestAnimationFrame(() => {
-              if (!tag?.hideIndicator) {
-                viewer.selectedEntity = new Entity({
-                  position: Cartographic.toCartesian(pos),
-                });
-              }
-            });
-          }
-
-          const layer = tag?.layerId
-            ? layersRef?.current?.overriddenLayers().find(l => l.id === tag.layerId) ??
-              layersRef?.current?.findById(tag.layerId)
-            : undefined;
-          const content = getEntityContent(
-            f.data.feature ?? f,
-            viewer.clock.currentTime ?? new JulianDate(),
-            tag?.layerId ? layer?.infobox?.property?.defaultContent : undefined,
-          );
-          onLayerSelect?.(
-            f.data.layerId,
-            f.data.featureId,
-            content.value.length
-              ? {
-                  defaultInfobox: {
-                    title: layer?.title ?? f.name,
-                    content,
-                  },
-                }
-              : undefined,
-            {
-              feature: f.data.feature,
-            },
-          );
-
-          return;
         }
       }
 
-      if (!entity || (entity instanceof Entity && tag?.hideIndicator)) {
-        viewer.selectedEntity = undefined;
-      }
+      viewer.selectedEntity = undefined;
       onLayerSelect?.();
     },
     [
