@@ -1,4 +1,3 @@
-import { clone } from "lodash-es";
 import { Ref, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 
 import type { ComputedFeature, Feature, LatLng, SelectedFeatureInfo } from "../mantle";
@@ -112,68 +111,7 @@ export default function useHooks(
   const timelineManagerRef: TimelineManagerRef = useRef();
 
   // scene
-  const [overriddenSceneProperty, originalOverrideSceneProperty] =
-    useOverriddenProperty(sceneProperty);
-
-  const overrideSceneProperty = useCallback(
-    (pluginId: string, property: SceneProperty) => {
-      if (property.timeline) {
-        const filteredTimeline = clone(property.timeline);
-        delete filteredTimeline.visible;
-        if (Object.keys(filteredTimeline).length > 0) {
-          if (
-            filteredTimeline.current !== undefined ||
-            filteredTimeline.start !== undefined ||
-            filteredTimeline.stop !== undefined
-          ) {
-            timelineManagerRef?.current?.commit({
-              cmd: "SET_TIME",
-              payload: {
-                start:
-                  filteredTimeline.start ?? timelineManagerRef?.current?.computedTimeline.start,
-                stop: filteredTimeline.stop ?? timelineManagerRef?.current?.computedTimeline.stop,
-                current:
-                  filteredTimeline.current ?? timelineManagerRef?.current?.computedTimeline.current,
-              },
-              committer: {
-                source: "overrideSceneProperty",
-                id: pluginId,
-              },
-            });
-          }
-          if (
-            filteredTimeline.multiplier !== undefined ||
-            filteredTimeline.stepType !== undefined ||
-            filteredTimeline.rangeType !== undefined
-          ) {
-            timelineManagerRef?.current?.commit({
-              cmd: "SET_OPTIONS",
-              payload: {
-                stepType: filteredTimeline.stepType,
-                multiplier: filteredTimeline.multiplier,
-                rangeType: filteredTimeline.rangeType,
-              },
-              committer: {
-                source: "overrideSceneProperty",
-                id: pluginId,
-              },
-            });
-          }
-          if (filteredTimeline.animation !== undefined) {
-            timelineManagerRef?.current?.commit({
-              cmd: filteredTimeline.animation ? "PLAY" : "PAUSE",
-              committer: {
-                source: "overrideSceneProperty",
-                id: pluginId,
-              },
-            });
-          }
-        }
-      }
-      originalOverrideSceneProperty(pluginId, property);
-    },
-    [timelineManagerRef, originalOverrideSceneProperty],
-  );
+  const [overriddenSceneProperty, overrideSceneProperty] = useOverriddenProperty(sceneProperty);
 
   // camera
   const [camera, changeCamera] = useValue(initialCamera, onCameraChange);

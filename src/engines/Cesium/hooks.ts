@@ -141,7 +141,8 @@ export default ({
     typeof meta?.cesiumIonAccessToken === "string" && meta.cesiumIonAccessToken
       ? meta.cesiumIonAccessToken
       : Ion.defaultAccessToken;
-  const cesiumIonAccessToken = property?.default?.ion || cesiumIonDefaultAccessToken;
+  const cesiumIonAccessToken =
+    property?.engine?.cesium?.ionAccessToken || cesiumIonDefaultAccessToken;
 
   // expose ref
   const engineAPI = useEngineRef(ref, cesium);
@@ -157,50 +158,52 @@ export default ({
 
   const backgroundColor = useMemo(
     () =>
-      property?.default?.bgcolor ? Color.fromCssColorString(property.default.bgcolor) : undefined,
-    [property?.default?.bgcolor],
+      property?.scene?.backgroundColor
+        ? Color.fromCssColorString(property.scene.backgroundColor)
+        : undefined,
+    [property?.scene?.backgroundColor],
   );
 
-  const light = useMemo(() => {
+  const sceneLight = useMemo(() => {
     let light;
-    if (property?.light?.lightType === "sunLight") {
+    if (property?.scene?.light?.lightType === "sunLight") {
       light = new SunLight({
-        color: property.light?.lightColor
-          ? Color.fromCssColorString(property.light.lightColor)
+        color: property.scene?.light?.lightColor
+          ? Color.fromCssColorString(property.scene.light.lightColor)
           : undefined,
-        intensity: property.light?.lightIntensity,
+        intensity: property.scene?.light?.lightIntensity,
       });
-    } else if (property?.light?.lightType === "directionalLight") {
+    } else if (property?.scene?.light?.lightType === "directionalLight") {
       light = new DirectionalLight({
         direction: new Cartesian3(
-          property?.light?.lightDirectionX ?? 1,
-          property?.light?.lightDirectionY ?? 0,
-          property?.light?.lightDirectionZ ?? 0,
+          property?.scene?.light?.lightDirectionX ?? 1,
+          property?.scene?.light?.lightDirectionY ?? 0,
+          property?.scene?.light?.lightDirectionZ ?? 0,
         ),
-        color: property.light?.lightColor
-          ? Color.fromCssColorString(property.light.lightColor)
+        color: property.scene?.light?.lightColor
+          ? Color.fromCssColorString(property.scene.light.lightColor)
           : undefined,
-        intensity: property.light?.lightIntensity,
+        intensity: property.scene?.light?.lightIntensity,
       });
     } else {
       light = cesium.current?.cesiumElement?.scene.light;
       if (light) {
-        light.color = property?.light?.lightColor
-          ? Color.fromCssColorString(property.light.lightColor)
+        light.color = property?.scene?.light?.lightColor
+          ? Color.fromCssColorString(property.scene.light.lightColor)
           : light.color;
-        light.intensity = property?.light?.lightIntensity
-          ? property.light.lightIntensity
+        light.intensity = property?.scene?.light?.lightIntensity
+          ? property.scene.light.lightIntensity
           : light.intensity;
       }
     }
     return light;
   }, [
-    property?.light?.lightType,
-    property?.light?.lightColor,
-    property?.light?.lightDirectionX,
-    property?.light?.lightDirectionY,
-    property?.light?.lightDirectionZ,
-    property?.light?.lightIntensity,
+    property?.scene?.light?.lightType,
+    property?.scene?.light?.lightColor,
+    property?.scene?.light?.lightDirectionX,
+    property?.scene?.light?.lightDirectionY,
+    property?.scene?.light?.lightDirectionZ,
+    property?.scene?.light?.lightIntensity,
   ]);
 
   // shadow map
@@ -222,11 +225,11 @@ export default ({
         })
       | undefined;
     if (!shadowMap) return;
-    shadowMap.softShadows = property?.atmosphere?.softShadow ?? false;
-    shadowMap.darkness = property?.atmosphere?.shadowDarkness ?? 0.3;
-    shadowMap.size = property?.atmosphere?.shadowResolution ?? 2048;
+    shadowMap.softShadows = property?.shadowMap?.softShadows ?? false;
+    shadowMap.darkness = property?.shadowMap?.darkness ?? 0.3;
+    shadowMap.size = property?.shadowMap?.size ?? 2048;
+    shadowMap.maximumDistance = property?.shadowMap?.maximumDistance ?? 5000;
     shadowMap.fadingEnabled = true;
-    shadowMap.maximumDistance = property?.atmosphere?.shadowMaximumDistance ?? 5000;
     shadowMap.normalOffset = true;
 
     // bias
@@ -279,15 +282,15 @@ export default ({
       Object.assign(shadowMap._pointBias, defaultPointBias);
     }
   }, [
-    property?.atmosphere?.softShadow,
-    property?.atmosphere?.shadowDarkness,
-    property?.atmosphere?.shadowResolution,
-    property?.atmosphere?.shadowMaximumDistance,
+    property?.shadowMap?.softShadows,
+    property?.shadowMap?.darkness,
+    property?.shadowMap?.size,
+    property?.shadowMap?.maximumDistance,
   ]);
 
   useEffect(() => {
-    engineAPI.changeSceneMode(property?.default?.sceneMode, 0);
-  }, [property?.default?.sceneMode, engineAPI]);
+    engineAPI.changeSceneMode(property?.scene?.mode, 0);
+  }, [property?.scene?.mode, engineAPI]);
 
   // move to initial position at startup
   const initialCameraFlight = useRef(false);
@@ -301,8 +304,8 @@ export default ({
         property?.cameraLimiter?.cameraLimitterTargetArea
       ) {
         engineAPI.flyTo(property?.cameraLimiter?.cameraLimitterTargetArea, { duration: 0 });
-      } else if (property?.default?.camera ?? property?.camera?.camera) {
-        const camera = property?.default?.camera ?? property?.camera?.camera;
+      } else if (property?.camera?.camera) {
+        const camera = property?.camera?.camera;
         engineAPI.flyTo(camera as Camera, { duration: 0 });
       }
       const camera = getCamera(cesium?.current?.cesiumElement);
@@ -313,7 +316,6 @@ export default ({
     },
     [
       engineAPI,
-      property?.default?.camera,
       property?.camera?.camera,
       property?.cameraLimiter?.cameraLimitterEnabled,
       onCameraChange,
@@ -322,10 +324,9 @@ export default ({
     (prevDeps, nextDeps) =>
       prevDeps[0] === nextDeps[0] &&
       isEqual(prevDeps[1], nextDeps[1]) &&
-      isEqual(prevDeps[2], nextDeps[2]) &&
+      prevDeps[2] === nextDeps[2] &&
       prevDeps[3] === nextDeps[3] &&
-      prevDeps[4] === nextDeps[4] &&
-      prevDeps[5] === nextDeps[5],
+      prevDeps[4] === nextDeps[4],
   );
 
   const handleUnmount = useCallback(() => {
@@ -489,21 +490,24 @@ export default ({
 
   const sphericalHarmonicCoefficients = useMemo(
     () =>
-      property?.light?.sphericalHarmonicCoefficients
+      property?.globe?.shader?.sphericalHarmonicCoefficients
         ? arrayToCartecian3(
-            property?.light?.sphericalHarmonicCoefficients,
-            property?.light?.imageBasedLightIntensity,
+            property?.globe?.shader?.sphericalHarmonicCoefficients,
+            property?.globe?.shader?.imageBasedLightIntensity,
           )
         : undefined,
-    [property?.light?.sphericalHarmonicCoefficients, property?.light?.imageBasedLightIntensity],
+    [
+      property?.globe?.shader?.sphericalHarmonicCoefficients,
+      property?.globe?.shader?.imageBasedLightIntensity,
+    ],
   );
 
   useOverrideGlobeShader({
     cesium,
     sphericalHarmonicCoefficients,
-    globeShadowDarkness: property?.atmosphere?.globeShadowDarkness,
-    globeImageBasedLighting: property?.atmosphere?.globeImageBasedLighting,
-    enableLighting: property?.atmosphere?.enable_lighting ?? property?.globeLighting?.globeLighting,
+    globeShadowDarkness: property?.globe?.shader?.shadowDarkness,
+    globeImageBasedLighting: property?.globe?.shader?.imageBasedLighting,
+    enableLighting: property?.globe?.enableLighting,
     hasVertexNormals: property?.terrain?.terrain && property.terrain.terrainNormal,
     terrain: property?.terrain,
   });
@@ -856,21 +860,17 @@ export default ({
     cesium.current.cesiumElement.scene.screenSpaceCameraController.enableZoom = allowCameraZoom;
   }, [featureFlags]);
 
-  // Anti-aliasing
-  useEffect(() => {
-    const viewer = cesium.current?.cesiumElement;
-    if (!viewer || viewer.isDestroyed()) return;
+  const sceneMsaaSamples = useMemo(() => {
     // TODO: FXAA doesn't support alpha blending in Cesium, so we will enable FXAA when this is fixed.
     // viewer.scene.postProcessStages.fxaa.enabled = property?.render?.antialias === "high";
-    viewer.scene.msaaSamples =
-      property?.render?.antialias === "extreme"
-        ? 8
-        : property?.render?.antialias === "high"
-          ? 6
-          : property?.render?.antialias === "medium"
-            ? 4
-            : 1; // default as 1
-  }, [property?.render?.antialias]);
+    return property?.scene?.antialias === "extreme"
+      ? 8
+      : property?.scene?.antialias === "high"
+        ? 6
+        : property?.scene?.antialias === "medium"
+          ? 4
+          : 1;
+  }, [property?.scene?.antialias]);
 
   // explicit rendering
   const explicitRender = useCallback(() => {
@@ -917,33 +917,16 @@ export default ({
     }
   }, [isLayerDragging, shouldRender, requestingRenderMode]);
 
-  // cesium timeline & animation widget
-  useEffect(() => {
-    const viewer = cesium.current?.cesiumElement;
-    if (!viewer) return;
-    if (viewer.animation?.container) {
-      (viewer.animation.container as HTMLDivElement).style.visibility = property?.timeline?.visible
-        ? "visible"
-        : "hidden";
-    }
-    if (viewer.timeline?.container) {
-      (viewer.timeline.container as HTMLDivElement).style.visibility = property?.timeline?.visible
-        ? "visible"
-        : "hidden";
-    }
-    viewer.forceResize();
-  }, [property]);
-
   const globe = cesium.current?.cesiumElement?.scene.globe;
 
   useEffect(() => {
     if (globe) {
       const surface = (globe as any)._surface as CustomGlobeSurface;
       if (surface) {
-        surface.tileProvider._debug.wireframe = property?.render?.showWireframe ?? false;
+        surface.tileProvider._debug.wireframe = property?.globe?.showWireframe ?? false;
       }
     }
-  }, [globe, property?.render?.showWireframe]);
+  }, [globe, property?.globe?.showWireframe]);
 
   const onPreRenderCallback = useCallback(
     (scene: Scene) => {
@@ -976,7 +959,8 @@ export default ({
     cesiumIonAccessToken,
     mouseEventHandles,
     context,
-    light,
+    sceneLight,
+    sceneMsaaSamples,
     handleMount,
     handleUnmount,
     handleUpdate,

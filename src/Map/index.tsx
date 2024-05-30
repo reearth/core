@@ -80,7 +80,6 @@ function MapFn(
     handleEngineLayerSelect,
   } = useHooks({
     ref,
-    sceneProperty,
     timelineManagerRef,
     cursor,
     onLayerSelect,
@@ -123,7 +122,7 @@ function MapFn(
         clusterComponent={currentEngine?.clusterComponent}
         delegatedDataTypes={currentEngine.delegatedDataTypes}
         meta={props.meta}
-        sceneProperty={props.property}
+        sceneProperty={sceneProperty}
         requestingRenderMode={requestingRenderMode}
         onLayerSelect={handleLayerSelect}
       />

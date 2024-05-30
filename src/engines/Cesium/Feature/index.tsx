@@ -127,8 +127,9 @@ export default function Feature({
     if (!isRenderableAppearance(k)) return null;
 
     const useSceneSphericalHarmonicCoefficients =
-      !!props.sceneProperty?.light?.sphericalHarmonicCoefficients;
-    const useSceneSpecularEnvironmentMaps = !!props.sceneProperty?.light?.specularEnvironmentMaps;
+      !!props.sceneProperty?.globe?.shader?.sphericalHarmonicCoefficients;
+    const useSceneSpecularEnvironmentMaps =
+      !!props.sceneProperty?.globe?.shader?.specularEnvironmentMaps;
 
     const isVisible = layer.layer.visible !== false && !isHidden;
 
@@ -205,9 +206,9 @@ export default function Feature({
           const isVisible = layer.layer.visible !== false && !isHidden;
           // NOTE: IBL for 3dtiles is not updated unless Tileset feature component is re-created.
           const useSceneSphericalHarmonicCoefficients =
-            !!props.sceneProperty?.light?.sphericalHarmonicCoefficients;
+            !!props.sceneProperty?.globe?.shader?.sphericalHarmonicCoefficients;
           const useSceneSpecularEnvironmentMaps =
-            !!props.sceneProperty?.light?.specularEnvironmentMaps;
+            !!props.sceneProperty?.globe?.shader?.specularEnvironmentMaps;
           const use3dtilesSphericalHarmonicCoefficients =
             layer?.layer?.type === "simple" &&
             !!layer?.layer?.["3dtiles"]?.sphericalHarmonicCoefficients;

@@ -5,12 +5,10 @@ import {
   IonResource,
   TerrainProvider,
 } from "cesium";
-import { pick } from "lodash-es";
 import { useMemo } from "react";
 import { Globe as CesiumGlobe } from "resium";
 
 import type { SceneProperty, TerrainProperty } from "../..";
-import { objKeys } from "../../../utils";
 import { toColor } from "../common";
 
 export type Props = {
@@ -22,9 +20,8 @@ export default function Globe({ property, cesiumIonAccessToken }: Props): JSX.El
   const terrainProperty = useMemo(
     (): TerrainProperty => ({
       ...property?.terrain,
-      ...pick(property?.default, terrainPropertyKeys),
     }),
-    [property?.terrain, property?.default],
+    [property?.terrain],
   );
 
   const terrainProvider = useMemo((): Promise<TerrainProvider> | TerrainProvider | undefined => {
@@ -50,42 +47,24 @@ export default function Globe({ property, cesiumIonAccessToken }: Props): JSX.El
   ]);
 
   const baseColor = useMemo(
-    () => toColor(property?.atmosphere?.globeBaseColor),
-    [property?.atmosphere?.globeBaseColor],
+    () => toColor(property?.globe?.baseColor),
+    [property?.globe?.baseColor],
   );
 
   return (
     <CesiumGlobe
       baseColor={baseColor}
-      enableLighting={
-        !!(property?.atmosphere?.enable_lighting ?? property?.globeLighting?.globeLighting)
-      }
-      showGroundAtmosphere={
-        property?.atmosphere?.ground_atmosphere ??
-        property?.globeAtmosphere?.globeAtmosphere ??
-        true
-      }
-      atmosphereLightIntensity={property?.globeAtmosphere?.globeAtmosphereIntensity}
-      atmosphereSaturationShift={property?.atmosphere?.surturation_shift}
-      atmosphereHueShift={property?.atmosphere?.hue_shift}
-      atmosphereBrightnessShift={property?.atmosphere?.brightness_shift}
+      enableLighting={!!property?.globe?.enableLighting}
+      showGroundAtmosphere={property?.globe?.showGroundAtmosphere ?? true}
+      atmosphereLightIntensity={property?.globe?.atmosphereLightIntensity}
+      atmosphereSaturationShift={property?.globe?.atmosphereSaturationShift}
+      atmosphereHueShift={property?.globe?.atmosphereHueShift}
+      atmosphereBrightnessShift={property?.globe?.atmosphereBrightnessShift}
       terrainProvider={terrainProvider}
-      depthTestAgainstTerrain={!!terrainProperty.depthTestAgainstTerrain}
+      depthTestAgainstTerrain={!!property?.globe?.depthTestAgainstTerrain}
     />
   );
 }
-
-const terrainPropertyKeys = objKeys<TerrainProperty>({
-  terrain: 0,
-  terrainType: 0,
-  terrainExaggeration: 0,
-  terrainExaggerationRelativeHeight: 0,
-  depthTestAgainstTerrain: 0,
-  terrainCesiumIonAsset: 0,
-  terrainCesiumIonAccessToken: 0,
-  terrainCesiumIonUrl: 0,
-  terrainUrl: 0,
-});
 
 const defaultTerrainProvider = new EllipsoidTerrainProvider();
 

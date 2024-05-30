@@ -165,10 +165,12 @@ ClampToGround.args = {
         tile_type: "default",
       },
     ],
+    globe: {
+      depthTestAgainstTerrain: true,
+    },
     terrain: {
       terrain: true,
       terrainType: "cesium",
-      depthTestAgainstTerrain: true,
     },
   },
 };

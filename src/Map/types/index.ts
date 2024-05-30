@@ -345,9 +345,6 @@ export type IndicatorTypes = "default" | "crosshair" | "custom";
 export type TerrainProperty = {
   terrain?: boolean;
   terrainType?: "cesium" | "arcgis" | "cesiumion"; // default: cesium
-  terrainExaggeration?: number; // default: 1
-  terrainExaggerationRelativeHeight?: number; // default: 0
-  depthTestAgainstTerrain?: boolean;
   terrainCesiumIonAsset?: string;
   terrainCesiumIonAccessToken?: string;
   terrainCesiumIonUrl?: string;
@@ -363,10 +360,48 @@ export type TerrainProperty = {
 };
 
 export type SceneProperty = {
-  main?: {
-    sceneMode?: SceneMode; // default: scene3d
-    ion?: string;
+  shadows?: boolean;
+  shadowMap?: {
+    size?: 1024 | 2048 | 4096;
+    softShadows?: boolean;
+    darkness?: number;
+    maximumDistance?: number;
+  };
+  globe?: {
+    baseColor?: string;
+    enableLighting?: boolean;
+    showGroundAtmosphere?: boolean;
+    atmosphereLightIntensity?: number;
+    atmosphereSaturationShift?: number;
+    atmosphereBrightnessShift?: number;
+    atmosphereHueShift?: number;
+    depthTestAgainstTerrain?: boolean;
+    shader?: {
+      imageBasedLighting?: boolean;
+      imageBasedLightIntensity?: number;
+      shadowDarkness?: number;
+      specularEnvironmentMaps?: string;
+      sphericalHarmonicCoefficients?: [x: number, y: number, z: number][];
+    };
+    showWireframe?: boolean;
+  };
+  terrain?: TerrainProperty;
+  scene?: {
+    backgroundColor?: string;
+    mode?: SceneMode;
+    verticalExaggeration?: number; // default: 1
+    verticalExaggerationRelativeHeight?: number; // default: 0
+    debugShowFramesPerSecond?: boolean;
     vr?: boolean;
+    light?: {
+      lightType?: "sunLight" | "directionalLight";
+      lightDirectionX?: number;
+      lightDirectionY?: number;
+      lightDirectionZ?: number;
+      lightColor?: string;
+      lightIntensity?: number;
+    };
+    antialias?: "low" | "medium" | "high" | "extreme";
   };
   tiles?: {
     id: string;
@@ -382,57 +417,29 @@ export type SceneProperty = {
     labelType: "japan_gsi_optimal_bvmap"; // | "other_map"
     style: Record<string, any>; // Function isn't allowed
   }[];
-  terrain?: {
-    terrain?: boolean;
-    terrainType?: "cesium" | "arcgis" | "cesiumion"; // default: cesium
-    terrainCesiumIonAsset?: string;
-    terrainCesiumIonAccessToken?: string;
-    terrainCesiumIonUrl?: string;
-    terrainExaggeration?: number; // default: 1
-    terrainExaggerationRelativeHeight?: number; // default: 0
-    depthTestAgainstTerrain?: boolean;
-  };
-  globeLighting?: {
-    globeLighting?: boolean;
-  };
-  globeShadow?: {
-    globeShadow?: boolean;
-  };
-  globeAtmosphere?: {
-    globeAtmosphere?: boolean;
-    globeAtmosphereIntensity?: number; // default: 10
-  };
   skyBox?: {
-    skyBox?: boolean;
+    show?: boolean;
   };
   sun?: {
-    sun?: boolean;
+    show?: boolean;
   };
   moon?: {
-    moon?: boolean;
+    show?: boolean;
+  };
+  fog?: {
+    enabled?: boolean;
+    density?: number;
   };
   skyAtmosphere?: {
-    skyAtmosphere?: boolean;
-    skyAtmosphereIntensity?: number; // default: 50
+    show?: boolean;
+    atmosphereLightIntensity?: number; // default: 50
+    saturationShift?: number;
+    brightnessShift?: number;
   };
   camera?: {
     camera?: Camera;
     allowEnterGround?: boolean;
-    fov?: number;
   };
-  render?: { showWireframe?: boolean };
-} & LegacySceneProperty;
-
-type LegacySceneProperty = {
-  default?: {
-    camera?: Camera;
-    allowEnterGround?: boolean;
-    skybox?: boolean;
-    bgcolor?: string;
-    ion?: string;
-    sceneMode?: SceneMode; // default: scene3d
-    vr?: boolean;
-  } & TerrainProperty; // compat
   cameraLimiter?: {
     cameraLimitterEnabled?: boolean;
     cameraLimitterShowHelper?: boolean;
@@ -440,82 +447,21 @@ type LegacySceneProperty = {
     cameraLimitterTargetWidth?: number;
     cameraLimitterTargetLength?: number;
   };
-  indicator?: {
-    indicator_type: IndicatorTypes;
-    indicator_image?: string;
-    indicator_image_scale?: number;
-  };
-  tiles?: {
-    id: string;
-    tile_type?: string;
-    tile_url?: string;
-    tile_zoomLevel?: number[];
-    tile_opacity?: number;
-  }[];
-  terrain?: TerrainProperty;
-  atmosphere?: {
-    enable_sun?: boolean;
-    enableMoon?: boolean;
-    enable_lighting?: boolean;
-    ground_atmosphere?: boolean;
-    sky_atmosphere?: boolean;
-    shadows?: boolean;
-    shadowResolution?: 1024 | 2048 | 4096;
-    softShadow?: boolean;
-    shadowDarkness?: number;
-    shadowMaximumDistance?: number;
-    fog?: boolean;
-    fog_density?: number;
-    hue_shift?: number;
-    brightness_shift?: number;
-    surturation_shift?: number;
-    skyboxBrightnessShift?: number;
-    skyboxSurturationShift?: number;
-    globeShadowDarkness?: number;
-    globeImageBasedLighting?: boolean;
-    globeBaseColor?: string;
-  };
-  timeline?: {
-    animation?: boolean;
-    visible?: boolean;
-    current?: string;
-    start?: string;
-    stop?: string;
-    stepType?: "rate" | "fixed";
-    multiplier?: number;
-    step?: number;
-    rangeType?: "unbounded" | "clamped" | "bounced";
-  };
-  googleAnalytics?: {
-    enableGA?: boolean;
-    trackingId?: string;
-  };
-  theme?: {
-    themeType?: "light" | "dark" | "forest" | "custom";
-    themeTextColor?: string;
-    themeSelectColor?: string;
-    themeBackgroundColor?: string;
-  };
   ambientOcclusion?: {
     enabled?: boolean;
     quality?: "low" | "medium" | "high" | "extreme";
     intensity?: number;
     ambientOcclusionOnly?: boolean;
   };
-  light?: {
-    lightType?: "sunLight" | "directionalLight";
-    lightDirectionX?: number;
-    lightDirectionY?: number;
-    lightDirectionZ?: number;
-    lightColor?: string;
-    lightIntensity?: number;
-    specularEnvironmentMaps?: string;
-    sphericalHarmonicCoefficients?: [x: number, y: number, z: number][];
-    imageBasedLightIntensity?: number;
+  indicator?: {
+    indicator_type: IndicatorTypes;
+    indicator_image?: string;
+    indicator_image_scale?: number;
   };
-  render?: {
-    antialias?: "low" | "medium" | "high" | "extreme";
-    debugFramePerSecond?: boolean;
+  engine?: {
+    cesium?: {
+      ionAccessToken?: string;
+    };
   };
 };
 

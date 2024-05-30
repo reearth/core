@@ -120,18 +120,18 @@ export default function Model({
     if (
       !property?.specularEnvironmentMaps &&
       !property?.sphericalHarmonicCoefficients &&
-      !sceneProperty?.light?.specularEnvironmentMaps &&
-      !sceneProperty?.light?.sphericalHarmonicCoefficients
+      !sceneProperty?.globe?.shader?.specularEnvironmentMaps &&
+      !sceneProperty?.globe?.shader?.sphericalHarmonicCoefficients
     )
       return ibl;
 
     const specularEnvironmentMaps =
-      property?.specularEnvironmentMaps ?? sceneProperty?.light?.specularEnvironmentMaps;
+      property?.specularEnvironmentMaps ?? sceneProperty?.globe?.shader?.specularEnvironmentMaps;
     const imageBasedLightIntensity =
-      property?.imageBasedLightIntensity ?? sceneProperty?.light?.imageBasedLightIntensity;
+      property?.imageBasedLightIntensity ?? sceneProperty?.globe?.shader?.imageBasedLightIntensity;
     const sphericalHarmonicCoefficients = arrayToCartecian3(
       property?.sphericalHarmonicCoefficients ??
-        sceneProperty?.light?.sphericalHarmonicCoefficients,
+        sceneProperty?.globe?.shader?.sphericalHarmonicCoefficients,
       imageBasedLightIntensity,
     );
 
@@ -146,9 +146,9 @@ export default function Model({
     property?.specularEnvironmentMaps,
     property?.sphericalHarmonicCoefficients,
     property?.imageBasedLightIntensity,
-    sceneProperty?.light?.specularEnvironmentMaps,
-    sceneProperty?.light?.sphericalHarmonicCoefficients,
-    sceneProperty?.light?.imageBasedLightIntensity,
+    sceneProperty?.globe?.shader?.specularEnvironmentMaps,
+    sceneProperty?.globe?.shader?.sphericalHarmonicCoefficients,
+    sceneProperty?.globe?.shader?.imageBasedLightIntensity,
   ]);
 
   const { viewer } = useCesium();

@@ -74,7 +74,8 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
     mouseEventHandles,
     cesiumIonAccessToken,
     context,
-    light,
+    sceneLight,
+    sceneMsaaSamples,
     layerSelectWithRectEventHandlers,
     handleMount,
     handleUnmount,
@@ -137,7 +138,7 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
         cursor: isLayerDragging ? "grab" : undefined,
         ...style,
       }}
-      shadows={!!(property?.atmosphere?.shadows ?? property?.globeShadow?.globeShadow)}
+      shadows={!!property?.shadows}
       onClick={handleClick}
       onDoubleClick={mouseEventHandles.doubleclick}
       onMouseDown={mouseEventHandles.mousedown}
@@ -200,9 +201,7 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
             ? property.cameraLimiter?.cameraLimitterTargetArea?.height ?? Number.POSITIVE_INFINITY
             : Number.POSITIVE_INFINITY
         }
-        enableCollisionDetection={
-          !(property?.default?.allowEnterGround ?? property?.camera?.allowEnterGround)
-        }
+        enableCollisionDetection={!property?.camera?.allowEnterGround}
       />
       <Camera
         onChange={handleCameraChange}
@@ -229,30 +228,25 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
           />
         </Entity>
       )}
-      {/* NOTE: useWebVR={false} will crash Cesium */}
       <Scene
         backgroundColor={backgroundColor}
-        useWebVR={!!property?.default?.vr || undefined}
-        light={light}
+        light={sceneLight}
+        msaaSamples={sceneMsaaSamples}
         useDepthPicking={false}
-        debugShowFramesPerSecond={!!property?.render?.debugFramePerSecond}
-        verticalExaggerationRelativeHeight={property?.terrain?.terrainExaggerationRelativeHeight}
-        verticalExaggeration={property?.terrain?.terrainExaggeration}
+        useWebVR={!!property?.scene?.vr || undefined} // NOTE: useWebVR={false} will crash Cesium
+        debugShowFramesPerSecond={!!property?.scene?.debugShowFramesPerSecond}
+        verticalExaggerationRelativeHeight={property?.scene?.verticalExaggerationRelativeHeight}
+        verticalExaggeration={property?.scene?.verticalExaggeration}
       />
-      <SkyBox show={property?.default?.skybox ?? property?.skyBox?.skyBox ?? true} />
-      <Fog
-        enabled={property?.atmosphere?.fog ?? true}
-        density={property?.atmosphere?.fog_density}
-      />
-      <Sun show={property?.atmosphere?.enable_sun ?? property?.sun?.sun ?? true} />
-      <Moon show={property?.atmosphere?.enableMoon ?? property?.moon?.moon ?? true} />
+      <SkyBox show={property?.skyBox?.show ?? true} />
+      <Fog enabled={property?.fog?.enabled ?? true} density={property?.fog?.density} />
+      <Sun show={property?.sun?.show ?? true} />
+      <Moon show={property?.moon?.show ?? true} />
       <SkyAtmosphere
-        show={
-          property?.atmosphere?.sky_atmosphere ?? property?.skyAtmosphere?.skyAtmosphere ?? true
-        }
-        saturationShift={property?.atmosphere?.skyboxSurturationShift}
-        atmosphereLightIntensity={property?.skyAtmosphere?.skyAtmosphereIntensity}
-        brightnessShift={property?.atmosphere?.skyboxBrightnessShift}
+        show={property?.skyAtmosphere?.show ?? true}
+        atmosphereLightIntensity={property?.skyAtmosphere?.atmosphereLightIntensity}
+        saturationShift={property?.skyAtmosphere?.saturationShift}
+        brightnessShift={property?.skyAtmosphere?.brightnessShift}
       />
       <Globe property={property} cesiumIonAccessToken={cesiumIonAccessToken} />
       <featureContext.Provider value={context}>{ready ? children : null}</featureContext.Provider>
