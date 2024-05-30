@@ -1,0 +1,9 @@
+on:
+  push:
+    branches: feat/release-flow
+
+jobs:
+  release:
+    uses: reearth/core/.github/workflows/npm_release.yml@feat/release-flow
+    with:
+        version-args: --preid beta prerelease

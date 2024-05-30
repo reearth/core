@@ -19,7 +19,10 @@
     "preview": "vite preview",
     "test": "vitest",
     "storybook": "storybook dev -p 6007",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "preversion": "yarn test run",
+    "version": "yarn build",
+    "postversion": "git push && git push --tags"
   },
   "engines": {
     "node": ">=20"
