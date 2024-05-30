@@ -6,4 +6,5 @@ jobs:
   release:
     uses: reearth/core/.github/workflows/npm_release.yml@feat/release-flow
     with:
+        tag: beta
         version-args: --preid beta prerelease

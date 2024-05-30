@@ -1,20 +1,13 @@
 on:
   workflow_call:
     inputs:
+        tag:
+          required: true
+          type: string
         version-args:
             required: true
             type: string
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: lts/*
-      - name: Run build
-        run: yarn build
-
   versioning:
     runs-on: ubuntu-latest
     steps:
@@ -37,6 +30,8 @@ jobs:
         run: npm version --no-git-tag-version ${{ inputs.version-args }}
 
   publish:
+    needs:
+      - versioning
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -48,4 +43,5 @@ jobs:
       - uses: JS-DevTools/npm-publish@v3
         with:
           token: ${{ secrets.NPM_TOKEN }}
+          tag: ${{ inputs.tag }}
           dry-run: true
