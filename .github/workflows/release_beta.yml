@@ -9,4 +9,4 @@ jobs:
         tag: beta
         version-args: --preid beta prerelease
     secrets:
-      npm-token: ${{ secrets.NPM_TOKEN }}
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

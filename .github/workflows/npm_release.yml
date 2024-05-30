@@ -8,11 +8,11 @@ on:
             required: true
             type: string
     secrets:
-      npm-token:
+      NPM_TOKEN:
         required: true
 
 jobs:
-  versioning:
+  release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -30,20 +30,13 @@ jobs:
             ${{ runner.os }}-yarn-
       - name: Run install
         run: yarn install --frozen-lockfile
+
       - name: Run npm version
         run: npm version --no-git-tag-version ${{ inputs.version-args }}
 
-  publish:
-    needs:
-      - versioning
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v3
+      - name: Release to NPM
+        uses: JS-DevTools/npm-publish@v3
         with:
-          node-version: lts/*
-      - uses: JS-DevTools/npm-publish@v3
-        with:
-          token: ${{ secrets.npm-token }}
+          token: ${{ secrets.NPM_TOKEN }}
           tag: ${{ inputs.tag }}
           dry-run: true
