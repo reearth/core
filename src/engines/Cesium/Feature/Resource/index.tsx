@@ -76,18 +76,9 @@ export default function Resource({
 
   const { requestRender, timelineManagerRef } = useContext();
 
-  const shouldBeChanged = useRef(true);
-
   const handleChange = useCallback(
     (e: DataSource) => {
       if (!viewer) return;
-
-      // GeoJSON is not delegated data, so we need to skip.
-      if (type === "geojson") return;
-
-      if (!shouldBeChanged.current) return;
-      shouldBeChanged.current = true;
-
       const features: Feature[] = [];
       const computedFeatures: ComputedFeature[] = [];
       e.entities.values.forEach(e => {
@@ -109,7 +100,11 @@ export default function Resource({
           computedFeatures.push(computedFeature);
         }
       });
-      onComputedFeatureFetch?.(features, computedFeatures);
+
+      // GeoJSON is not delegated data, so we need to skip.
+      if (type !== "geojson") {
+        onComputedFeatureFetch?.(features, computedFeatures);
+      }
 
       requestRender?.();
     },
@@ -123,21 +118,16 @@ export default function Resource({
   });
   const handleLoad = useCallback(
     (ds: DataSource) => {
-      if (type === "geojson") {
-        ds.entities.values.forEach(e =>
-          requestAnimationFrame(() => {
-            const tag = getTag(e);
-            attachTag(e, {
-              layerId: layer?.id,
-              featureId: makeFeatureId(e),
-              hideIndicator: hideIndicator ?? tag?.hideIndicator,
-            });
-          }),
-        );
-      } else {
-        handleChange(ds);
-      }
-
+      ds.entities.values.forEach(e =>
+        requestAnimationFrame(() => {
+          const tag = getTag(e);
+          attachTag(e, {
+            layerId: layer?.id,
+            featureId: makeFeatureId(e),
+            hideIndicator: hideIndicator ?? tag?.hideIndicator,
+          });
+        }),
+      );
       if (!updateClock) {
         if (
           initialClock.current.current &&
@@ -157,25 +147,25 @@ export default function Resource({
             },
           });
         }
-      } else {
-        if (ds.clock) {
-          timelineManagerRef?.current?.commit({
-            cmd: "SET_TIME",
-            payload: {
-              start: JulianDate.toDate(ds.clock.startTime),
-              stop: JulianDate.toDate(ds.clock.stopTime),
-              current: JulianDate.toDate(ds.clock.currentTime),
-            },
-            committer: {
-              source: "featureResource",
-              id: layer?.id,
-            },
-          });
-        }
+        return;
+      }
+      if (ds.clock) {
+        timelineManagerRef?.current?.commit({
+          cmd: "SET_TIME",
+          payload: {
+            start: JulianDate.toDate(ds.clock.startTime),
+            stop: JulianDate.toDate(ds.clock.stopTime),
+            current: JulianDate.toDate(ds.clock.currentTime),
+          },
+          committer: {
+            source: "featureResource",
+            id: layer?.id,
+          },
+        });
       }
       requestRender?.();
     },
-    [updateClock, timelineManagerRef, layer?.id, requestRender, hideIndicator, handleChange, type],
+    [updateClock, timelineManagerRef, layer?.id, requestRender, hideIndicator],
   );
 
   // convert hexCodeColorString to ColorValue?s
@@ -204,21 +194,6 @@ export default function Resource({
     },
     [], // eslint-disable-line react-hooks/exhaustive-deps
   );
-
-  useEffect(() => {
-    shouldBeChanged.current = true;
-  }, [
-    isVisible,
-    show,
-    url,
-    Component,
-    clampToGround,
-    strokeValue,
-    fillValue,
-    strokeWidth,
-    markerSize,
-    markerColor,
-  ]);
 
   if (!isVisible || !show || !Component || !url) return null;
 
