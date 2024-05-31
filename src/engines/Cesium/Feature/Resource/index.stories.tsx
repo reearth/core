@@ -39,7 +39,7 @@ Default.args = {
     tiles: [
       {
         id: "default",
-        tile_type: "default",
+        type: "default",
       },
     ],
   },

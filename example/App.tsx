@@ -30,10 +30,13 @@ function App() {
         onLayerSelect={handleSelect}
         engine="cesium"
         sceneProperty={{
+          scene: {
+            mode: "2d",
+          },
           tiles: [
             {
               id: "default",
-              tile_type: "default",
+              type: "default",
             },
           ],
         }}

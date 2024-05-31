@@ -4,11 +4,9 @@ import { ClockStep, JulianDate, Math as CesiumMath } from "cesium";
 import { useImperativeHandle, Ref, RefObject, useMemo, useRef } from "react";
 import { CesiumComponentRef } from "resium";
 
-import type { EngineRef, MouseEventProps, Feature, ComputedFeature } from "..";
-import { MouseEventCallbacks, TickEventCallback } from "../../Map";
-import { SketchType } from "../../Map/Sketch/types";
-import { Position2d, Position3d } from "../../types";
-
+import type { EngineRef, MouseEventProps, Feature, ComputedFeature } from "../..";
+import { MouseEventCallbacks, TickEventCallback, SketchType } from "../../../Map";
+import { Position2d, Position3d } from "../../../types";
 import {
   getLocationFromScreen,
   flyTo,
@@ -34,11 +32,11 @@ import {
   cartesianToLatLngHeight,
   getExtrudedHeight,
   getOverriddenScreenSpaceCameraOptions,
-} from "./common";
-import { attachTag, getTag } from "./Feature";
-import { PickedFeature, pickManyFromViewportAsFeature } from "./pickMany";
-import { createGeometry } from "./Sketch/createGeometry";
-import { CursorType } from "./types";
+} from "../common";
+import { attachTag, getTag } from "../Feature";
+import { PickedFeature, pickManyFromViewportAsFeature } from "../pickMany";
+import { createGeometry } from "../Sketch/createGeometry";
+import { CursorType } from "../types";
 import {
   convertCesium3DTileFeatureProperties,
   convertEntityDescription,
@@ -46,7 +44,7 @@ import {
   convertObjToComputedFeature,
   findEntity,
   findFeaturesFromLayer,
-} from "./utils/utils";
+} from "../utils/utils";
 
 export default function useEngineRef(
   ref: Ref<EngineRef>,
@@ -539,13 +537,15 @@ export default function useEngineRef(
         const oldTransform = Cesium.Matrix4.clone(camera.transform);
 
         const center = getCenterCamera({ camera, scene });
-        // Get fixed frame from center to globe ellipsoid.
-        const frame = Cesium.Transforms.eastNorthUpToFixedFrame(
-          center || camera.positionWC,
-          scene.globe.ellipsoid,
-        );
+        if (center || camera.positionWC) {
+          // Get fixed frame from center to globe ellipsoid.
+          const frame = Cesium.Transforms.eastNorthUpToFixedFrame(
+            center || camera.positionWC,
+            scene.globe.ellipsoid,
+          );
 
-        camera.lookAtTransform(frame);
+          camera.lookAtTransform(frame);
+        }
 
         if (viewer.scene.mode !== Cesium.SceneMode.SCENE3D) {
           camera.move(

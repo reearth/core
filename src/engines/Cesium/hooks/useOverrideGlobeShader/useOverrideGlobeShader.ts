@@ -8,15 +8,15 @@ import { Viewer, Globe, Material, Cartesian3 } from "cesium";
 import { RefObject, useCallback, useEffect, useMemo, useRef } from "react";
 import { CesiumComponentRef } from "resium";
 
-import { TerrainProperty } from "..";
-import { useImmutableFunction } from "../../hooks/useRefFunction";
-import { StringMatcher } from "../../utils/StringMatcher";
+import { TerrainProperty } from "../../..";
+import { useImmutableFunction } from "../../../../hooks/useRefFunction";
+import { StringMatcher } from "../../../../utils/StringMatcher";
+import { createColorMapImage } from "../../Feature/HeatMap/colorMap";
+import GlobeFSDefinitions from "../../Shaders/OverriddenShaders/GlobeFS/Definitions.glsl?raw";
+import HeatmapForTerrainFS from "../../Shaders/OverriddenShaders/GlobeFS/HeatmapForTerrain.glsl?raw";
+import IBLFS from "../../Shaders/OverriddenShaders/GlobeFS/IBL.glsl?raw";
+import { PrivateCesiumGlobe } from "../../types";
 
-import { createColorMapImage } from "./Feature/HeatMap/colorMap";
-import GlobeFSDefinitions from "./Shaders/OverriddenShaders/GlobeFS/Definitions.glsl?raw";
-import HeatmapForTerrainFS from "./Shaders/OverriddenShaders/GlobeFS/HeatmapForTerrain.glsl?raw";
-import IBLFS from "./Shaders/OverriddenShaders/GlobeFS/IBL.glsl?raw";
-import { PrivateCesiumGlobe } from "./types";
 import { VertexTerrainElevationMaterial } from "./VertexTerrainElevationMaterial";
 
 const defaultMatcher = new StringMatcher()
@@ -122,17 +122,19 @@ const useIBL = ({
 
 const useTerrainHeatmap = ({
   cesium,
-  terrain: {
-    heatmapType,
-    heatmapMaxHeight,
-    heatmapMinHeight,
-    heatmapLogarithmic,
-    heatmapColorLUT,
-  } = {},
+  terrain,
 }: {
   cesium: RefObject<CesiumComponentRef<Viewer>>;
   terrain: TerrainProperty | undefined;
 }) => {
+  const {
+    type: heatmapType,
+    maxHeight: heatmapMaxHeight,
+    minHeight: heatmapMinHeight,
+    logarithmic: heatmapLogarithmic,
+    colorLUT: heatmapColorLUT,
+  } = terrain?.heatmap ?? {};
+
   const isCustomHeatmapEnabled = useMemo(() => heatmapType === "custom", [heatmapType]);
 
   const shaderForTerrainHeatmap = useMemo(

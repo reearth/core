@@ -1,7 +1,8 @@
 import { Ellipsoid, Material } from "cesium";
 
-import { createColorMapImage } from "./Feature/HeatMap/colorMap";
-import { turboColorMap } from "./Feature/HeatMap/constants";
+import { createColorMapImage } from "../../Feature/HeatMap/colorMap";
+import { turboColorMap } from "../../Feature/HeatMap/constants";
+
 import { JapanSeaLevelEllipsoid } from "./JapanSeaLevelEllipsoid";
 import source from "./vertexTerrainElevationMaterial.glsl?raw";
 

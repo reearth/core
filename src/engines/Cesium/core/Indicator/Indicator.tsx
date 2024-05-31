@@ -29,17 +29,17 @@ export default function Indicator({
     mountOnEnter: true,
     unmountOnExit: true,
   });
-  const { indicator_type, indicator_image, indicator_image_scale } = property?.indicator ?? {};
-  const [img, w, h] = useIcon({ image: indicator_image, imageSize: indicator_image_scale });
+  const { type, image, imageScale } = property?.indicator ?? {};
+  const [img, w, h] = useIcon({ image: image, imageSize: imageScale });
 
   useEffect(() => {
-    !(!indicator_type || indicator_type === "default")
+    !(!type || type === "default")
       ? viewer?.selectionIndicator.viewModel.selectionIndicatorElement.setAttribute(
           "hidden",
           "true",
         )
       : viewer?.selectionIndicator.viewModel.selectionIndicatorElement.removeAttribute("hidden");
-  }, [indicator_type, viewer, viewer?.selectionIndicator]);
+  }, [type, viewer, viewer?.selectionIndicator]);
 
   useEffect(() => {
     if (!viewer) return;
@@ -90,7 +90,7 @@ export default function Indicator({
   }, [viewer, timelineManagerRef]);
 
   return transition !== "unmounted" && pos ? (
-    indicator_type === "crosshair" ? (
+    type === "crosshair" ? (
       <div
         className={className}
         style={{
@@ -109,7 +109,7 @@ export default function Indicator({
         }}>
         <Crosshair />
       </div>
-    ) : indicator_type === "custom" ? (
+    ) : type === "custom" ? (
       <img
         src={img}
         width={w}

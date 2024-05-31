@@ -58,7 +58,7 @@ Basic.args = {
     tiles: [
       {
         id: "default",
-        tile_type: "default",
+        type: "default",
       },
     ],
   },
@@ -113,7 +113,7 @@ Excluded.args = {
     tiles: [
       {
         id: "default",
-        tile_type: "default",
+        type: "default",
       },
     ],
   },
@@ -162,15 +162,15 @@ ClampToGround.args = {
     tiles: [
       {
         id: "default",
-        tile_type: "default",
+        type: "default",
       },
     ],
     globe: {
       depthTestAgainstTerrain: true,
     },
     terrain: {
-      terrain: true,
-      terrainType: "cesium",
+      enabled: true,
+      type: "cesium",
     },
   },
 };

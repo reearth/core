@@ -26,9 +26,9 @@ export default function Globe({ property, cesiumIonAccessToken }: Props): JSX.El
 
   const terrainProvider = useMemo((): Promise<TerrainProvider> | TerrainProvider | undefined => {
     const opts = {
-      terrain: terrainProperty?.terrain,
-      terrainType: terrainProperty?.terrainType,
-      terrainNormal: terrainProperty?.terrainNormal,
+      terrain: terrainProperty?.enabled,
+      terrainType: terrainProperty?.type,
+      terrainNormal: terrainProperty?.normal,
       terrainCesiumIonAccessToken:
         terrainProperty?.terrainCesiumIonAccessToken || cesiumIonAccessToken,
       terrainCesiumIonAsset: terrainProperty?.terrainCesiumIonAsset,
@@ -37,12 +37,12 @@ export default function Globe({ property, cesiumIonAccessToken }: Props): JSX.El
     const provider = opts.terrain ? terrainProviders[opts.terrainType || "cesium"] : undefined;
     return (typeof provider === "function" ? provider(opts) : provider) ?? defaultTerrainProvider;
   }, [
-    terrainProperty?.terrain,
-    terrainProperty?.terrainType,
+    terrainProperty?.enabled,
+    terrainProperty?.type,
     terrainProperty?.terrainCesiumIonAccessToken,
     terrainProperty?.terrainCesiumIonAsset,
     terrainProperty?.terrainCesiumIonUrl,
-    terrainProperty?.terrainNormal,
+    terrainProperty?.normal,
     cesiumIonAccessToken,
   ]);
 
@@ -69,19 +69,16 @@ export default function Globe({ property, cesiumIonAccessToken }: Props): JSX.El
 const defaultTerrainProvider = new EllipsoidTerrainProvider();
 
 const terrainProviders: {
-  [k in NonNullable<TerrainProperty["terrainType"]>]:
+  [k in NonNullable<TerrainProperty["type"]>]:
     | TerrainProvider
     | ((
         opts: Pick<
           TerrainProperty,
-          | "terrainCesiumIonAccessToken"
-          | "terrainCesiumIonAsset"
-          | "terrainCesiumIonUrl"
-          | "terrainNormal"
+          "terrainCesiumIonAccessToken" | "terrainCesiumIonAsset" | "terrainCesiumIonUrl" | "normal"
         >,
       ) => Promise<TerrainProvider> | TerrainProvider | null);
 } = {
-  cesium: ({ terrainCesiumIonAccessToken, terrainNormal }) =>
+  cesium: ({ terrainCesiumIonAccessToken, normal: terrainNormal }) =>
     CesiumTerrainProvider.fromUrl(
       IonResource.fromAssetId(1, {
         accessToken: terrainCesiumIonAccessToken,
@@ -99,7 +96,7 @@ const terrainProviders: {
     terrainCesiumIonAccessToken,
     terrainCesiumIonAsset,
     terrainCesiumIonUrl,
-    terrainNormal,
+    normal: terrainNormal,
   }) =>
     terrainCesiumIonAsset
       ? CesiumTerrainProvider.fromUrl(

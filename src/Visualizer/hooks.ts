@@ -21,6 +21,7 @@ import { TimelineManagerRef } from "../Map/useTimelineManager";
 
 import type { InteractionModeType } from "./interactionMode";
 import { INTERACTION_MODES } from "./interactionMode";
+import useCoreAPI from "./useCoreAPI";
 import useViewport from "./useViewport";
 
 export default function useHooks(
@@ -286,6 +287,8 @@ export default function useHooks(
     }),
     [],
   );
+
+  useCoreAPI();
 
   return {
     mapRef,

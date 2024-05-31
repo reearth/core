@@ -343,20 +343,22 @@ export type SceneMode = "3d" | "2d" | "columbus";
 export type IndicatorTypes = "default" | "crosshair" | "custom";
 
 export type TerrainProperty = {
-  terrain?: boolean;
-  terrainType?: "cesium" | "arcgis" | "cesiumion"; // default: cesium
+  enabled?: boolean;
+  type?: "cesium" | "arcgis" | "cesiumion"; // default: cesium
+  url?: string;
+  normal?: boolean;
   terrainCesiumIonAsset?: string;
   terrainCesiumIonAccessToken?: string;
   terrainCesiumIonUrl?: string;
-  terrainUrl?: string;
-  terrainNormal?: boolean;
   // TODO: Add encode option
   // Need to specify a tile from `tiles` option with `heatmap` option.
-  heatmapType?: "custom"; // TODO: Support Cesium's terrain heatmap as built-in: https://sandcastle.cesium.com/?src=Globe%20Materials.html
-  heatmapColorLUT?: LUT;
-  heatmapMinHeight?: number;
-  heatmapMaxHeight?: number;
-  heatmapLogarithmic?: boolean;
+  heatmap?: {
+    type?: "custom"; // TODO: Support Cesium's terrain heatmap as built-in: https://sandcastle.cesium.com/?src=Globe%20Materials.html
+    colorLUT?: LUT;
+    minHeight?: number;
+    maxHeight?: number;
+    logarithmic?: boolean;
+  };
 };
 
 export type SceneProperty = {
@@ -383,7 +385,9 @@ export type SceneProperty = {
       specularEnvironmentMaps?: string;
       sphericalHarmonicCoefficients?: [x: number, y: number, z: number][];
     };
-    showWireframe?: boolean;
+    debug?: {
+      showWireframe?: boolean;
+    };
   };
   terrain?: TerrainProperty;
   scene?: {
@@ -391,25 +395,27 @@ export type SceneProperty = {
     mode?: SceneMode;
     verticalExaggeration?: number; // default: 1
     verticalExaggerationRelativeHeight?: number; // default: 0
-    debugShowFramesPerSecond?: boolean;
     vr?: boolean;
     light?: {
-      lightType?: "sunLight" | "directionalLight";
-      lightDirectionX?: number;
-      lightDirectionY?: number;
-      lightDirectionZ?: number;
-      lightColor?: string;
-      lightIntensity?: number;
+      type?: "sunLight" | "directionalLight";
+      directionX?: number;
+      directionY?: number;
+      directionZ?: number;
+      color?: string;
+      intensity?: number;
     };
     antialias?: "low" | "medium" | "high" | "extreme";
+    debug?: {
+      showFramesPerSecond?: boolean;
+    };
   };
   tiles?: {
     id: string;
-    tile_type?: string;
-    tile_url?: string;
-    tile_zoomLevel?: number[];
-    tile_zoomLevelForURL?: number[];
-    tile_opacity?: number;
+    type?: string;
+    url?: string;
+    opacity?: number;
+    zoomLevel?: number[];
+    zoomLevelForURL?: number[];
     heatmap?: boolean;
   }[];
   tileLabels?: {
@@ -441,11 +447,11 @@ export type SceneProperty = {
     allowEnterGround?: boolean;
   };
   cameraLimiter?: {
-    cameraLimitterEnabled?: boolean;
-    cameraLimitterShowHelper?: boolean;
-    cameraLimitterTargetArea?: Camera;
-    cameraLimitterTargetWidth?: number;
-    cameraLimitterTargetLength?: number;
+    enabled?: boolean;
+    showHelper?: boolean;
+    targetArea?: Camera;
+    targetWidth?: number;
+    targetLength?: number;
   };
   ambientOcclusion?: {
     enabled?: boolean;
@@ -454,9 +460,9 @@ export type SceneProperty = {
     ambientOcclusionOnly?: boolean;
   };
   indicator?: {
-    indicator_type: IndicatorTypes;
-    indicator_image?: string;
-    indicator_image_scale?: number;
+    type: IndicatorTypes;
+    image?: string;
+    imageScale?: number;
   };
   engine?: {
     cesium?: {

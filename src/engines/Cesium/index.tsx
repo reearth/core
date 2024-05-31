@@ -27,6 +27,10 @@ import LabelImageryLayers from "./core/labels/LabelImageryLayers";
 import Event from "./Event";
 import Feature, { context as featureContext } from "./Feature";
 import useHooks from "./hooks";
+import useCamera from "./hooks/useCamera";
+import useExplicitRender from "./hooks/useExplicitRender";
+import useLayerDragDrop from "./hooks/useLayerDragDrop";
+import useSceneProperty from "./hooks/useSceneProperty";
 import { AmbientOcclusion, AmbientOcclusionOutputType } from "./PostProcesses/hbao";
 import { AMBIENT_OCCLUSION_QUALITY } from "./PostProcesses/hbao/config";
 import Sketch from "./Sketch";
@@ -66,42 +70,32 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
   ref,
 ) => {
   const {
-    backgroundColor,
     cesium,
+    engineAPI,
     cameraViewBoundaries,
     cameraViewOuterBoundaries,
     cameraViewBoundariesMaterial,
     mouseEventHandles,
     cesiumIonAccessToken,
     context,
-    sceneLight,
-    sceneMsaaSamples,
     layerSelectWithRectEventHandlers,
     handleMount,
     handleUnmount,
     handleUpdate,
     handleClick,
-    handleCameraChange,
-    handleCameraMoveEnd,
   } = useHooks({
     ref,
     property,
     camera,
     selectedLayerId,
     selectionReason: layerSelectionReason,
-    isLayerDraggable,
-    isLayerDragging,
     meta,
     layersRef,
     featureFlags,
-    requestingRenderMode,
-    shouldRender,
     timelineManagerRef,
     cameraForceHorizontalRoll,
     onLayerSelect,
     onCameraChange,
-    onLayerDrag,
-    onLayerDrop,
     onLayerEdit,
     onLayerSelectWithRectStart,
     onLayerSelectWithRectMove,
@@ -109,6 +103,22 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
     onMount,
     onLayerVisibility,
     onLayerLoad,
+  });
+
+  const { sceneLight, sceneBackgroundColor, sceneMsaaSamples, sceneMode } = useSceneProperty({
+    property,
+    cesium,
+  });
+
+  useLayerDragDrop({ cesium, onLayerDrag, onLayerDrop, isLayerDraggable });
+
+  useExplicitRender({ cesium, requestingRenderMode, isLayerDragging, shouldRender, property });
+
+  const { handleCameraChange, handleCameraMoveEnd } = useCamera({
+    cesium,
+    camera,
+    engineAPI,
+    onCameraChange,
   });
 
   return (
@@ -197,18 +207,18 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
       </ScreenSpaceEventHandler>
       <ScreenSpaceCameraController
         maximumZoomDistance={
-          property?.cameraLimiter?.cameraLimitterEnabled
-            ? property.cameraLimiter?.cameraLimitterTargetArea?.height ?? Number.POSITIVE_INFINITY
+          property?.cameraLimiter?.enabled
+            ? property.cameraLimiter?.targetArea?.height ?? Number.POSITIVE_INFINITY
             : Number.POSITIVE_INFINITY
         }
         enableCollisionDetection={!property?.camera?.allowEnterGround}
       />
       <Camera
-        onChange={handleCameraChange}
         percentageChanged={0.2}
+        onChange={handleCameraChange}
         onMoveEnd={handleCameraMoveEnd}
       />
-      {cameraViewBoundaries && property?.cameraLimiter?.cameraLimitterShowHelper && (
+      {cameraViewBoundaries && property?.cameraLimiter?.showHelper && (
         <Entity>
           <PolylineGraphics
             positions={cameraViewBoundaries}
@@ -218,7 +228,7 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
           />
         </Entity>
       )}
-      {cameraViewOuterBoundaries && property?.cameraLimiter?.cameraLimitterShowHelper && (
+      {cameraViewOuterBoundaries && property?.cameraLimiter?.showHelper && (
         <Entity>
           <PolylineGraphics
             positions={cameraViewOuterBoundaries}
@@ -229,12 +239,13 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
         </Entity>
       )}
       <Scene
-        backgroundColor={backgroundColor}
+        backgroundColor={sceneBackgroundColor}
         light={sceneLight}
+        mode={sceneMode}
         msaaSamples={sceneMsaaSamples}
         useDepthPicking={false}
         useWebVR={!!property?.scene?.vr || undefined} // NOTE: useWebVR={false} will crash Cesium
-        debugShowFramesPerSecond={!!property?.scene?.debugShowFramesPerSecond}
+        debugShowFramesPerSecond={!!property?.scene?.debug?.showFramesPerSecond}
         verticalExaggerationRelativeHeight={property?.scene?.verticalExaggerationRelativeHeight}
         verticalExaggeration={property?.scene?.verticalExaggeration}
       />
