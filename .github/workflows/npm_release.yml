@@ -11,6 +11,8 @@ on:
             required: true
             type: string
     secrets:
+      PAT:
+        required: true
       NPM_TOKEN:
         required: true
 permissions:
@@ -37,11 +39,11 @@ jobs:
 
       - name: Set up github actions user
         run: |
-          git config --global user.name "keiya01"
-          git config --global user.email "34934510+keiya01@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
       - name: Run npm version
-        run: npm version --no-commit-hooks ${{ inputs.version-args }}
+        run: npm version ${{ inputs.version-args }}
 
       - name: Push tag
         run: git push --tags
@@ -53,8 +55,9 @@ jobs:
       - name: Create pull request to bump version
         uses: peter-evans/create-pull-request@v6
         with:
+          token: ${{ secrets.PAT }}
           branch: bump/version-${{ inputs.tag }}
-          commit-message: Bump version to ${{ steps.npm.outputs.version }}
+          title: "chore: bump version to ${{ steps.npm.outputs.version }}"
 
       - name: Release to NPM
         uses: JS-DevTools/npm-publish@v3
