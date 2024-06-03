@@ -1,6 +1,9 @@
 on:
   push:
     branches: alpha
+    paths-ignore:
+      - 'package.json'
+  workflow_dispatch:
 
 jobs:
   release:
