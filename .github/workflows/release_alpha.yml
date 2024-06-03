@@ -1,13 +1,13 @@
 on:
   push:
-    branches: feat/release-flow
+    branches: alpha
 
 jobs:
   release:
     uses: reearth/core/.github/workflows/npm_release.yml@feat/release-flow
     with:
-        branch: feat/release-flow
-        tag: beta
-        version-args: --preid beta prerelease
+        branch: alpha
+        tag: alpha
+        version-args: --preid alpha prerelease
     secrets:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

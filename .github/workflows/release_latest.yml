@@ -1,0 +1,20 @@
+on:
+  workflow_dispatch:
+    inputs:
+      version-type:
+        required: true
+        type: choice
+        options:
+          - major
+          - minor
+          - patch
+
+jobs:
+  release:
+    uses: reearth/core/.github/workflows/npm_release.yml@feat/release-flow
+    with:
+        branch: main
+        tag: latest
+        version-args: ${{ inputs.version-type }}
+    secrets:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

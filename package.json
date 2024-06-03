@@ -21,8 +21,7 @@
     "storybook": "storybook dev -p 6007",
     "build-storybook": "storybook build",
     "preversion": "yarn test run",
-    "version": "yarn build",
-    "postversion": "git push && git push --tags"
+    "version": "yarn build"
   },
   "engines": {
     "node": ">=20"
