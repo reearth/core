@@ -64,29 +64,26 @@ export function attachProperties<
   }
 
   const tag = getTag(entity);
+  const originalProperties = tag?.originalProperties || {};
+  const isUpdatedInLastUpdate = originalProperties[appearanceName];
 
-  // Backup original properties
-  overrideOriginalProperties(
-    entity,
-    tag,
-    propertyName,
-    Object.keys(propertyMap).reduce(
-      (r, k) => {
-        r[k] = (property as any)[k];
-        return r;
-      },
-      {} as Record<string, any>,
-    ),
-  );
-
+  let isUpdated = false;
   Object.entries(propertyMap).forEach(([entityPropertyKey, appearancePropertyKey]) => {
     const appearanceKeyName = appearancePropertyKey.name;
     const appearanceKeyType = appearancePropertyKey.type as AppearancePropertyKeyType;
 
     let value =
       appearancePropertyKey.override ??
-      (computedFeature?.[appearanceName] as any)?.[appearanceKeyName] ??
-      appearancePropertyKey.default;
+      (computedFeature?.[appearanceName] as any)?.[appearanceKeyName];
+    const isDefaultUsed = value == null && !!appearancePropertyKey.default;
+    value = value == null ? appearancePropertyKey.default : value;
+
+    if ((value == null || isDefaultUsed) && !isUpdatedInLastUpdate) {
+      return;
+    }
+
+    isUpdated = true;
+
     switch (appearanceKeyType) {
       case "color":
         value = toColor(value);
@@ -98,9 +95,14 @@ export function attachProperties<
         value = heightReference(value);
     }
 
+    if (value === (entity[propertyName] as any)[entityPropertyKey]) {
+      return;
+    }
+
     (entity[propertyName] as any)[entityPropertyKey] =
       value ?? (property as any)[entityPropertyKey];
   });
+  overrideOriginalProperties(entity, tag, appearanceName, isUpdated);
 }
 
 const hasAppearance = <
@@ -111,7 +113,7 @@ const hasAppearance = <
   entity: Entity,
   namePair: [appearanceName: AName, propertyName: PName],
 ): boolean => {
-  return !!(extractSimpleLayer(layer)?.[namePair[0]] || entity[namePair[1]]);
+  return !!(extractSimpleLayer(layer)?.[namePair[0]] && entity[namePair[1]]);
 };
 
 export const makeFeatureId = (e: Entity) => String(e.id);
