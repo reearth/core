@@ -35,19 +35,26 @@ jobs:
       - name: Run install
         run: yarn install --frozen-lockfile
 
-      # Ref: https://github.com/actions/checkout/blob/main/README.md#push-a-commit-using-the-built-in-token
       - name: Set up github actions user
         run: |
           git config --global user.name "keiya01"
           git config --global user.email "34934510+keiya01@users.noreply.github.com"
 
       - name: Run npm version
-        run: npm version ${{ inputs.version-args }}
+        run: npm version --no-commit-hooks ${{ inputs.version-args }}
 
-      - name: Git push
-        run: |
-          git push origin ${{ inputs.branch }}
-          git push --tags
+      - name: Push tag
+        run: git push --tags
+
+      - name: Get new version
+        id: npm
+        run: echo "version=$(cat package.json| jq -r '.version')" >> "$GITHUB_OUTPUT"
+
+      - name: Create pull request to bump version
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: bump/version-${{ inputs.tag }}
+          commit-message: Bump version to ${{ steps.npm.outputs.version }}
 
       - name: Release to NPM
         uses: JS-DevTools/npm-publish@v3
