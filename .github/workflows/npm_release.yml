@@ -35,12 +35,12 @@ jobs:
         run: yarn install --frozen-lockfile
 
       - name: Run npm version
-        run: npm version --no-git-tag-version ${{ inputs.version-args }}
+        run: npm version ${{ inputs.version-args }}
 
       - name: Git push
         run: |
           git push origin ${{ inputs.branch }}
-          git push origin ${{ inputs.branch }} --tags
+          git push --tags
 
       - name: Release to NPM
         uses: JS-DevTools/npm-publish@v3
