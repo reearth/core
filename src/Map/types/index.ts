@@ -378,13 +378,13 @@ export type SceneProperty = {
     atmosphereBrightnessShift?: number;
     atmosphereHueShift?: number;
     depthTestAgainstTerrain?: boolean;
-    shader?: {
-      imageBasedLighting?: boolean;
-      imageBasedLightIntensity?: number;
-      shadowDarkness?: number;
+    imageBasedLighting?: {
+      enabled?: boolean;
+      intensity?: number;
       specularEnvironmentMaps?: string;
       sphericalHarmonicCoefficients?: [x: number, y: number, z: number][];
     };
+    shadowDarkness?: number;
     debug?: {
       showWireframe?: boolean;
     };
