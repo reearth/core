@@ -1,0 +1,13 @@
+on:
+  push:
+    branches: beta
+
+jobs:
+  release:
+    uses: reearth/core/.github/workflows/npm_release.yml@main
+    with:
+        branch: beta
+        tag: beta
+        version-args: --preid beta prerelease
+    secrets:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
