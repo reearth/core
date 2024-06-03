@@ -1,12 +1,12 @@
 on:
   push:
-    branches: ci/pull-request
+    branches: beta
 
 jobs:
   release:
-    uses: reearth/core/.github/workflows/npm_release.yml@ci/pull-request
+    uses: reearth/core/.github/workflows/npm_release.yml@beta
     with:
-        branch: ci/pull-request
+        branch: beta
         tag: beta
         version-args: --preid beta prerelease
     secrets:
