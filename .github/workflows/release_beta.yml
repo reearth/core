@@ -1,12 +1,12 @@
 on:
   push:
-    branches: feat/release-flow
+    branches: beta
 
 jobs:
   release:
-    uses: reearth/core/.github/workflows/npm_release.yml@feat/release-flow
+    uses: reearth/core/.github/workflows/npm_release.yml@main
     with:
-        branch: feat/release-flow
+        branch: beta
         tag: beta
         version-args: --preid beta prerelease
     secrets:

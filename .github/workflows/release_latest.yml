@@ -11,7 +11,7 @@ on:
 
 jobs:
   release:
-    uses: reearth/core/.github/workflows/npm_release.yml@feat/release-flow
+    uses: reearth/core/.github/workflows/npm_release.yml@main
     with:
         branch: main
         tag: latest
