@@ -1,0 +1,55 @@
+on:
+  workflow_call:
+    inputs:
+        branch:
+          required: true
+          type: string
+        tag:
+          required: true
+          type: string
+        version-args:
+            required: true
+            type: string
+    secrets:
+      NPM_TOKEN:
+        required: true
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v3
+        with:
+          node-version: lts/*
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "path=$(yarn cache dir)" >> $GITHUB_OUTPUT
+      - uses: actions/cache@v3
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.path }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+      - name: Run install
+        run: yarn install --frozen-lockfile
+
+      # Ref: https://github.com/actions/checkout/blob/main/README.md#push-a-commit-using-the-built-in-token
+      - name: Set up github actions user
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Run npm version
+        run: npm version ${{ inputs.version-args }}
+
+      - name: Git push
+        run: |
+          git push origin ${{ inputs.branch }}
+          git push --tags
+
+      - name: Release to NPM
+        uses: JS-DevTools/npm-publish@v3
+        with:
+          token: ${{ secrets.NPM_TOKEN }}
+          tag: ${{ inputs.tag }}
