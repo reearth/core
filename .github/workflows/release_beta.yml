@@ -4,7 +4,7 @@ on:
 
 jobs:
   release:
-    uses: reearth/core/.github/workflows/npm_release.yml@main
+    uses: reearth/core/.github/workflows/npm_release.yml@beta
     with:
         branch: beta
         tag: beta
