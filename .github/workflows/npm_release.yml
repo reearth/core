@@ -11,6 +11,8 @@ on:
             required: true
             type: string
     secrets:
+      PAT:
+        required: true
       NPM_TOKEN:
         required: true
 permissions:
@@ -20,6 +22,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT }}
       - uses: actions/setup-node@v3
         with:
           node-version: lts/*
@@ -35,7 +39,6 @@ jobs:
       - name: Run install
         run: yarn install --frozen-lockfile
 
-      # Ref: https://github.com/actions/checkout/blob/main/README.md#push-a-commit-using-the-built-in-token
       - name: Set up github actions user
         run: |
           git config --global user.name "keiya01"

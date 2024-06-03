@@ -11,3 +11,4 @@ jobs:
         version-args: --preid alpha prerelease
     secrets:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      PAT: ${{ secrets.PAT }}
