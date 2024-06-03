@@ -14,7 +14,7 @@ export type Props = {
   isHidden?: (id: string) => boolean;
   clusters?: Cluster[];
   delegatedDataTypes?: DataType[];
-  sceneProperty?: any;
+  viewerProperty?: any;
   clusterComponent?: ClusterComponentType;
   Feature?: LayerProps["Feature"];
 } & Omit<CommonProps, "isSelected" | "isHidden" | "selectedFeatureId">;

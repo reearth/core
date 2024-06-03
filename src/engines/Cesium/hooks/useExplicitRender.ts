@@ -2,7 +2,7 @@ import { Viewer } from "cesium";
 import { MutableRefObject, RefObject, useCallback, useEffect, useRef } from "react";
 import { CesiumComponentRef } from "resium";
 
-import { RequestingRenderMode, SceneProperty } from "../../../Map";
+import { RequestingRenderMode, ViewerProperty } from "../../../Map";
 import { FORCE_REQUEST_RENDER, NO_REQUEST_RENDER, REQUEST_RENDER_ONCE } from "../../../Map/hooks";
 
 export default ({
@@ -16,7 +16,7 @@ export default ({
   requestingRenderMode?: MutableRefObject<RequestingRenderMode>;
   isLayerDragging?: boolean;
   shouldRender?: boolean;
-  property?: SceneProperty;
+  property?: ViewerProperty;
 }) => {
   // explicit rendering
   const explicitRender = useCallback(() => {

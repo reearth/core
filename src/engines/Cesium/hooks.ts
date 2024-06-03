@@ -24,7 +24,7 @@ import type {
   Camera,
   LayerSelectionReason,
   EngineRef,
-  SceneProperty,
+  ViewerProperty,
   MouseEvents,
   LayerEditEvent,
   LayerVisibilityEvent,
@@ -85,7 +85,7 @@ export default ({
   onLayerLoad,
 }: {
   ref: React.ForwardedRef<EngineRef>;
-  property?: SceneProperty;
+  property?: ViewerProperty;
   camera?: Camera;
   selectedLayerId?: {
     layerId?: string;
@@ -151,10 +151,10 @@ export default ({
         })
       | undefined;
     if (!shadowMap) return;
-    shadowMap.softShadows = property?.shadowMap?.softShadows ?? false;
-    shadowMap.darkness = property?.shadowMap?.darkness ?? 0.3;
-    shadowMap.size = property?.shadowMap?.size ?? 2048;
-    shadowMap.maximumDistance = property?.shadowMap?.maximumDistance ?? 5000;
+    shadowMap.softShadows = property?.shadow?.shadowMap?.softShadows ?? false;
+    shadowMap.darkness = property?.shadow?.shadowMap?.darkness ?? 0.3;
+    shadowMap.size = property?.shadow?.shadowMap?.size ?? 2048;
+    shadowMap.maximumDistance = property?.shadow?.shadowMap?.maximumDistance ?? 5000;
     shadowMap.fadingEnabled = true;
     shadowMap.normalOffset = true;
 
@@ -208,10 +208,10 @@ export default ({
       Object.assign(shadowMap._pointBias, defaultPointBias);
     }
   }, [
-    property?.shadowMap?.softShadows,
-    property?.shadowMap?.darkness,
-    property?.shadowMap?.size,
-    property?.shadowMap?.maximumDistance,
+    property?.shadow?.shadowMap?.softShadows,
+    property?.shadow?.shadowMap?.darkness,
+    property?.shadow?.shadowMap?.size,
+    property?.shadow?.shadowMap?.maximumDistance,
   ]);
 
   // move to initial position at startup
@@ -392,7 +392,7 @@ export default ({
   useOverrideGlobeShader({
     cesium,
     sphericalHarmonicCoefficients,
-    globeShadowDarkness: property?.globe?.shadowDarkness,
+    globeShadowDarkness: property?.shadow?.globeShadowDarkness,
     globeImageBasedLighting: property?.globe?.imageBasedLighting?.enabled,
     enableLighting: property?.globe?.enableLighting,
     hasVertexNormals: property?.terrain?.enabled && property.terrain.normal,

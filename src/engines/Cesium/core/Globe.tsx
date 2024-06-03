@@ -8,11 +8,11 @@ import {
 import { useMemo } from "react";
 import { Globe as CesiumGlobe } from "resium";
 
-import type { SceneProperty, TerrainProperty } from "../..";
+import type { ViewerProperty, TerrainProperty } from "../..";
 import { toColor } from "../common";
 
 export type Props = {
-  property?: SceneProperty;
+  property?: ViewerProperty;
   cesiumIonAccessToken?: string;
 };
 

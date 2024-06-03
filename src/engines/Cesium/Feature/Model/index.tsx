@@ -39,7 +39,7 @@ export default function Model({
   id,
   isVisible,
   property,
-  sceneProperty,
+  viewerProperty,
   geometry,
   layer,
   feature,
@@ -120,19 +120,19 @@ export default function Model({
     if (
       !property?.specularEnvironmentMaps &&
       !property?.sphericalHarmonicCoefficients &&
-      !sceneProperty?.globe?.imageBasedLighting?.specularEnvironmentMaps &&
-      !sceneProperty?.globe?.imageBasedLighting?.sphericalHarmonicCoefficients
+      !viewerProperty?.globe?.imageBasedLighting?.specularEnvironmentMaps &&
+      !viewerProperty?.globe?.imageBasedLighting?.sphericalHarmonicCoefficients
     )
       return ibl;
 
     const specularEnvironmentMaps =
       property?.specularEnvironmentMaps ??
-      sceneProperty?.globe?.imageBasedLighting?.specularEnvironmentMaps;
+      viewerProperty?.globe?.imageBasedLighting?.specularEnvironmentMaps;
     const imageBasedLightIntensity =
-      property?.imageBasedLightIntensity ?? sceneProperty?.globe?.imageBasedLighting?.intensity;
+      property?.imageBasedLightIntensity ?? viewerProperty?.globe?.imageBasedLighting?.intensity;
     const sphericalHarmonicCoefficients = arrayToCartecian3(
       property?.sphericalHarmonicCoefficients ??
-        sceneProperty?.globe?.imageBasedLighting?.sphericalHarmonicCoefficients,
+        viewerProperty?.globe?.imageBasedLighting?.sphericalHarmonicCoefficients,
       imageBasedLightIntensity,
     );
 
@@ -147,9 +147,9 @@ export default function Model({
     property?.specularEnvironmentMaps,
     property?.sphericalHarmonicCoefficients,
     property?.imageBasedLightIntensity,
-    sceneProperty?.globe?.imageBasedLighting?.specularEnvironmentMaps,
-    sceneProperty?.globe?.imageBasedLighting?.sphericalHarmonicCoefficients,
-    sceneProperty?.globe?.imageBasedLighting?.intensity,
+    viewerProperty?.globe?.imageBasedLighting?.specularEnvironmentMaps,
+    viewerProperty?.globe?.imageBasedLighting?.sphericalHarmonicCoefficients,
+    viewerProperty?.globe?.imageBasedLighting?.intensity,
   ]);
 
   const { viewer } = useCesium();

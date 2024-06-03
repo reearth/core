@@ -2,14 +2,14 @@ import { Cartesian3, Color, DirectionalLight, SceneMode, SunLight, Viewer } from
 import { RefObject, useMemo } from "react";
 import { CesiumComponentRef } from "resium";
 
-import { SceneProperty } from "../..";
+import { ViewerProperty } from "../..";
 
 export default ({
   cesium,
   property,
 }: {
   cesium: RefObject<CesiumComponentRef<Viewer>>;
-  property?: SceneProperty;
+  property?: ViewerProperty;
 }) => {
   const sceneLight = useMemo(() => {
     let light;

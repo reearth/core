@@ -6,7 +6,7 @@ import type {
   LayerSelectionReason,
   Camera,
   ComputedLayer,
-  SceneProperty,
+  ViewerProperty,
   LayerEditEvent,
   CursorType,
   LayerVisibilityEvent,
@@ -28,7 +28,7 @@ export default function useHooks(
   {
     camera: initialCamera,
     interactionMode: initialInteractionMode,
-    sceneProperty,
+    viewerProperty,
     zoomedLayerId,
     onLayerSelect,
     onCameraChange,
@@ -39,7 +39,7 @@ export default function useHooks(
   }: {
     camera?: Camera;
     interactionMode?: InteractionModeType;
-    sceneProperty?: SceneProperty;
+    viewerProperty?: ViewerProperty;
     zoomedLayerId?: string;
     onLayerSelect?: (
       layerId: string | undefined,
@@ -112,7 +112,7 @@ export default function useHooks(
   const timelineManagerRef: TimelineManagerRef = useRef();
 
   // scene
-  const [overriddenSceneProperty, overrideSceneProperty] = useOverriddenProperty(sceneProperty);
+  const [overriddenViewerProperty, overrideViewerProperty] = useOverriddenProperty(viewerProperty);
 
   // camera
   const [camera, changeCamera] = useValue(initialCamera, onCameraChange);
@@ -245,8 +245,8 @@ export default function useHooks(
       selectedLayer,
       selectedComputedFeature,
       viewport,
-      overriddenSceneProperty,
-      overrideSceneProperty,
+      overriddenViewerProperty,
+      overrideViewerProperty,
       handleCameraForceHorizontalRollChange,
       handleInteractionModeChange: changeInteractionMode,
       onSketchPluginFeatureCreate,
@@ -263,8 +263,8 @@ export default function useHooks(
       selectedLayer,
       selectedComputedFeature,
       viewport,
-      overriddenSceneProperty,
-      overrideSceneProperty,
+      overriddenViewerProperty,
+      overrideViewerProperty,
       changeInteractionMode,
       handleCameraForceHorizontalRollChange,
       onLayerEdit,
@@ -296,14 +296,14 @@ export default function useHooks(
     selectedFeature,
     camera,
     featureFlags,
-    overriddenSceneProperty,
+    overriddenViewerProperty,
     isLayerDragging,
     timelineManagerRef,
     cursor,
     cameraForceHorizontalRoll,
     coreContextValue,
     containerStyle,
-    overrideSceneProperty,
+    overrideViewerProperty,
     handleLayerSelect,
     handleLayerDrag,
     handleLayerDrop,

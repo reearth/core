@@ -4,7 +4,7 @@ import {
   LayerEditEvent,
   LayerSelectionReason,
   LayerVisibilityEvent,
-  SceneProperty,
+  ViewerProperty,
 } from "../engines";
 import { ComputedFeature, ComputedLayer } from "../mantle";
 import {
@@ -28,8 +28,8 @@ type CoreContext = {
   };
   selectedComputedFeature?: ComputedFeature | undefined;
   viewport?: Viewport;
-  overriddenSceneProperty?: SceneProperty;
-  overrideSceneProperty?: (pluginId: string, property: SceneProperty) => void;
+  overriddenViewerProperty?: ViewerProperty;
+  overrideViewerProperty?: (pluginId: string, property: ViewerProperty) => void;
   handleCameraForceHorizontalRollChange?: (enable?: boolean) => void;
   handleInteractionModeChange?: (mode?: InteractionModeType | undefined) => void;
   onSketchPluginFeatureCreate?: (cb: SketchEventCallback) => void;

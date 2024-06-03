@@ -35,7 +35,7 @@ import type {
   ComputedLayer,
   FeatureComponentProps,
   Geometry,
-  SceneProperty,
+  ViewerProperty,
 } from "../..";
 import { Data, Layer, LayerSimple, TimeInterval } from "../../../mantle";
 import { FeatureIndex } from "../FeatureIndex";
@@ -48,7 +48,7 @@ export type FeatureProps<P = any> = {
   layer?: ComputedLayer;
   feature?: ComputedFeature;
   geometry?: Geometry;
-  sceneProperty?: SceneProperty;
+  viewerProperty?: ViewerProperty;
 } & Omit<FeatureComponentProps, "layer">;
 
 export type FeatureComponent = ComponentType<FeatureProps>;

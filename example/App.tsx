@@ -29,7 +29,7 @@ function App() {
         onMount={handleMount}
         onLayerSelect={handleSelect}
         engine="cesium"
-        sceneProperty={{
+        viewerProperty={{
           scene: {
             mode: "2d",
           },

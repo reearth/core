@@ -54,7 +54,7 @@ function MapFn(
     layers,
     overrides,
     timelineManagerRef,
-    sceneProperty,
+    viewerProperty,
     interactionMode,
     selectedFeature,
     cursor,
@@ -122,7 +122,7 @@ function MapFn(
         clusterComponent={currentEngine?.clusterComponent}
         delegatedDataTypes={currentEngine.delegatedDataTypes}
         meta={props.meta}
-        sceneProperty={sceneProperty}
+        viewerProperty={viewerProperty}
         requestingRenderMode={requestingRenderMode}
         onLayerSelect={handleLayerSelect}
       />

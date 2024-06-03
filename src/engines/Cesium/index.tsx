@@ -30,7 +30,7 @@ import useHooks from "./hooks";
 import useCamera from "./hooks/useCamera";
 import useExplicitRender from "./hooks/useExplicitRender";
 import useLayerDragDrop from "./hooks/useLayerDragDrop";
-import useSceneProperty from "./hooks/useSceneProperty";
+import useViewerProperty from "./hooks/useViewerProperty";
 import { AmbientOcclusion, AmbientOcclusionOutputType } from "./PostProcesses/hbao";
 import { AMBIENT_OCCLUSION_QUALITY } from "./PostProcesses/hbao/config";
 import Sketch from "./Sketch";
@@ -105,7 +105,7 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
     onLayerLoad,
   });
 
-  const { sceneLight, sceneBackgroundColor, sceneMsaaSamples, sceneMode } = useSceneProperty({
+  const { sceneLight, sceneBackgroundColor, sceneMsaaSamples, sceneMode } = useViewerProperty({
     property,
     cesium,
   });
@@ -148,7 +148,7 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
         cursor: isLayerDragging ? "grab" : undefined,
         ...style,
       }}
-      shadows={!!property?.shadows}
+      shadows={!!property?.shadow?.enabled}
       onClick={handleClick}
       onDoubleClick={mouseEventHandles.doubleclick}
       onMouseDown={mouseEventHandles.mousedown}

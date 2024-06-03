@@ -202,7 +202,7 @@ export type EngineProps = {
   style?: CSSProperties;
   isEditable?: boolean;
   isBuilt?: boolean;
-  property?: SceneProperty;
+  property?: ViewerProperty;
   camera?: Camera;
   cameraForceHorizontalRoll?: boolean;
   small?: boolean;
@@ -361,14 +361,7 @@ export type TerrainProperty = {
   };
 };
 
-export type SceneProperty = {
-  shadows?: boolean;
-  shadowMap?: {
-    size?: 1024 | 2048 | 4096;
-    softShadows?: boolean;
-    darkness?: number;
-    maximumDistance?: number;
-  };
+export type ViewerProperty = {
   globe?: {
     baseColor?: string;
     enableLighting?: boolean;
@@ -384,12 +377,21 @@ export type SceneProperty = {
       specularEnvironmentMaps?: string;
       sphericalHarmonicCoefficients?: [x: number, y: number, z: number][];
     };
-    shadowDarkness?: number;
     debug?: {
       showWireframe?: boolean;
     };
   };
   terrain?: TerrainProperty;
+  shadow?: {
+    enabled?: boolean;
+    globeShadowDarkness?: number;
+    shadowMap?: {
+      size?: 1024 | 2048 | 4096;
+      softShadows?: boolean;
+      darkness?: number;
+      maximumDistance?: number;
+    };
+  };
   scene?: {
     backgroundColor?: string;
     mode?: SceneMode;
@@ -448,10 +450,10 @@ export type SceneProperty = {
   };
   cameraLimiter?: {
     enabled?: boolean;
-    showHelper?: boolean;
     targetArea?: Camera;
     targetWidth?: number;
     targetLength?: number;
+    showHelper?: boolean;
   };
   ambientOcclusion?: {
     enabled?: boolean;

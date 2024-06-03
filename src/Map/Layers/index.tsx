@@ -36,7 +36,7 @@ export type Props = Omit<ClusteredLayerProps, "atomMap" | "isHidden" | "selected
     reason?: LayerSelectionReason;
   };
   hiddenLayers?: string[];
-  sceneProperty?: any;
+  viewerProperty?: any;
   requestingRenderMode?: MutableRefObject<RequestingRenderMode>;
   engineRef?: RefObject<EngineRef>;
   onLayerSelect?: (

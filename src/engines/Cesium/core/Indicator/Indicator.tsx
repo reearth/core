@@ -4,7 +4,7 @@ import { BoundingSphere, Cartesian3, SceneTransforms, Cartesian2, JulianDate } f
 import { useEffect, useState } from "react";
 import { useCesium } from "resium";
 
-import type { SceneProperty } from "../../..";
+import type { ViewerProperty } from "../../..";
 import { TimelineManagerRef } from "../../../../Map/useTimelineManager";
 import { useIcon } from "../../common";
 
@@ -12,7 +12,7 @@ import Crosshair from "./crosshair.svg?react";
 
 export type Props = {
   className?: string;
-  property?: SceneProperty;
+  property?: ViewerProperty;
   timelineManagerRef?: TimelineManagerRef;
 };
 

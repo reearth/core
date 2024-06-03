@@ -15,7 +15,7 @@ export const Cesium: Story = {
   args: {
     ready: true,
     engine: "cesium",
-    sceneProperty: {
+    viewerProperty: {
       tiles: [
         {
           id: "default",
@@ -72,7 +72,7 @@ export const API: Story = {
   args: {
     ready: true,
     engine: "cesium",
-    sceneProperty: {
+    viewerProperty: {
       tiles: [
         {
           id: "default",
