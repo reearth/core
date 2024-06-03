@@ -37,8 +37,8 @@ jobs:
       # Ref: https://github.com/actions/checkout/blob/main/README.md#push-a-commit-using-the-built-in-token
       - name: Set up github actions user
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "keiya01"
+          git config user.email "34934510+keiya01@users.noreply.github.com"
 
       - name: Run npm version
         run: npm version ${{ inputs.version-args }}
