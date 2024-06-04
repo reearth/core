@@ -40,6 +40,7 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
     className,
     style,
     property,
+    initialTime,
     camera,
     small,
     ready,
@@ -86,6 +87,7 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
   } = useHooks({
     ref,
     property,
+    initialTime,
     camera,
     selectedLayerId,
     selectionReason: layerSelectionReason,
@@ -207,8 +209,8 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
       </ScreenSpaceEventHandler>
       <ScreenSpaceCameraController
         maximumZoomDistance={
-          property?.cameraLimiter?.enabled
-            ? property.cameraLimiter?.targetArea?.height ?? Number.POSITIVE_INFINITY
+          property?.camera?.limiter?.enabled
+            ? property.camera?.limiter?.targetArea?.height ?? Number.POSITIVE_INFINITY
             : Number.POSITIVE_INFINITY
         }
         enableCollisionDetection={!property?.camera?.allowEnterGround}
@@ -218,7 +220,7 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
         onChange={handleCameraChange}
         onMoveEnd={handleCameraMoveEnd}
       />
-      {cameraViewBoundaries && property?.cameraLimiter?.showHelper && (
+      {cameraViewBoundaries && property?.camera?.limiter?.showHelper && (
         <Entity>
           <PolylineGraphics
             positions={cameraViewBoundaries}
@@ -228,7 +230,7 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
           />
         </Entity>
       )}
-      {cameraViewOuterBoundaries && property?.cameraLimiter?.showHelper && (
+      {cameraViewOuterBoundaries && property?.camera?.limiter?.showHelper && (
         <Entity>
           <PolylineGraphics
             positions={cameraViewOuterBoundaries}
@@ -245,19 +247,19 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
         msaaSamples={sceneMsaaSamples}
         useDepthPicking={false}
         useWebVR={!!property?.scene?.vr || undefined} // NOTE: useWebVR={false} will crash Cesium
-        debugShowFramesPerSecond={!!property?.scene?.debug?.showFramesPerSecond}
+        debugShowFramesPerSecond={!!property?.debug?.showFramesPerSecond}
         verticalExaggerationRelativeHeight={property?.scene?.verticalExaggerationRelativeHeight}
         verticalExaggeration={property?.scene?.verticalExaggeration}
       />
-      <SkyBox show={property?.skyBox?.show ?? true} />
-      <Fog enabled={property?.fog?.enabled ?? true} density={property?.fog?.density} />
-      <Sun show={property?.sun?.show ?? true} />
-      <Moon show={property?.moon?.show ?? true} />
+      <SkyBox show={property?.sky?.skyBox?.show ?? true} />
+      <Fog enabled={property?.sky?.fog?.enabled ?? true} density={property?.sky?.fog?.density} />
+      <Sun show={property?.sky?.sun?.show ?? true} />
+      <Moon show={property?.sky?.moon?.show ?? true} />
       <SkyAtmosphere
-        show={property?.skyAtmosphere?.show ?? true}
-        atmosphereLightIntensity={property?.skyAtmosphere?.atmosphereLightIntensity}
-        saturationShift={property?.skyAtmosphere?.saturationShift}
-        brightnessShift={property?.skyAtmosphere?.brightnessShift}
+        show={property?.sky?.skyAtmosphere?.show ?? true}
+        atmosphereLightIntensity={property?.sky?.skyAtmosphere?.atmosphereLightIntensity}
+        saturationShift={property?.sky?.skyAtmosphere?.saturationShift}
+        brightnessShift={property?.sky?.skyAtmosphere?.brightnessShift}
       />
       <Globe property={property} cesiumIonAccessToken={cesiumIonAccessToken} />
       <featureContext.Provider value={context}>{ready ? children : null}</featureContext.Provider>

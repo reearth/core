@@ -34,6 +34,7 @@ export type CoreVisualizerProps = {
   isBuilt?: boolean;
   isEditable?: boolean;
   viewerProperty?: ViewerProperty;
+  initialTime?: string | Date;
   layers?: Layer[];
   clusters?: Cluster[]; // TODO: remove completely from beta core
   camera?: Camera;
@@ -68,6 +69,7 @@ export const CoreVisualizer = memo(
         isBuilt,
         isEditable,
         viewerProperty,
+        initialTime,
         layers,
         clusters,
         small,
@@ -155,6 +157,7 @@ export const CoreVisualizer = memo(
                 featureFlags={featureFlags}
                 shouldRender={shouldRender}
                 property={overriddenViewerProperty}
+                initialTime={initialTime}
                 small={small}
                 ready={ready}
                 timelineManagerRef={timelineManagerRef}

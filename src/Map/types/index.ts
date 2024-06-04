@@ -22,7 +22,6 @@ import type {
   Feature,
   ComputedFeature,
   CameraPosition,
-  LUT,
 } from "../../mantle";
 import type {
   CameraOptions,
@@ -42,6 +41,8 @@ import type {
 import { SketchComponentType } from "../Sketch";
 import { SketchAppearance, SketchType } from "../Sketch/types";
 import type { TimelineManagerRef } from "../useTimelineManager";
+
+import type { SceneMode, ViewerProperty } from "./viewerProperty";
 
 export type {
   FeatureComponentProps,
@@ -72,6 +73,7 @@ export type {
   ValueType,
 } from "../../mantle";
 export * from "./event";
+export * from "./viewerProperty";
 
 export type EngineRef = {
   name: string;
@@ -203,6 +205,7 @@ export type EngineProps = {
   isEditable?: boolean;
   isBuilt?: boolean;
   property?: ViewerProperty;
+  initialTime?: string | Date;
   camera?: Camera;
   cameraForceHorizontalRoll?: boolean;
   small?: boolean;
@@ -338,140 +341,6 @@ export type MouseEventCallbacks = { [key in keyof MouseEvents]: MouseEvents[key]
 
 export type TickEvent = (cb: TickEventCallback) => void;
 export type TickEventCallback = (current: Date, clock: { start: Date; stop: Date }) => void;
-
-export type SceneMode = "3d" | "2d" | "columbus";
-export type IndicatorTypes = "default" | "crosshair" | "custom";
-
-export type TerrainProperty = {
-  enabled?: boolean;
-  type?: "cesium" | "arcgis" | "cesiumion"; // default: cesium
-  url?: string;
-  normal?: boolean;
-  terrainCesiumIonAsset?: string;
-  terrainCesiumIonAccessToken?: string;
-  terrainCesiumIonUrl?: string;
-  // TODO: Add encode option
-  // Need to specify a tile from `tiles` option with `heatmap` option.
-  heatmap?: {
-    type?: "custom"; // TODO: Support Cesium's terrain heatmap as built-in: https://sandcastle.cesium.com/?src=Globe%20Materials.html
-    colorLUT?: LUT;
-    minHeight?: number;
-    maxHeight?: number;
-    logarithmic?: boolean;
-  };
-};
-
-export type ViewerProperty = {
-  globe?: {
-    baseColor?: string;
-    enableLighting?: boolean;
-    showGroundAtmosphere?: boolean;
-    atmosphereLightIntensity?: number;
-    atmosphereSaturationShift?: number;
-    atmosphereBrightnessShift?: number;
-    atmosphereHueShift?: number;
-    depthTestAgainstTerrain?: boolean;
-    imageBasedLighting?: {
-      enabled?: boolean;
-      intensity?: number;
-      specularEnvironmentMaps?: string;
-      sphericalHarmonicCoefficients?: [x: number, y: number, z: number][];
-    };
-    debug?: {
-      showWireframe?: boolean;
-    };
-  };
-  terrain?: TerrainProperty;
-  shadow?: {
-    enabled?: boolean;
-    globeShadowDarkness?: number;
-    shadowMap?: {
-      size?: 1024 | 2048 | 4096;
-      softShadows?: boolean;
-      darkness?: number;
-      maximumDistance?: number;
-    };
-  };
-  scene?: {
-    backgroundColor?: string;
-    mode?: SceneMode;
-    verticalExaggeration?: number; // default: 1
-    verticalExaggerationRelativeHeight?: number; // default: 0
-    vr?: boolean;
-    light?: {
-      type?: "sunLight" | "directionalLight";
-      directionX?: number;
-      directionY?: number;
-      directionZ?: number;
-      color?: string;
-      intensity?: number;
-    };
-    antialias?: "low" | "medium" | "high" | "extreme";
-    debug?: {
-      showFramesPerSecond?: boolean;
-    };
-  };
-  tiles?: {
-    id: string;
-    type?: string;
-    url?: string;
-    opacity?: number;
-    zoomLevel?: number[];
-    zoomLevelForURL?: number[];
-    heatmap?: boolean;
-  }[];
-  tileLabels?: {
-    id: string;
-    labelType: "japan_gsi_optimal_bvmap"; // | "other_map"
-    style: Record<string, any>; // Function isn't allowed
-  }[];
-  skyBox?: {
-    show?: boolean;
-  };
-  sun?: {
-    show?: boolean;
-  };
-  moon?: {
-    show?: boolean;
-  };
-  fog?: {
-    enabled?: boolean;
-    density?: number;
-  };
-  skyAtmosphere?: {
-    show?: boolean;
-    atmosphereLightIntensity?: number; // default: 50
-    saturationShift?: number;
-    brightnessShift?: number;
-  };
-  camera?: {
-    camera?: Camera;
-    allowEnterGround?: boolean;
-  };
-  cameraLimiter?: {
-    enabled?: boolean;
-    targetArea?: Camera;
-    targetWidth?: number;
-    targetLength?: number;
-    showHelper?: boolean;
-  };
-  ambientOcclusion?: {
-    enabled?: boolean;
-    quality?: "low" | "medium" | "high" | "extreme";
-    intensity?: number;
-    ambientOcclusionOnly?: boolean;
-  };
-  indicator?: {
-    type: IndicatorTypes;
-    image?: string;
-    imageScale?: number;
-  };
-  engine?: {
-    cesium?: {
-      ionAccessToken?: string;
-    };
-  };
-};
 
 export type EngineComponent = ForwardRefExoticComponent<
   PropsWithoutRef<EngineProps> & RefAttributes<EngineRef>

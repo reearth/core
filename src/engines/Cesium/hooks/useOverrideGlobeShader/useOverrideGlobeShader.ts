@@ -133,7 +133,7 @@ const useTerrainHeatmap = ({
     minHeight: heatmapMinHeight,
     logarithmic: heatmapLogarithmic,
     colorLUT: heatmapColorLUT,
-  } = terrain?.heatmap ?? {};
+  } = terrain?.heightMap ?? {};
 
   const isCustomHeatmapEnabled = useMemo(() => heatmapType === "custom", [heatmapType]);
 
@@ -208,6 +208,7 @@ export const useOverrideGlobeShader = ({
     enableLighting,
   });
 
+  // Terrain Heatmap is actually a built-in feature for globe, it renders as a heatmap using terrain height data.
   const { isCustomHeatmapEnabled, shaderForTerrainHeatmap } = useTerrainHeatmap({
     cesium,
     terrain,

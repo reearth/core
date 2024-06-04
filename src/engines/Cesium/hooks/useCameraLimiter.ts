@@ -12,7 +12,7 @@ import type { Viewer as CesiumViewer } from "cesium";
 import { useEffect, useMemo, useState, RefObject } from "react";
 import { CesiumComponentRef } from "resium";
 
-import type { ViewerProperty } from "../..";
+import { CameraLimiterProperty } from "../../../Map";
 import { Camera } from "../../../utils";
 import { getCamera } from "../common";
 
@@ -22,7 +22,7 @@ const targetLength = 1000000;
 export function useCameraLimiter(
   cesium: RefObject<CesiumComponentRef<CesiumViewer>>,
   camera: Camera | undefined,
-  property: ViewerProperty["cameraLimiter"] | undefined,
+  property: CameraLimiterProperty | undefined,
 ) {
   const geodesic = useMemo(() => {
     const viewer = cesium.current?.cesiumElement;

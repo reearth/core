@@ -9,6 +9,7 @@ import { useMemo } from "react";
 import { Globe as CesiumGlobe } from "resium";
 
 import type { ViewerProperty, TerrainProperty } from "../..";
+import { AssetsProperty } from "../../../Map";
 import { toColor } from "../common";
 
 export type Props = {
@@ -28,21 +29,20 @@ export default function Globe({ property, cesiumIonAccessToken }: Props): JSX.El
     const opts = {
       terrain: terrainProperty?.enabled,
       terrainType: terrainProperty?.type,
-      terrainNormal: terrainProperty?.normal,
-      terrainCesiumIonAccessToken:
-        terrainProperty?.terrainCesiumIonAccessToken || cesiumIonAccessToken,
-      terrainCesiumIonAsset: terrainProperty?.terrainCesiumIonAsset,
-      terrainCesiumIonUrl: terrainProperty?.terrainCesiumIonUrl,
+      normal: terrainProperty?.normal,
+      ionAccessToken: property?.assets?.cesium?.terrian?.ionAccessToken || cesiumIonAccessToken,
+      ionAsset: property?.assets?.cesium?.terrian?.ionAsset,
+      ionUrl: property?.assets?.cesium?.terrian?.ionUrl,
     };
     const provider = opts.terrain ? terrainProviders[opts.terrainType || "cesium"] : undefined;
     return (typeof provider === "function" ? provider(opts) : provider) ?? defaultTerrainProvider;
   }, [
     terrainProperty?.enabled,
     terrainProperty?.type,
-    terrainProperty?.terrainCesiumIonAccessToken,
-    terrainProperty?.terrainCesiumIonAsset,
-    terrainProperty?.terrainCesiumIonUrl,
     terrainProperty?.normal,
+    property?.assets?.cesium?.terrian?.ionAccessToken,
+    property?.assets?.cesium?.terrian?.ionAsset,
+    property?.assets?.cesium?.terrian?.ionUrl,
     cesiumIonAccessToken,
   ]);
 
@@ -72,19 +72,16 @@ const terrainProviders: {
   [k in NonNullable<TerrainProperty["type"]>]:
     | TerrainProvider
     | ((
-        opts: Pick<
-          TerrainProperty,
-          "terrainCesiumIonAccessToken" | "terrainCesiumIonAsset" | "terrainCesiumIonUrl" | "normal"
-        >,
+        opts: Pick<TerrainProperty, "normal"> & AssetsProperty["cesium"]["terrian"],
       ) => Promise<TerrainProvider> | TerrainProvider | null);
 } = {
-  cesium: ({ terrainCesiumIonAccessToken, normal: terrainNormal }) =>
+  cesium: ({ ionAccessToken, normal }) =>
     CesiumTerrainProvider.fromUrl(
       IonResource.fromAssetId(1, {
-        accessToken: terrainCesiumIonAccessToken,
+        accessToken: ionAccessToken,
       }),
       {
-        requestVertexNormals: terrainNormal,
+        requestVertexNormals: normal,
         requestWaterMask: false,
       },
     ),
@@ -92,20 +89,15 @@ const terrainProviders: {
     ArcGISTiledElevationTerrainProvider.fromUrl(
       "https://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer",
     ),
-  cesiumion: ({
-    terrainCesiumIonAccessToken,
-    terrainCesiumIonAsset,
-    terrainCesiumIonUrl,
-    normal: terrainNormal,
-  }) =>
-    terrainCesiumIonAsset
+  cesiumion: ({ ionAccessToken, ionAsset, ionUrl, normal }) =>
+    ionAsset
       ? CesiumTerrainProvider.fromUrl(
-          terrainCesiumIonUrl ||
-            IonResource.fromAssetId(parseInt(terrainCesiumIonAsset, 10), {
-              accessToken: terrainCesiumIonAccessToken,
+          ionUrl ||
+            IonResource.fromAssetId(parseInt(ionAsset, 10), {
+              accessToken: ionAccessToken,
             }),
           {
-            requestVertexNormals: terrainNormal,
+            requestVertexNormals: normal,
           },
         )
       : null,

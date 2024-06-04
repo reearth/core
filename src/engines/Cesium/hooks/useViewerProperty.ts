@@ -82,6 +82,11 @@ export default ({
         : SceneMode.SCENE3D;
   }, [property?.scene?.mode]);
 
+  // Update timeline
+  // const timeline = useMemo(() => {
+  //   return property?.timeline;
+  // }, [property?.timeline]);
+
   return {
     sceneLight,
     sceneBackgroundColor,

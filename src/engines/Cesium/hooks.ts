@@ -66,6 +66,7 @@ type CesiumMouseWheelEvent = (delta: number) => void;
 export default ({
   ref,
   property,
+  initialTime,
   camera,
   selectedLayerId,
   selectionReason,
@@ -86,6 +87,7 @@ export default ({
 }: {
   ref: React.ForwardedRef<EngineRef>;
   property?: ViewerProperty;
+  initialTime?: string | Date;
   camera?: Camera;
   selectedLayerId?: {
     layerId?: string;
@@ -118,7 +120,7 @@ export default ({
       ? meta.cesiumIonAccessToken
       : Ion.defaultAccessToken;
   const cesiumIonAccessToken =
-    property?.engine?.cesium?.ionAccessToken || cesiumIonDefaultAccessToken;
+    property?.assets?.cesium?.tiles?.ionAccessToken || cesiumIonDefaultAccessToken;
 
   // expose ref
   const engineAPI = useEngineRef(ref, cesium);
@@ -221,8 +223,8 @@ export default ({
     () => {
       if (initialCameraFlight.current) return;
       initialCameraFlight.current = true;
-      if (property?.cameraLimiter?.enabled && property?.cameraLimiter?.targetArea) {
-        engineAPI.flyTo(property?.cameraLimiter?.targetArea, { duration: 0 });
+      if (property?.camera?.limiter?.enabled && property?.camera?.limiter?.targetArea) {
+        engineAPI.flyTo(property?.camera?.limiter?.targetArea, { duration: 0 });
       } else if (property?.camera?.camera) {
         const camera = property?.camera?.camera;
         engineAPI.flyTo(camera as Camera, { duration: 0 });
@@ -236,7 +238,7 @@ export default ({
     [
       engineAPI,
       property?.camera?.camera,
-      property?.cameraLimiter?.enabled,
+      property?.camera?.limiter?.enabled,
       onCameraChange,
       onMount,
     ],
@@ -392,7 +394,7 @@ export default ({
   useOverrideGlobeShader({
     cesium,
     sphericalHarmonicCoefficients,
-    globeShadowDarkness: property?.shadow?.globeShadowDarkness,
+    globeShadowDarkness: property?.shadow?.darkness,
     globeImageBasedLighting: property?.globe?.imageBasedLighting?.enabled,
     enableLighting: property?.globe?.enableLighting,
     hasVertexNormals: property?.terrain?.enabled && property.terrain.normal,
@@ -667,7 +669,7 @@ export default ({
   }, []);
 
   const { cameraViewBoundaries, cameraViewOuterBoundaries, cameraViewBoundariesMaterial } =
-    useCameraLimiter(cesium, camera, property?.cameraLimiter);
+    useCameraLimiter(cesium, camera, property?.camera?.limiter);
 
   const context = useMemo<FeatureContext>(
     () => ({
@@ -707,10 +709,10 @@ export default ({
     if (globe) {
       const surface = (globe as any)._surface as CustomGlobeSurface;
       if (surface) {
-        surface.tileProvider._debug.wireframe = property?.globe?.debug?.showWireframe ?? false;
+        surface.tileProvider._debug.wireframe = property?.debug?.showGlobeWireframe ?? false;
       }
     }
-  }, [globe, property?.globe?.debug?.showWireframe]);
+  }, [globe, property?.debug?.showGlobeWireframe]);
 
   const onPreRenderCallback = useCallback(
     (scene: Scene) => {
@@ -733,6 +735,22 @@ export default ({
     if (!viewer) return;
     return viewer.scene.preRender.addEventListener(onPreRenderCallback);
   }, [onPreRenderCallback]);
+
+  useEffect(() => {
+    if (!initialTime) return;
+    timelineManagerRef?.current?.commit({
+      cmd: "SET_TIME",
+      payload: {
+        start: initialTime,
+        stop: initialTime,
+        current: initialTime,
+      },
+      committer: {
+        source: "initialize",
+        id: "reearth_core",
+      },
+    });
+  }, [initialTime, timelineManagerRef]);
 
   return {
     cesium,
