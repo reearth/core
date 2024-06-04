@@ -23,9 +23,9 @@ export default ({
     } else if (property?.scene?.light?.type === "directionalLight") {
       light = new DirectionalLight({
         direction: new Cartesian3(
-          property?.scene?.light?.directionX ?? 1,
-          property?.scene?.light?.directionY ?? 0,
-          property?.scene?.light?.directionZ ?? 0,
+          property?.scene?.light?.direction?.[0] ?? 1,
+          property?.scene?.light?.direction?.[1] ?? 0,
+          property?.scene?.light?.direction?.[2] ?? 0,
         ),
         color: property.scene?.light?.color
           ? Color.fromCssColorString(property.scene.light.color)
@@ -48,9 +48,7 @@ export default ({
     cesium,
     property?.scene?.light?.type,
     property?.scene?.light?.color,
-    property?.scene?.light?.directionX,
-    property?.scene?.light?.directionY,
-    property?.scene?.light?.directionZ,
+    property?.scene?.light?.direction,
     property?.scene?.light?.intensity,
   ]);
 

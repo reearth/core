@@ -21,13 +21,17 @@ export type ViewerProperty = {
 export type GlobeProperty = {
   baseColor?: string;
   enableLighting?: boolean;
-  showGroundAtmosphere?: boolean;
-  atmosphereLightIntensity?: number;
-  atmosphereSaturationShift?: number;
-  atmosphereBrightnessShift?: number;
-  atmosphereHueShift?: number;
+  atmosphere?: GlobeAtmosphereProperty;
   depthTestAgainstTerrain?: boolean;
   imageBasedLighting?: ImageBasedLighting;
+};
+
+export type GlobeAtmosphereProperty = {
+  enabled?: boolean;
+  lightIntensity?: number;
+  brightnessShift?: number;
+  hueShift?: number;
+  saturationShift?: number;
 };
 
 export type ImageBasedLighting = {
@@ -78,9 +82,7 @@ export type SceneProperty = {
 
 export type LightProperty = {
   type?: "sunLight" | "directionalLight";
-  directionX?: number;
-  directionY?: number;
-  directionZ?: number;
+  direction?: [x: number, y: number, z: number];
   color?: string;
   intensity?: number;
 };
