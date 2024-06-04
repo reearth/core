@@ -62,7 +62,6 @@ export type TimelineCommit = (PlayCommand | PauseCommand | SetTimeCommand | SetO
 
 export type TimelineCommitter = {
   source:
-    | "overrideViewerProperty"
     | "widgetContext"
     | "pluginAPI"
     | "featureResource"
