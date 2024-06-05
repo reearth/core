@@ -157,17 +157,17 @@ export type AmbientOcclusionProperty = {
 };
 
 export type IndicatorProperty = {
-  type: IndicatorTypes;
+  type?: IndicatorTypes;
   image?: string;
   imageScale?: number;
 };
 
 export type AssetsProperty = {
-  cesium: {
-    tiles: {
+  cesium?: {
+    tiles?: {
       ionAccessToken?: string;
     };
-    terrian: {
+    terrian?: {
       ionAccessToken?: string;
       ionAsset?: string;
       ionUrl?: string;
