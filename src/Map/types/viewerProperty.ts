@@ -130,7 +130,7 @@ export type FogProperty = {
 
 export type SkyAtmosphereProperty = {
   show?: boolean;
-  atmosphereLightIntensity?: number;
+  lightIntensity?: number;
   saturationShift?: number;
   brightnessShift?: number;
 };

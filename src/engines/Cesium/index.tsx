@@ -257,7 +257,7 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
       <Moon show={property?.sky?.moon?.show ?? true} />
       <SkyAtmosphere
         show={property?.sky?.skyAtmosphere?.show ?? true}
-        atmosphereLightIntensity={property?.sky?.skyAtmosphere?.atmosphereLightIntensity}
+        atmosphereLightIntensity={property?.sky?.skyAtmosphere?.lightIntensity}
         saturationShift={property?.sky?.skyAtmosphere?.saturationShift}
         brightnessShift={property?.sky?.skyAtmosphere?.brightnessShift}
       />
