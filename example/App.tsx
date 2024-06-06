@@ -30,15 +30,20 @@ function App() {
         onLayerSelect={handleSelect}
         engine="cesium"
         viewerProperty={{
-          scene: {
-            mode: "2d",
-          },
           tiles: [
             {
               id: "default",
               type: "default",
             },
           ],
+          assets: {
+            cesium: {
+              tiles: {
+                ionAccessToken:
+                  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI0YjhlOGM0Yy0xNzcwLTQwNWEtODk4Yy0xMGJkODg4MTA5ZGEiLCJpZCI6MjU5LCJpYXQiOjE3MTc0MzM4NjB9.VwBpSnRTNdg_G6uvU-JNsRNcSOCDMKW_j3Nl5E7wfwg",
+              },
+            },
+          },
         }}
         layers={[
           {

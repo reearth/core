@@ -205,7 +205,7 @@ export type EngineProps = {
   isEditable?: boolean;
   isBuilt?: boolean;
   property?: ViewerProperty;
-  initialTime?: string | Date;
+  time?: string | Date;
   camera?: Camera;
   cameraForceHorizontalRoll?: boolean;
   small?: boolean;

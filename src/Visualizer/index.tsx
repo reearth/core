@@ -34,9 +34,9 @@ export type CoreVisualizerProps = {
   isBuilt?: boolean;
   isEditable?: boolean;
   viewerProperty?: ViewerProperty;
-  initialTime?: string | Date;
   layers?: Layer[];
   clusters?: Cluster[]; // TODO: remove completely from beta core
+  time?: string | Date;
   camera?: Camera;
   interactionMode?: InteractionModeType;
   shouldRender?: boolean;
@@ -69,13 +69,13 @@ export const CoreVisualizer = memo(
         isBuilt,
         isEditable,
         viewerProperty,
-        initialTime,
         layers,
         clusters,
         small,
         ready,
         hiddenLayers,
         camera: initialCamera,
+        time,
         interactionMode,
         shouldRender,
         meta,
@@ -99,7 +99,6 @@ export const CoreVisualizer = memo(
         selectedFeature,
         camera,
         featureFlags,
-        overriddenViewerProperty,
         isLayerDragging,
         timelineManagerRef,
         cursor,
@@ -123,8 +122,8 @@ export const CoreVisualizer = memo(
         {
           camera: initialCamera,
           interactionMode,
-          viewerProperty,
           zoomedLayerId,
+          viewerProperty,
           onLayerSelect,
           onCameraChange,
           onZoomToLayer,
@@ -145,7 +144,7 @@ export const CoreVisualizer = memo(
                 isEditable={isEditable}
                 engine={engine}
                 layers={layers}
-                engines={engines}
+                engines={engines} 
                 camera={camera}
                 cameraForceHorizontalRoll={cameraForceHorizontalRoll}
                 clusters={clusters}
@@ -156,8 +155,8 @@ export const CoreVisualizer = memo(
                 style={style}
                 featureFlags={featureFlags}
                 shouldRender={shouldRender}
-                property={overriddenViewerProperty}
-                initialTime={initialTime}
+                property={viewerProperty}
+                time={time}
                 small={small}
                 ready={ready}
                 timelineManagerRef={timelineManagerRef}

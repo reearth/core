@@ -6,7 +6,6 @@ import type {
   LayerSelectionReason,
   Camera,
   ComputedLayer,
-  ViewerProperty,
   LayerEditEvent,
   CursorType,
   LayerVisibilityEvent,
@@ -14,8 +13,8 @@ import type {
   LayerSelectWithRectStart,
   LayerSelectWithRectMove,
   LayerSelectWithRectEnd,
+  ViewerProperty,
 } from "../Map";
-import { useOverriddenProperty } from "../Map";
 import { SketchEventCallback, SketchEventProps, SketchType } from "../Map/Sketch/types";
 import { TimelineManagerRef } from "../Map/useTimelineManager";
 
@@ -28,8 +27,8 @@ export default function useHooks(
   {
     camera: initialCamera,
     interactionMode: initialInteractionMode,
-    viewerProperty,
     zoomedLayerId,
+    viewerProperty,
     onLayerSelect,
     onCameraChange,
     onInteractionModeChange,
@@ -39,8 +38,8 @@ export default function useHooks(
   }: {
     camera?: Camera;
     interactionMode?: InteractionModeType;
-    viewerProperty?: ViewerProperty;
     zoomedLayerId?: string;
+    viewerProperty?: ViewerProperty;
     onLayerSelect?: (
       layerId: string | undefined,
       layer: (() => Promise<ComputedLayer | undefined>) | undefined,
@@ -110,9 +109,6 @@ export default function useHooks(
   );
 
   const timelineManagerRef: TimelineManagerRef = useRef();
-
-  // scene
-  const [overriddenViewerProperty, overrideViewerProperty] = useOverriddenProperty(viewerProperty);
 
   // camera
   const [camera, changeCamera] = useValue(initialCamera, onCameraChange);
@@ -245,8 +241,6 @@ export default function useHooks(
       selectedLayer,
       selectedComputedFeature,
       viewport,
-      overriddenViewerProperty,
-      overrideViewerProperty,
       handleCameraForceHorizontalRollChange,
       handleInteractionModeChange: changeInteractionMode,
       onSketchPluginFeatureCreate,
@@ -263,8 +257,6 @@ export default function useHooks(
       selectedLayer,
       selectedComputedFeature,
       viewport,
-      overriddenViewerProperty,
-      overrideViewerProperty,
       changeInteractionMode,
       handleCameraForceHorizontalRollChange,
       onLayerEdit,
@@ -288,7 +280,7 @@ export default function useHooks(
     [],
   );
 
-  useCoreAPI();
+  useCoreAPI({ viewerProperty });
 
   return {
     mapRef,
@@ -296,14 +288,12 @@ export default function useHooks(
     selectedFeature,
     camera,
     featureFlags,
-    overriddenViewerProperty,
     isLayerDragging,
     timelineManagerRef,
     cursor,
     cameraForceHorizontalRoll,
     coreContextValue,
     containerStyle,
-    overrideViewerProperty,
     handleLayerSelect,
     handleLayerDrag,
     handleLayerDrop,

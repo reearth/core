@@ -40,7 +40,7 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
     className,
     style,
     property,
-    initialTime,
+    time,
     camera,
     small,
     ready,
@@ -73,36 +73,27 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
   const {
     cesium,
     engineAPI,
-    cameraViewBoundaries,
-    cameraViewOuterBoundaries,
-    cameraViewBoundariesMaterial,
     mouseEventHandles,
     cesiumIonAccessToken,
     context,
     layerSelectWithRectEventHandlers,
-    handleMount,
-    handleUnmount,
     handleUpdate,
     handleClick,
   } = useHooks({
     ref,
     property,
-    initialTime,
-    camera,
+    time,
     selectedLayerId,
     selectionReason: layerSelectionReason,
     meta,
     layersRef,
     featureFlags,
     timelineManagerRef,
-    cameraForceHorizontalRoll,
     onLayerSelect,
-    onCameraChange,
     onLayerEdit,
     onLayerSelectWithRectStart,
     onLayerSelectWithRectMove,
     onLayerSelectWithRectEnd,
-    onMount,
     onLayerVisibility,
     onLayerLoad,
   });
@@ -116,11 +107,23 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
 
   useExplicitRender({ cesium, requestingRenderMode, isLayerDragging, shouldRender, property });
 
-  const { handleCameraChange, handleCameraMoveEnd } = useCamera({
+  const {
+    cameraViewBoundaries,
+    cameraViewOuterBoundaries,
+    cameraViewBoundariesMaterial,
+    handleCameraChange,
+    handleCameraMoveEnd,
+    handleMount,
+    handleUnmount,
+  } = useCamera({
     cesium,
+    property,
     camera,
+    cameraForceHorizontalRoll,
+    featureFlags,
     engineAPI,
     onCameraChange,
+    onMount,
   });
 
   return (

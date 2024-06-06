@@ -8,7 +8,7 @@ import Sketch, { SketchProps } from "./Sketch";
 import type { Engine, EngineProps } from "./types";
 
 export * from "./types";
-export { useGet, type WrappedRef, type Undefinable, useOverriddenProperty } from "./utils";
+export { useGet, type WrappedRef, type Undefinable } from "./utils";
 
 export type {
   NaiveLayer,

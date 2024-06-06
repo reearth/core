@@ -9,7 +9,7 @@ import { useMemo } from "react";
 import { Globe as CesiumGlobe } from "resium";
 
 import type { ViewerProperty, TerrainProperty } from "../..";
-import { AssetsProperty } from "../../../Map";
+import { AssetsCesiumProperty } from "../../../Map";
 import { toColor } from "../common";
 
 export type Props = {
@@ -72,7 +72,7 @@ const terrainProviders: {
   [k in NonNullable<TerrainProperty["type"]>]:
     | TerrainProvider
     | ((
-        opts: Pick<TerrainProperty, "normal"> & AssetsProperty["cesium"]["terrian"],
+        opts: Pick<TerrainProperty, "normal"> & AssetsCesiumProperty["terrian"],
       ) => Promise<TerrainProvider> | TerrainProvider | null);
 } = {
   cesium: ({ ionAccessToken, normal }) =>

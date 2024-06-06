@@ -163,15 +163,17 @@ export type IndicatorProperty = {
 };
 
 export type AssetsProperty = {
-  cesium?: {
-    tiles?: {
-      ionAccessToken?: string;
-    };
-    terrian?: {
-      ionAccessToken?: string;
-      ionAsset?: string;
-      ionUrl?: string;
-    };
+  cesium?: AssetsCesiumProperty;
+};
+
+export type AssetsCesiumProperty = {
+  tiles?: {
+    ionAccessToken?: string;
+  };
+  terrian?: {
+    ionAccessToken?: string;
+    ionAsset?: string;
+    ionUrl?: string;
   };
 };
 
