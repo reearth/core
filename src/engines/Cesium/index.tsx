@@ -153,7 +153,7 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
         cursor: isLayerDragging ? "grab" : undefined,
         ...style,
       }}
-      shadows={!!property?.shadow?.enabled}
+      shadows={!!property?.scene?.shadow?.enabled}
       onClick={handleClick}
       onDoubleClick={mouseEventHandles.doubleclick}
       onMouseDown={mouseEventHandles.mousedown}
@@ -267,11 +267,11 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
       <Globe property={property} cesiumIonAccessToken={cesiumIonAccessToken} />
       <featureContext.Provider value={context}>{ready ? children : null}</featureContext.Provider>
       <AmbientOcclusion
-        {...AMBIENT_OCCLUSION_QUALITY[property?.ambientOcclusion?.quality || "low"]}
-        enabled={!!property?.ambientOcclusion?.enabled}
-        intensity={property?.ambientOcclusion?.intensity ?? 100}
+        {...AMBIENT_OCCLUSION_QUALITY[property?.render?.ambientOcclusion?.quality || "low"]}
+        enabled={!!property?.render?.ambientOcclusion?.enabled}
+        intensity={property?.render?.ambientOcclusion?.intensity ?? 100}
         outputType={
-          property?.ambientOcclusion?.ambientOcclusionOnly
+          property?.render?.ambientOcclusion?.ambientOcclusionOnly
             ? AmbientOcclusionOutputType.Occlusion
             : null
         }

@@ -140,10 +140,10 @@ export default ({
         })
       | undefined;
     if (!shadowMap) return;
-    shadowMap.softShadows = property?.shadow?.shadowMap?.softShadows ?? false;
-    shadowMap.darkness = property?.shadow?.shadowMap?.darkness ?? 0.3;
-    shadowMap.size = property?.shadow?.shadowMap?.size ?? 2048;
-    shadowMap.maximumDistance = property?.shadow?.shadowMap?.maximumDistance ?? 5000;
+    shadowMap.softShadows = property?.scene?.shadow?.shadowMap?.softShadows ?? false;
+    shadowMap.darkness = property?.scene?.shadow?.shadowMap?.darkness ?? 0.3;
+    shadowMap.size = property?.scene?.shadow?.shadowMap?.size ?? 2048;
+    shadowMap.maximumDistance = property?.scene?.shadow?.shadowMap?.maximumDistance ?? 5000;
     shadowMap.fadingEnabled = true;
     shadowMap.normalOffset = true;
 
@@ -197,10 +197,10 @@ export default ({
       Object.assign(shadowMap._pointBias, defaultPointBias);
     }
   }, [
-    property?.shadow?.shadowMap?.softShadows,
-    property?.shadow?.shadowMap?.darkness,
-    property?.shadow?.shadowMap?.size,
-    property?.shadow?.shadowMap?.maximumDistance,
+    property?.scene?.shadow?.shadowMap?.softShadows,
+    property?.scene?.shadow?.shadowMap?.darkness,
+    property?.scene?.shadow?.shadowMap?.size,
+    property?.scene?.shadow?.shadowMap?.maximumDistance,
   ]);
 
   const prevSelectedEntity = useRef<
@@ -343,7 +343,7 @@ export default ({
   useOverrideGlobeShader({
     cesium,
     sphericalHarmonicCoefficients,
-    globeShadowDarkness: property?.shadow?.darkness,
+    globeShadowDarkness: property?.scene?.shadow?.darkness,
     globeImageBasedLighting: property?.globe?.imageBasedLighting?.enabled,
     enableLighting: property?.globe?.enableLighting,
     hasVertexNormals: property?.terrain?.enabled && property.terrain.normal,

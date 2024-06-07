@@ -1,21 +1,19 @@
 import type { LUT, Camera } from "../../mantle";
 
 export type SceneMode = "3d" | "2d" | "columbus";
-export type IndicatorTypes = "default" | "crosshair" | "custom";
 
 export type ViewerProperty = {
   globe?: GlobeProperty;
   terrain?: TerrainProperty;
-  shadow?: ShadowProperty;
   scene?: SceneProperty;
   tiles?: TileProperty[];
   tileLabels?: TileLabelProperty[];
   sky?: SkyProperty;
   camera?: CameraProperty;
-  ambientOcclusion?: AmbientOcclusionProperty;
-  indicator?: IndicatorProperty;
-  assets?: AssetsProperty;
+  render?: RenderPeropty;
+  assets?: AssetsProperty; // anything related to specific assets and its access tokens
   debug?: DebugProperty;
+  indicator?: IndicatorProperty; // consider remove this if not needed in the future
 };
 
 export type GlobeProperty = {
@@ -57,6 +55,16 @@ export type HeightMapProperty = {
   logarithmic?: boolean;
 };
 
+export type SceneProperty = {
+  backgroundColor?: string;
+  mode?: SceneMode;
+  verticalExaggeration?: number;
+  verticalExaggerationRelativeHeight?: number;
+  vr?: boolean;
+  light?: LightProperty;
+  shadow?: ShadowProperty;
+};
+
 export type ShadowProperty = {
   enabled?: boolean;
   darkness?: number;
@@ -68,16 +76,6 @@ export type ShadowMapProperty = {
   softShadows?: boolean;
   darkness?: number;
   maximumDistance?: number;
-};
-
-export type SceneProperty = {
-  backgroundColor?: string;
-  mode?: SceneMode;
-  verticalExaggeration?: number;
-  verticalExaggerationRelativeHeight?: number;
-  vr?: boolean;
-  light?: LightProperty;
-  antialias?: "low" | "medium" | "high" | "extreme";
 };
 
 export type LightProperty = {
@@ -149,6 +147,11 @@ export type CameraLimiterProperty = {
   showHelper?: boolean;
 };
 
+export type RenderPeropty = {
+  antialias?: "low" | "medium" | "high" | "extreme";
+  ambientOcclusion?: AmbientOcclusionProperty;
+};
+
 export type AmbientOcclusionProperty = {
   enabled?: boolean;
   quality?: "low" | "medium" | "high" | "extreme";
@@ -157,7 +160,7 @@ export type AmbientOcclusionProperty = {
 };
 
 export type IndicatorProperty = {
-  type?: IndicatorTypes;
+  type?: "default" | "crosshair" | "custom";
   image?: string;
   imageScale?: number;
 };

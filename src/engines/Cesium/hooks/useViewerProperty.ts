@@ -63,14 +63,14 @@ export default ({
   const sceneMsaaSamples = useMemo(() => {
     // TODO: FXAA doesn't support alpha blending in Cesium, so we will enable FXAA when this is fixed.
     // viewer.scene.postProcessStages.fxaa.enabled = property?.render?.antialias === "high";
-    return property?.scene?.antialias === "extreme"
+    return property?.render?.antialias === "extreme"
       ? 8
-      : property?.scene?.antialias === "high"
+      : property?.render?.antialias === "high"
         ? 6
-        : property?.scene?.antialias === "medium"
+        : property?.render?.antialias === "medium"
           ? 4
           : 1;
-  }, [property?.scene?.antialias]);
+  }, [property?.render?.antialias]);
 
   const sceneMode = useMemo(() => {
     return property?.scene?.mode === "2d"
