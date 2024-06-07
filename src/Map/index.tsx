@@ -36,7 +36,12 @@ export type Props = {
   engine?: string;
 } & Omit<
   LayersProps,
-  "Feature" | "clusterComponent" | "selectionReason" | "delegatedDataTypes" | "selectedLayerId"
+  | "Feature"
+  | "clusterComponent"
+  | "selectionReason"
+  | "delegatedDataTypes"
+  | "selectedLayerId"
+  | "viewerProperty"
 > &
   Omit<EngineProps, "onLayerSelect" | "layerSelectionReason" | "selectedLayerId"> &
   Omit<SketchProps, "layersRef" | "engineRef" | "SketchComponent"> & {
@@ -54,7 +59,6 @@ function MapFn(
     layers,
     overrides,
     timelineManagerRef,
-    viewerProperty,
     interactionMode,
     selectedFeature,
     cursor,
@@ -122,7 +126,7 @@ function MapFn(
         clusterComponent={currentEngine?.clusterComponent}
         delegatedDataTypes={currentEngine.delegatedDataTypes}
         meta={props.meta}
-        viewerProperty={viewerProperty}
+        viewerProperty={props.property}
         requestingRenderMode={requestingRenderMode}
         onLayerSelect={handleLayerSelect}
       />

@@ -44,7 +44,7 @@ export type Props = {
   atom?: Atom;
   overrides?: Record<string, any>;
   delegatedDataTypes?: DataType[];
-  viewerProperty?: any;
+  viewerProperty?: ViewerProperty;
   selectedFeatureId?: string;
   /** Feature component should be injected by a map engine. */
   Feature?: ComponentType<FeatureComponentProps>;
