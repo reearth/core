@@ -1,6 +1,6 @@
 {
   "name": "@reearth/core",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "author": "Re:Earth contributors <community@reearth.io>",
   "license": "Apache-2.0",
   "description": "A library that abstracts a map engine as one common API.",
@@ -19,7 +19,9 @@
     "preview": "vite preview",
     "test": "vitest",
     "storybook": "storybook dev -p 6007",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "preversion": "yarn test run",
+    "version": "yarn build"
   },
   "engines": {
     "node": ">=20"

@@ -1,0 +1,17 @@
+on:
+  push:
+    branches: alpha
+    paths-ignore:
+      - 'package.json'
+  workflow_dispatch:
+
+jobs:
+  release:
+    uses: reearth/core/.github/workflows/npm_release.yml@beta
+    with:
+        branch: alpha
+        tag: alpha
+        version-args: --preid alpha prerelease
+    secrets:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      PAT: ${{ secrets.PAT }}
