@@ -2,7 +2,9 @@ import { useCallback, useRef, useState } from "react";
 
 import { CoreVisualizer, MapRef } from "@reearth/core";
 
+import { VIEWER } from "./scene";
 import { TEST_LAYERS } from "./testLayers";
+import { CESIUM_ION_ACCESS_TOKEN } from "./token";
 
 function App() {
   const ref = useRef<MapRef>(null);
@@ -29,21 +31,9 @@ function App() {
         onMount={handleMount}
         onLayerSelect={handleSelect}
         engine="cesium"
-        viewerProperty={{
-          tiles: [
-            {
-              id: "default",
-              type: "default",
-            },
-          ],
-          assets: {
-            cesium: {
-              general: {
-                ionAccessToken:
-                  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI0YjhlOGM0Yy0xNzcwLTQwNWEtODk4Yy0xMGJkODg4MTA5ZGEiLCJpZCI6MjU5LCJpYXQiOjE3MTc0MzM4NjB9.VwBpSnRTNdg_G6uvU-JNsRNcSOCDMKW_j3Nl5E7wfwg",
-              },
-            },
-          },
+        viewerProperty={VIEWER}
+        meta={{
+          cesiumIonAccessToken: CESIUM_ION_ACCESS_TOKEN || undefined,
         }}
         layers={[
           {

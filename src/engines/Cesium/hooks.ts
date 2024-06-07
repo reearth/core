@@ -328,15 +328,15 @@ export default ({
 
   const sphericalHarmonicCoefficients = useMemo(
     () =>
-      property?.globe?.imageBasedLighting?.sphericalHarmonicCoefficients
+      property?.scene?.imageBasedLighting?.sphericalHarmonicCoefficients
         ? arrayToCartecian3(
-            property?.globe?.imageBasedLighting?.sphericalHarmonicCoefficients,
-            property?.globe?.imageBasedLighting?.intensity,
+            property?.scene?.imageBasedLighting?.sphericalHarmonicCoefficients,
+            property?.scene?.imageBasedLighting?.intensity,
           )
         : undefined,
     [
-      property?.globe?.imageBasedLighting?.sphericalHarmonicCoefficients,
-      property?.globe?.imageBasedLighting?.intensity,
+      property?.scene?.imageBasedLighting?.sphericalHarmonicCoefficients,
+      property?.scene?.imageBasedLighting?.intensity,
     ],
   );
 
@@ -344,7 +344,7 @@ export default ({
     cesium,
     sphericalHarmonicCoefficients,
     globeShadowDarkness: property?.scene?.shadow?.darkness,
-    globeImageBasedLighting: property?.globe?.imageBasedLighting?.enabled,
+    globeImageBasedLighting: property?.scene?.imageBasedLighting?.enabled,
     enableLighting: property?.globe?.enableLighting,
     hasVertexNormals: property?.terrain?.enabled && property.terrain.normal,
     terrain: property?.terrain,

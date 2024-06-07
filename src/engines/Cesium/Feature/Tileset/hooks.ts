@@ -738,20 +738,20 @@ export const useHooks = ({
     if (
       !property?.specularEnvironmentMaps &&
       !property?.sphericalHarmonicCoefficients &&
-      !viewerProperty?.globe?.imageBasedLighting?.specularEnvironmentMaps &&
-      !viewerProperty?.globe?.imageBasedLighting?.sphericalHarmonicCoefficients
+      !viewerProperty?.scene?.imageBasedLighting?.specularEnvironmentMaps &&
+      !viewerProperty?.scene?.imageBasedLighting?.sphericalHarmonicCoefficients
     )
       return;
 
     const ibl = new ImageBasedLighting();
     const specularEnvironmentMaps =
       property?.specularEnvironmentMaps ??
-      viewerProperty?.globe?.imageBasedLighting?.specularEnvironmentMaps;
+      viewerProperty?.scene?.imageBasedLighting?.specularEnvironmentMaps;
     const imageBasedLightIntensity =
-      property?.imageBasedLightIntensity ?? viewerProperty?.globe?.imageBasedLighting?.intensity;
+      property?.imageBasedLightIntensity ?? viewerProperty?.scene?.imageBasedLighting?.intensity;
     const sphericalHarmonicCoefficients = arrayToCartecian3(
       property?.sphericalHarmonicCoefficients ??
-        viewerProperty?.globe?.imageBasedLighting?.sphericalHarmonicCoefficients,
+        viewerProperty?.scene?.imageBasedLighting?.sphericalHarmonicCoefficients,
       imageBasedLightIntensity,
     );
 
@@ -766,9 +766,9 @@ export const useHooks = ({
     property?.specularEnvironmentMaps,
     property?.sphericalHarmonicCoefficients,
     property?.imageBasedLightIntensity,
-    viewerProperty?.globe?.imageBasedLighting?.specularEnvironmentMaps,
-    viewerProperty?.globe?.imageBasedLighting?.sphericalHarmonicCoefficients,
-    viewerProperty?.globe?.imageBasedLighting?.intensity,
+    viewerProperty?.scene?.imageBasedLighting?.specularEnvironmentMaps,
+    viewerProperty?.scene?.imageBasedLighting?.sphericalHarmonicCoefficients,
+    viewerProperty?.scene?.imageBasedLighting?.intensity,
   ]);
 
   const handleReady = useCallback(

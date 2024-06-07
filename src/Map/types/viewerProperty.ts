@@ -21,7 +21,6 @@ export type GlobeProperty = {
   enableLighting?: boolean;
   atmosphere?: GlobeAtmosphereProperty;
   depthTestAgainstTerrain?: boolean;
-  imageBasedLighting?: ImageBasedLighting;
 };
 
 export type GlobeAtmosphereProperty = {
@@ -30,13 +29,6 @@ export type GlobeAtmosphereProperty = {
   brightnessShift?: number;
   hueShift?: number;
   saturationShift?: number;
-};
-
-export type ImageBasedLighting = {
-  enabled?: boolean;
-  intensity?: number;
-  specularEnvironmentMaps?: string;
-  sphericalHarmonicCoefficients?: [number, number, number][];
 };
 
 export type TerrainProperty = {
@@ -63,6 +55,14 @@ export type SceneProperty = {
   vr?: boolean;
   light?: LightProperty;
   shadow?: ShadowProperty;
+  imageBasedLighting?: ImageBasedLighting;
+};
+
+export type LightProperty = {
+  type?: "sunLight" | "directionalLight";
+  direction?: [x: number, y: number, z: number];
+  color?: string;
+  intensity?: number;
 };
 
 export type ShadowProperty = {
@@ -78,11 +78,11 @@ export type ShadowMapProperty = {
   maximumDistance?: number;
 };
 
-export type LightProperty = {
-  type?: "sunLight" | "directionalLight";
-  direction?: [x: number, y: number, z: number];
-  color?: string;
+export type ImageBasedLighting = {
+  enabled?: boolean;
   intensity?: number;
+  specularEnvironmentMaps?: string;
+  sphericalHarmonicCoefficients?: [number, number, number][];
 };
 
 export type TileProperty = {
