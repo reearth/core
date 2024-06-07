@@ -23,8 +23,6 @@ type CoreContext = {
   };
   selectedComputedFeature?: ComputedFeature | undefined;
   viewport?: Viewport;
-  // overriddenViewerProperty?: ViewerProperty;
-  // overrideViewerProperty?: (pluginId: string, property: ViewerProperty) => void;
   handleCameraForceHorizontalRollChange?: (enable?: boolean) => void;
   handleInteractionModeChange?: (mode?: InteractionModeType | undefined) => void;
   onSketchPluginFeatureCreate?: (cb: SketchEventCallback) => void;
