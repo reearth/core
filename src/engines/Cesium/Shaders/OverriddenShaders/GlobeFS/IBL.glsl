@@ -1,3 +1,4 @@
+#ifdef ENABLE_VERTEX_LIGHTING
 // This file refers this implementation:
 // https://github.com/takram-design-engineering/plateau-view/blob/8ea8bf1d5ef64319d92d0eb05b936cca7f1a2e8f/libs/cesium/src/shaders/imageBasedLightingStage.glsl
 
@@ -55,3 +56,4 @@ vec4 reearth_computeImageBasedLightingColor(vec4 color) {
     return vec4(color.rgb * czm_lightColor * diffuseIntensity, color.a);
   }
 }
+#endif
