@@ -170,7 +170,7 @@ export type AssetsProperty = {
 };
 
 export type AssetsCesiumProperty = {
-  tiles?: {
+  general?: {
     ionAccessToken?: string;
   };
   terrian?: {

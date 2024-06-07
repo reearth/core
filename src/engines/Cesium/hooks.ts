@@ -107,7 +107,7 @@ export default ({
       ? meta.cesiumIonAccessToken
       : Ion.defaultAccessToken;
   const cesiumIonAccessToken =
-    property?.assets?.cesium?.tiles?.ionAccessToken || cesiumIonDefaultAccessToken;
+    property?.assets?.cesium?.general?.ionAccessToken || cesiumIonDefaultAccessToken;
 
   // expose ref
   const engineAPI = useEngineRef(ref, cesium);
