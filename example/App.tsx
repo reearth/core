@@ -2,13 +2,17 @@ import { useCallback, useRef, useState } from "react";
 
 import { CoreVisualizer, MapRef } from "@reearth/core";
 
+import { SCENE } from "./scene";
 import { TEST_LAYERS } from "./testLayers";
+import { CESIUM_ION_ACCESS_TOKEN } from "./token";
 
 function App() {
   const ref = useRef<MapRef>(null);
   const [isReady, setIsReady] = useState(false);
   const handleMount = useCallback(() => {
-    setIsReady(true);
+    requestAnimationFrame(() => {
+      setIsReady(true);
+    });
   }, []);
 
   // TODO: use onLayerSelect props (core should export a type for selection).
@@ -29,14 +33,11 @@ function App() {
         onMount={handleMount}
         onLayerSelect={handleSelect}
         engine="cesium"
-        sceneProperty={{
-          tiles: [
-            {
-              id: "default",
-              tile_type: "default",
-            },
-          ],
+        meta={{
+          cesiumIonAccessToken: CESIUM_ION_ACCESS_TOKEN || undefined,
         }}
+        // FIXME: Terrain isn't rendered in initial render.
+        sceneProperty={isReady ? SCENE : undefined}
         layers={[
           {
             id: "marker",
