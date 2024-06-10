@@ -31,12 +31,17 @@ export const VIEWER: ViewerProperty = {
   tiles: [
     {
       id: "default",
-      tile_type: "open_street_map",
+      type: "open_street_map",
     },
   ],
-  atmosphere: {
-    enable_lighting: true,
-    globeImageBasedLighting: true,
+  globe: {
+    enableLighting: true,
+  },
+  scene: {
+    imageBasedLighting: {
+      enabled: true,
+      sphericalHarmonicCoefficients,
+    },
   },
   camera: {
     camera: {
@@ -50,10 +55,7 @@ export const VIEWER: ViewerProperty = {
     },
   },
   terrain: {
-    terrain: true,
-    terrainNormal: true,
-  },
-  light: {
-    sphericalHarmonicCoefficients,
+    enabled: true,
+    normal: true,
   },
 };
