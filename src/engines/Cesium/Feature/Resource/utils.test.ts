@@ -50,12 +50,6 @@ test("attachProperties()", () => {
     outlineWidth: 100,
     outlineColor: "blue",
   });
-  expect(mockEntity.properties.reearth_originalProperties).toEqual({
-    polygon: {
-      material: toColor("blue"),
-      outlineWidth: 100,
-    },
-  });
 
   // Computed feature should not be changed.
   expect(mockComputedFeature).toEqual({

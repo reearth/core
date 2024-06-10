@@ -10,7 +10,9 @@ function App() {
   const ref = useRef<MapRef>(null);
   const [isReady, setIsReady] = useState(false);
   const handleMount = useCallback(() => {
-    setIsReady(true);
+    requestAnimationFrame(() => {
+      setIsReady(true);
+    });
   }, []);
 
   // TODO: use onLayerSelect props (core should export a type for selection).
@@ -31,10 +33,11 @@ function App() {
         onMount={handleMount}
         onLayerSelect={handleSelect}
         engine="cesium"
-        viewerProperty={VIEWER}
         meta={{
           cesiumIonAccessToken: CESIUM_ION_ACCESS_TOKEN || undefined,
         }}
+        // FIXME: Terrain isn't rendered in initial render.
+        viewerProperty={isReady ? VIEWER : undefined}
         layers={[
           {
             id: "marker",
