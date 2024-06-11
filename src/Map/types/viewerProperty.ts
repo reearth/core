@@ -22,8 +22,13 @@
   * 1. Determine the Appropriate Category: Identify the aspect of the viewer your new property will affect and choose the most relevant existing sub-property type (e.g., GlobeProperty, TerrainProperty, SceneProperty, etc.). If your property does not fit into an existing category, consider creating a new sub-property type.
   * 2. Define the New Property: Add your new property to the chosen sub-property type. Ensure that the property name is descriptive and the type is correctly specified. If your property requires complex structures, define new types as needed.
   * 3. Maintain Optional Properties: To keep the interface flexible, add new properties as optional (?) unless they are strictly required.
-  * 4. Document the Property: Add comments or documentation to describe the purpose and usage of the new property. This will help other developers understand its function and how to use it.
-  * 5. Update Usage Examples: If applicable, update any example configurations or documentation to include the new property, demonstrating how it should be used.
+  * 4. Follow Naming Rules:
+  * - Use CamelCase for property names.
+  * - Keep property names descriptive but concise.
+  * - Maintain consistency with existing naming patterns.
+  * - Avoid abbreviations unless widely understood and standard.
+  * 5. Document the Property: Add comments or documentation to describe the purpose and usage of the new property. This will help other developers understand its function and how to use it.
+  * 6. Update Usage Examples: If applicable, update any example configurations or documentation to include the new property, demonstrating how it should be used.
 */
 
 import type { LUT, Camera } from "../../mantle";

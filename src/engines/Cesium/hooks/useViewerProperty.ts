@@ -4,6 +4,7 @@ import { CesiumComponentRef } from "resium";
 
 import { ViewerProperty } from "../..";
 
+// TODO: move all viewer property -> resium component prop logic here (from the gerneal long Cesium/hooks file)
 export default ({
   cesium,
   property,
