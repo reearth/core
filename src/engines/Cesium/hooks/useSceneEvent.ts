@@ -2,7 +2,6 @@
  * ref: https://github.com/takram-design-engineering/plateau-view/blob/main/libs/cesium/src/useSceneEvent.ts
  */
 import { type Event, type JulianDate, type Scene } from "@cesium/engine";
-import { SceneMode } from "cesium";
 import { useLayoutEffect, useRef } from "react";
 import { useCesium } from "resium";
 
@@ -20,9 +19,7 @@ export function useSceneEvent(type: SceneEventType, callback: SceneEventListener
   useLayoutEffect(() => {
     return scene?.[type].addEventListener((scene: Scene, currentTime: JulianDate) => {
       try {
-        if (scene.mode !== SceneMode.SCENE2D) {
-          callbackRef.current(scene, currentTime);
-        }
+        callbackRef.current(scene, currentTime);
       } catch (error) {
         // WORKAROUND: Errors in scene event listeners silently terminates
         // rendering.
