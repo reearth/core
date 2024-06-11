@@ -131,12 +131,10 @@ export default ({
 }) => {
   const cesium = useRef<CesiumComponentRef<CesiumViewer>>(null);
 
-  const cesiumIonDefaultAccessToken =
+  const cesiumIonAccessToken =
     typeof meta?.cesiumIonAccessToken === "string" && meta.cesiumIonAccessToken
       ? meta.cesiumIonAccessToken
       : Ion.defaultAccessToken;
-  const cesiumIonAccessToken =
-    property?.assets?.cesium?.general?.ionAccessToken || cesiumIonDefaultAccessToken;
 
   // expose ref
   const engineAPI = useEngineRef(ref, cesium);

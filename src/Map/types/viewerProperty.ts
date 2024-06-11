@@ -1,3 +1,31 @@
+/*
+  * ViewerProperty Interface
+  * ------------------------
+  * The ViewerProperty interface defines a collection of sub-properties that represent different aspects of the viewer component.
+  * Each sub-property encapsulates specific settings and configurations related to the viewer's behavior and appearance.
+  
+  * GlobeProperty: Settings related to the globe visualization, such as base color, lighting, and atmosphere.
+  * TerrainProperty: Configuration options for terrain visualization, including terrain type, height map, and normal mapping.
+  * SceneProperty: Scene-specific settings, such as background color, scene mode, vertical exaggeration, and lighting.
+  * TilesProperty: Properties for managing tile layers, including URLs, opacity, zoom levels, and heatmap settings.
+  * TileLabelProperty: Properties for managing tile labels, such as label type and style.
+  * SkyProperty: Settings for sky visualization, including skybox, sun, moon, fog, and sky atmosphere.
+  * CameraProperty: Camera-related settings, such as camera position, limiter, and ground entry.
+  * RenderProperty: Rendering settings, such as antialiasing and ambient occlusion.
+  * IndicatorProperty: Properties for customizing the viewer's indicator, such as type and image.
+  * AssetsProperty: Asset-related settings, such as access tokens and URLs for external assets.
+  * DebugProperty: Debugging options, such as wireframe display and FPS counter.
+  
+  * Guidelines for Adding New Properties
+  * ------------------------------------
+  * When adding new properties to the ViewerProperty interface, follow these steps to ensure consistency and maintainability:
+  * 1. Determine the Appropriate Category: Identify the aspect of the viewer your new property will affect and choose the most relevant existing sub-property type (e.g., GlobeProperty, TerrainProperty, SceneProperty, etc.). If your property does not fit into an existing category, consider creating a new sub-property type.
+  * 2. Define the New Property: Add your new property to the chosen sub-property type. Ensure that the property name is descriptive and the type is correctly specified. If your property requires complex structures, define new types as needed.
+  * 3. Maintain Optional Properties: To keep the interface flexible, add new properties as optional (?) unless they are strictly required.
+  * 4. Document the Property: Add comments or documentation to describe the purpose and usage of the new property. This will help other developers understand its function and how to use it.
+  * 5. Update Usage Examples: If applicable, update any example configurations or documentation to include the new property, demonstrating how it should be used.
+*/
+
 import type { LUT, Camera } from "../../mantle";
 
 export type SceneMode = "3d" | "2d" | "columbus";
@@ -170,9 +198,6 @@ export type AssetsProperty = {
 };
 
 export type AssetsCesiumProperty = {
-  general?: {
-    ionAccessToken?: string;
-  };
   terrian?: {
     ionAccessToken?: string;
     ionAsset?: string;
