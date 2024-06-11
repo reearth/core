@@ -99,6 +99,8 @@ export default ({
   onLayerSelectWithRectEnd?: (e: LayerSelectWithRectEnd) => void;
   onLayerVisibility?: (e: LayerVisibilityEvent) => void;
   onLayerLoad?: (e: LayerLoadEvent) => void;
+  mountCamera?: () => void;
+  unmountCamera?: () => void;
 }) => {
   const cesium = useRef<CesiumComponentRef<CesiumViewer>>(null);
 

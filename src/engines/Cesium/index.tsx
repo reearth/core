@@ -30,6 +30,7 @@ import useHooks from "./hooks";
 import useCamera from "./hooks/useCamera";
 import useExplicitRender from "./hooks/useExplicitRender";
 import useLayerDragDrop from "./hooks/useLayerDragDrop";
+import useMount from "./hooks/useMount";
 import useViewerProperty from "./hooks/useViewerProperty";
 import { AmbientOcclusion, AmbientOcclusionOutputType } from "./PostProcesses/hbao";
 import { AMBIENT_OCCLUSION_QUALITY } from "./PostProcesses/hbao/config";
@@ -113,8 +114,8 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
     cameraViewBoundariesMaterial,
     handleCameraChange,
     handleCameraMoveEnd,
-    handleMount,
-    handleUnmount,
+    mountCamera,
+    unmountCamera,
   } = useCamera({
     cesium,
     property,
@@ -123,8 +124,9 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
     featureFlags,
     engineAPI,
     onCameraChange,
-    onMount,
   });
+
+  const { handleMount, handleUnmount } = useMount({ onMount, mountCamera, unmountCamera });
 
   return (
     <Viewer

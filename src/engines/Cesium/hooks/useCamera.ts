@@ -20,7 +20,6 @@ export default ({
   engineAPI,
   cameraForceHorizontalRoll = false,
   onCameraChange,
-  onMount,
 }: {
   cesium: RefObject<CesiumComponentRef<Viewer>>;
   property?: ViewerProperty;
@@ -29,7 +28,6 @@ export default ({
   camera?: Camera;
   cameraForceHorizontalRoll?: boolean;
   onCameraChange?: (camera: Camera) => void;
-  onMount?: () => void;
 }) => {
   // cache the camera data emitted from viewer camera change
   const emittedCamera = useRef<Camera[]>([]);
@@ -80,7 +78,7 @@ export default ({
   // move to initial position at startup
   const initialCameraFlight = useRef(false);
 
-  const handleMount = useCustomCompareCallback(
+  const mountCamera = useCustomCompareCallback(
     () => {
       if (initialCameraFlight.current) return;
       initialCameraFlight.current = true;
@@ -94,24 +92,16 @@ export default ({
       if (camera) {
         onCameraChange?.(camera);
       }
-      onMount?.();
     },
-    [
-      engineAPI,
-      property?.camera?.camera,
-      property?.camera?.limiter?.enabled,
-      onCameraChange,
-      onMount,
-    ],
+    [engineAPI, property?.camera?.camera, property?.camera?.limiter?.enabled, onCameraChange],
     (prevDeps, nextDeps) =>
       prevDeps[0] === nextDeps[0] &&
       isEqual(prevDeps[1], nextDeps[1]) &&
       prevDeps[2] === nextDeps[2] &&
-      prevDeps[3] === nextDeps[3] &&
-      prevDeps[4] === nextDeps[4],
+      prevDeps[3] === nextDeps[3],
   );
 
-  const handleUnmount = useCallback(() => {
+  const unmountCamera = useCallback(() => {
     initialCameraFlight.current = false;
   }, []);
 
@@ -146,9 +136,9 @@ export default ({
     cameraViewBoundaries,
     cameraViewOuterBoundaries,
     cameraViewBoundariesMaterial,
+    mountCamera,
+    unmountCamera,
     handleCameraChange,
     handleCameraMoveEnd,
-    handleMount,
-    handleUnmount,
   };
 };
