@@ -13,7 +13,7 @@ import {
   ShadowMap,
   ImageryLayer,
 } from "cesium";
-import { RefObject, useCallback, useEffect, useMemo, useRef } from "react";
+import { MutableRefObject, RefObject, useCallback, useEffect, useMemo, useRef } from "react";
 import type { CesiumComponentRef, CesiumMovementEvent, RootEventTarget } from "resium";
 
 import type {
@@ -25,13 +25,14 @@ import type {
   LayerVisibilityEvent,
 } from "..";
 import { e2eAccessToken, setE2ECesiumViewer } from "../../e2eConfig";
-import { ComputedFeature, DataType, SelectedFeatureInfo } from "../../mantle";
+import { ComputedFeature, DataType, SelectedFeatureInfo, LatLng, Camera } from "../../mantle";
 import {
   LayerLoadEvent,
   LayerSelectWithRectEnd,
   LayerSelectWithRectMove,
   LayerSelectWithRectStart,
   LayersRef,
+  RequestingRenderMode,
 } from "../../Map";
 import { TimelineManagerRef } from "../../Map/useTimelineManager";
 import { FEATURE_FLAGS } from "../../Visualizer/featureFlags";
@@ -39,9 +40,13 @@ import { FEATURE_FLAGS } from "../../Visualizer/featureFlags";
 import { isSelectable } from "./common";
 import { getTag, type Context as FeatureContext } from "./Feature";
 import { arrayToCartecian3 } from "./helpers/sphericalHaromic";
+import useCamera from "./hooks/useCamera";
 import useEngineRef from "./hooks/useEngineRef";
+import useExplicitRender from "./hooks/useExplicitRender";
+import useLayerDragDrop from "./hooks/useLayerDragDrop";
 import { useLayerSelectWithRect } from "./hooks/useLayerSelectWithRect";
 import { useOverrideGlobeShader } from "./hooks/useOverrideGlobeShader/useOverrideGlobeShader";
+import useViewerProperty from "./hooks/useViewerProperty";
 import { InternalCesium3DTileFeature } from "./types";
 import { makeMouseEventProps } from "./utils/mouse";
 import { findEntity, getEntityContent } from "./utils/utils";
@@ -67,13 +72,23 @@ export default ({
   layersRef,
   featureFlags,
   timelineManagerRef,
+  isLayerDraggable,
+  isLayerDragging,
+  shouldRender,
+  requestingRenderMode,
+  camera,
+  cameraForceHorizontalRoll,
   onLayerSelect,
+  onLayerDrag,
+  onLayerDrop,
   onLayerEdit,
   onLayerSelectWithRectStart,
   onLayerSelectWithRectMove,
   onLayerSelectWithRectEnd,
   onLayerVisibility,
   onLayerLoad,
+  onCameraChange,
+  onMount,
 }: {
   ref: React.ForwardedRef<EngineRef>;
   property?: ViewerProperty;
@@ -87,11 +102,23 @@ export default ({
   meta?: Record<string, unknown>;
   featureFlags: number;
   timelineManagerRef?: TimelineManagerRef;
+  isLayerDraggable?: boolean;
+  isLayerDragging?: boolean;
+  shouldRender?: boolean;
+  requestingRenderMode?: MutableRefObject<RequestingRenderMode>;
+  camera?: Camera;
+  cameraForceHorizontalRoll?: boolean;
   onLayerSelect?: (
     layerId?: string,
     featureId?: string,
     options?: LayerSelectionReason,
     info?: SelectedFeatureInfo,
+  ) => void;
+  onLayerDrag?: (layerId: string, featureId: string | undefined, position: LatLng) => void;
+  onLayerDrop?: (
+    layerId: string,
+    featureId: string | undefined,
+    position: LatLng | undefined,
   ) => void;
   onLayerEdit?: (e: LayerEditEvent) => void;
   onLayerSelectWithRectStart?: (e: LayerSelectWithRectStart) => void;
@@ -99,8 +126,8 @@ export default ({
   onLayerSelectWithRectEnd?: (e: LayerSelectWithRectEnd) => void;
   onLayerVisibility?: (e: LayerVisibilityEvent) => void;
   onLayerLoad?: (e: LayerLoadEvent) => void;
-  mountCamera?: () => void;
-  unmountCamera?: () => void;
+  onCameraChange?: (camera: Camera) => void;
+  onMount?: () => void;
 }) => {
   const cesium = useRef<CesiumComponentRef<CesiumViewer>>(null);
 
@@ -664,15 +691,61 @@ export default ({
     });
   }, [time, timelineManagerRef]);
 
+  const { sceneLight, sceneBackgroundColor, sceneMsaaSamples, sceneMode } = useViewerProperty({
+    property,
+    cesium,
+  });
+
+  useLayerDragDrop({ cesium, onLayerDrag, onLayerDrop, isLayerDraggable });
+
+  useExplicitRender({ cesium, requestingRenderMode, isLayerDragging, shouldRender, property });
+
+  const {
+    cameraViewBoundaries,
+    cameraViewOuterBoundaries,
+    cameraViewBoundariesMaterial,
+    handleCameraChange,
+    handleCameraMoveEnd,
+    mountCamera,
+    unmountCamera,
+  } = useCamera({
+    cesium,
+    property,
+    camera,
+    cameraForceHorizontalRoll,
+    featureFlags,
+    engineAPI,
+    onCameraChange,
+  });
+
+  const handleMount = useCallback(() => {
+    mountCamera?.();
+    onMount?.();
+  }, [mountCamera, onMount]);
+
+  const handleUnmount = useCallback(() => {
+    unmountCamera?.();
+  }, [unmountCamera]);
+
   return {
     cesium,
-    engineAPI,
     cesiumIonAccessToken,
     mouseEventHandles,
     layerSelectWithRectEventHandlers,
     context,
+    sceneLight,
+    sceneBackgroundColor,
+    sceneMsaaSamples,
+    sceneMode,
+    cameraViewBoundaries,
+    cameraViewOuterBoundaries,
+    cameraViewBoundariesMaterial,
+    handleCameraChange,
+    handleCameraMoveEnd,
     handleUpdate,
     handleClick,
+    handleMount,
+    handleUnmount,
   };
 };
 

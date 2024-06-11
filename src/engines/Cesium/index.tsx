@@ -27,11 +27,6 @@ import LabelImageryLayers from "./core/labels/LabelImageryLayers";
 import Event from "./Event";
 import Feature, { context as featureContext } from "./Feature";
 import useHooks from "./hooks";
-import useCamera from "./hooks/useCamera";
-import useExplicitRender from "./hooks/useExplicitRender";
-import useLayerDragDrop from "./hooks/useLayerDragDrop";
-import useMount from "./hooks/useMount";
-import useViewerProperty from "./hooks/useViewerProperty";
 import { AmbientOcclusion, AmbientOcclusionOutputType } from "./PostProcesses/hbao";
 import { AMBIENT_OCCLUSION_QUALITY } from "./PostProcesses/hbao/config";
 import Sketch from "./Sketch";
@@ -73,13 +68,23 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
 ) => {
   const {
     cesium,
-    engineAPI,
     mouseEventHandles,
     cesiumIonAccessToken,
     context,
     layerSelectWithRectEventHandlers,
+    sceneLight,
+    sceneBackgroundColor,
+    sceneMsaaSamples,
+    sceneMode,
+    cameraViewBoundaries,
+    cameraViewOuterBoundaries,
+    cameraViewBoundariesMaterial,
+    handleCameraChange,
+    handleCameraMoveEnd,
     handleUpdate,
     handleClick,
+    handleMount,
+    handleUnmount,
   } = useHooks({
     ref,
     property,
@@ -90,6 +95,14 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
     layersRef,
     featureFlags,
     timelineManagerRef,
+    isLayerDraggable,
+    isLayerDragging,
+    shouldRender,
+    requestingRenderMode,
+    camera,
+    cameraForceHorizontalRoll,
+    onLayerDrag,
+    onLayerDrop,
     onLayerSelect,
     onLayerEdit,
     onLayerSelectWithRectStart,
@@ -97,36 +110,9 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
     onLayerSelectWithRectEnd,
     onLayerVisibility,
     onLayerLoad,
-  });
-
-  const { sceneLight, sceneBackgroundColor, sceneMsaaSamples, sceneMode } = useViewerProperty({
-    property,
-    cesium,
-  });
-
-  useLayerDragDrop({ cesium, onLayerDrag, onLayerDrop, isLayerDraggable });
-
-  useExplicitRender({ cesium, requestingRenderMode, isLayerDragging, shouldRender, property });
-
-  const {
-    cameraViewBoundaries,
-    cameraViewOuterBoundaries,
-    cameraViewBoundariesMaterial,
-    handleCameraChange,
-    handleCameraMoveEnd,
-    mountCamera,
-    unmountCamera,
-  } = useCamera({
-    cesium,
-    property,
-    camera,
-    cameraForceHorizontalRoll,
-    featureFlags,
-    engineAPI,
     onCameraChange,
+    onMount,
   });
-
-  const { handleMount, handleUnmount } = useMount({ onMount, mountCamera, unmountCamera });
 
   return (
     <Viewer
