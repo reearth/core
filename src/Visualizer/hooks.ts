@@ -1,4 +1,3 @@
-import { clone } from "lodash-es";
 import { Ref, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 
 import type { ComputedFeature, Feature, LatLng, SelectedFeatureInfo } from "../mantle";
@@ -7,7 +6,6 @@ import type {
   LayerSelectionReason,
   Camera,
   ComputedLayer,
-  SceneProperty,
   LayerEditEvent,
   CursorType,
   LayerVisibilityEvent,
@@ -15,21 +13,22 @@ import type {
   LayerSelectWithRectStart,
   LayerSelectWithRectMove,
   LayerSelectWithRectEnd,
+  ViewerProperty,
 } from "../Map";
-import { useOverriddenProperty } from "../Map";
 import { SketchEventCallback, SketchEventProps, SketchType } from "../Map/Sketch/types";
 import { TimelineManagerRef } from "../Map/useTimelineManager";
 
 import type { InteractionModeType } from "./interactionMode";
 import { INTERACTION_MODES } from "./interactionMode";
+import useCoreAPI from "./useCoreAPI";
 import useViewport from "./useViewport";
 
 export default function useHooks(
   {
     camera: initialCamera,
     interactionMode: initialInteractionMode,
-    sceneProperty,
     zoomedLayerId,
+    viewerProperty,
     onLayerSelect,
     onCameraChange,
     onInteractionModeChange,
@@ -39,8 +38,8 @@ export default function useHooks(
   }: {
     camera?: Camera;
     interactionMode?: InteractionModeType;
-    sceneProperty?: SceneProperty;
     zoomedLayerId?: string;
+    viewerProperty?: ViewerProperty;
     onLayerSelect?: (
       layerId: string | undefined,
       layer: (() => Promise<ComputedLayer | undefined>) | undefined,
@@ -110,70 +109,6 @@ export default function useHooks(
   );
 
   const timelineManagerRef: TimelineManagerRef = useRef();
-
-  // scene
-  const [overriddenSceneProperty, originalOverrideSceneProperty] =
-    useOverriddenProperty(sceneProperty);
-
-  const overrideSceneProperty = useCallback(
-    (pluginId: string, property: SceneProperty) => {
-      if (property.timeline) {
-        const filteredTimeline = clone(property.timeline);
-        delete filteredTimeline.visible;
-        if (Object.keys(filteredTimeline).length > 0) {
-          if (
-            filteredTimeline.current !== undefined ||
-            filteredTimeline.start !== undefined ||
-            filteredTimeline.stop !== undefined
-          ) {
-            timelineManagerRef?.current?.commit({
-              cmd: "SET_TIME",
-              payload: {
-                start:
-                  filteredTimeline.start ?? timelineManagerRef?.current?.computedTimeline.start,
-                stop: filteredTimeline.stop ?? timelineManagerRef?.current?.computedTimeline.stop,
-                current:
-                  filteredTimeline.current ?? timelineManagerRef?.current?.computedTimeline.current,
-              },
-              committer: {
-                source: "overrideSceneProperty",
-                id: pluginId,
-              },
-            });
-          }
-          if (
-            filteredTimeline.multiplier !== undefined ||
-            filteredTimeline.stepType !== undefined ||
-            filteredTimeline.rangeType !== undefined
-          ) {
-            timelineManagerRef?.current?.commit({
-              cmd: "SET_OPTIONS",
-              payload: {
-                stepType: filteredTimeline.stepType,
-                multiplier: filteredTimeline.multiplier,
-                rangeType: filteredTimeline.rangeType,
-              },
-              committer: {
-                source: "overrideSceneProperty",
-                id: pluginId,
-              },
-            });
-          }
-          if (filteredTimeline.animation !== undefined) {
-            timelineManagerRef?.current?.commit({
-              cmd: filteredTimeline.animation ? "PLAY" : "PAUSE",
-              committer: {
-                source: "overrideSceneProperty",
-                id: pluginId,
-              },
-            });
-          }
-        }
-      }
-      originalOverrideSceneProperty(pluginId, property);
-    },
-    [timelineManagerRef, originalOverrideSceneProperty],
-  );
 
   // camera
   const [camera, changeCamera] = useValue(initialCamera, onCameraChange);
@@ -306,8 +241,6 @@ export default function useHooks(
       selectedLayer,
       selectedComputedFeature,
       viewport,
-      overriddenSceneProperty,
-      overrideSceneProperty,
       handleCameraForceHorizontalRollChange,
       handleInteractionModeChange: changeInteractionMode,
       onSketchPluginFeatureCreate,
@@ -324,8 +257,6 @@ export default function useHooks(
       selectedLayer,
       selectedComputedFeature,
       viewport,
-      overriddenSceneProperty,
-      overrideSceneProperty,
       changeInteractionMode,
       handleCameraForceHorizontalRollChange,
       onLayerEdit,
@@ -349,20 +280,20 @@ export default function useHooks(
     [],
   );
 
+  useCoreAPI({ viewerProperty });
+
   return {
     mapRef,
     wrapperRef,
     selectedFeature,
     camera,
     featureFlags,
-    overriddenSceneProperty,
     isLayerDragging,
     timelineManagerRef,
     cursor,
     cameraForceHorizontalRoll,
     coreContextValue,
     containerStyle,
-    overrideSceneProperty,
     handleLayerSelect,
     handleLayerDrag,
     handleLayerDrop,

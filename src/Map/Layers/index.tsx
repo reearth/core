@@ -2,7 +2,7 @@ import { forwardRef, RefObject, type ForwardRefRenderFunction, type MutableRefOb
 
 import { SelectedFeatureInfo } from "../../mantle";
 import ClusteredLayers, { type Props as ClusteredLayerProps } from "../ClusteredLayers";
-import type { ComputedLayer, EngineRef, RequestingRenderMode } from "../types";
+import type { ComputedLayer, EngineRef, RequestingRenderMode, ViewerProperty } from "../types";
 
 import useHooks, { LayerSelectionReason, type Ref } from "./hooks";
 
@@ -36,7 +36,7 @@ export type Props = Omit<ClusteredLayerProps, "atomMap" | "isHidden" | "selected
     reason?: LayerSelectionReason;
   };
   hiddenLayers?: string[];
-  sceneProperty?: any;
+  viewerProperty?: ViewerProperty;
   requestingRenderMode?: MutableRefObject<RequestingRenderMode>;
   engineRef?: RefObject<EngineRef>;
   onLayerSelect?: (

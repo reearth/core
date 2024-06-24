@@ -5,7 +5,7 @@ import { ComputedFeature } from "../mantle";
 import {
   Map,
   type MapRef,
-  type SceneProperty,
+  type ViewerProperty,
   type Layer,
   type LayerSelectionReason,
   type Camera,
@@ -33,9 +33,10 @@ export type CoreVisualizerProps = {
   engine?: EngineType;
   isBuilt?: boolean;
   isEditable?: boolean;
-  sceneProperty?: SceneProperty;
+  viewerProperty?: ViewerProperty;
   layers?: Layer[];
   clusters?: Cluster[]; // TODO: remove completely from beta core
+  time?: string | Date;
   camera?: Camera;
   interactionMode?: InteractionModeType;
   shouldRender?: boolean;
@@ -67,13 +68,14 @@ export const CoreVisualizer = memo(
         engine,
         isBuilt,
         isEditable,
-        sceneProperty,
+        viewerProperty,
         layers,
         clusters,
         small,
         ready,
         hiddenLayers,
         camera: initialCamera,
+        time,
         interactionMode,
         shouldRender,
         meta,
@@ -97,7 +99,6 @@ export const CoreVisualizer = memo(
         selectedFeature,
         camera,
         featureFlags,
-        overriddenSceneProperty,
         isLayerDragging,
         timelineManagerRef,
         cursor,
@@ -121,8 +122,8 @@ export const CoreVisualizer = memo(
         {
           camera: initialCamera,
           interactionMode,
-          sceneProperty,
           zoomedLayerId,
+          viewerProperty,
           onLayerSelect,
           onCameraChange,
           onZoomToLayer,
@@ -154,7 +155,8 @@ export const CoreVisualizer = memo(
                 style={style}
                 featureFlags={featureFlags}
                 shouldRender={shouldRender}
-                property={overriddenSceneProperty}
+                property={viewerProperty}
+                time={time}
                 small={small}
                 ready={ready}
                 timelineManagerRef={timelineManagerRef}

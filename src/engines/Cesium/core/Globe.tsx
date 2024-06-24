@@ -5,16 +5,15 @@ import {
   IonResource,
   TerrainProvider,
 } from "cesium";
-import { pick } from "lodash-es";
 import { useMemo } from "react";
 import { Globe as CesiumGlobe } from "resium";
 
-import type { SceneProperty, TerrainProperty } from "../..";
-import { objKeys } from "../../../utils";
+import type { ViewerProperty, TerrainProperty } from "../..";
+import { AssetsCesiumProperty } from "../../../Map";
 import { toColor } from "../common";
 
 export type Props = {
-  property?: SceneProperty;
+  property?: ViewerProperty;
   cesiumIonAccessToken?: string;
 };
 
@@ -22,93 +21,67 @@ export default function Globe({ property, cesiumIonAccessToken }: Props): JSX.El
   const terrainProperty = useMemo(
     (): TerrainProperty => ({
       ...property?.terrain,
-      ...pick(property?.default, terrainPropertyKeys),
     }),
-    [property?.terrain, property?.default],
+    [property?.terrain],
   );
 
   const terrainProvider = useMemo((): Promise<TerrainProvider> | TerrainProvider | undefined => {
     const opts = {
-      terrain: terrainProperty?.terrain,
-      terrainType: terrainProperty?.terrainType,
-      terrainNormal: terrainProperty?.terrainNormal,
-      terrainCesiumIonAccessToken:
-        terrainProperty?.terrainCesiumIonAccessToken || cesiumIonAccessToken,
-      terrainCesiumIonAsset: terrainProperty?.terrainCesiumIonAsset,
-      terrainCesiumIonUrl: terrainProperty?.terrainCesiumIonUrl,
+      terrain: terrainProperty?.enabled,
+      terrainType: terrainProperty?.type,
+      normal: terrainProperty?.normal,
+      ionAccessToken: property?.assets?.cesium?.terrian?.ionAccessToken || cesiumIonAccessToken,
+      ionAsset: property?.assets?.cesium?.terrian?.ionAsset,
+      ionUrl: property?.assets?.cesium?.terrian?.ionUrl,
     };
     const provider = opts.terrain ? terrainProviders[opts.terrainType || "cesium"] : undefined;
     return (typeof provider === "function" ? provider(opts) : provider) ?? defaultTerrainProvider;
   }, [
-    terrainProperty?.terrain,
-    terrainProperty?.terrainType,
-    terrainProperty?.terrainCesiumIonAccessToken,
-    terrainProperty?.terrainCesiumIonAsset,
-    terrainProperty?.terrainCesiumIonUrl,
-    terrainProperty?.terrainNormal,
+    terrainProperty?.enabled,
+    terrainProperty?.type,
+    terrainProperty?.normal,
+    property?.assets?.cesium?.terrian?.ionAccessToken,
+    property?.assets?.cesium?.terrian?.ionAsset,
+    property?.assets?.cesium?.terrian?.ionUrl,
     cesiumIonAccessToken,
   ]);
 
   const baseColor = useMemo(
-    () => toColor(property?.atmosphere?.globeBaseColor),
-    [property?.atmosphere?.globeBaseColor],
+    () => toColor(property?.globe?.baseColor),
+    [property?.globe?.baseColor],
   );
 
   return (
     <CesiumGlobe
       baseColor={baseColor}
-      enableLighting={
-        !!(property?.atmosphere?.enable_lighting ?? property?.globeLighting?.globeLighting)
-      }
-      showGroundAtmosphere={
-        property?.atmosphere?.ground_atmosphere ??
-        property?.globeAtmosphere?.globeAtmosphere ??
-        true
-      }
-      atmosphereLightIntensity={property?.globeAtmosphere?.globeAtmosphereIntensity}
-      atmosphereSaturationShift={property?.atmosphere?.surturation_shift}
-      atmosphereHueShift={property?.atmosphere?.hue_shift}
-      atmosphereBrightnessShift={property?.atmosphere?.brightness_shift}
+      enableLighting={!!property?.globe?.enableLighting}
+      showGroundAtmosphere={property?.globe?.atmosphere?.enabled ?? true}
+      atmosphereLightIntensity={property?.globe?.atmosphere?.lightIntensity}
+      atmosphereSaturationShift={property?.globe?.atmosphere?.saturationShift}
+      atmosphereHueShift={property?.globe?.atmosphere?.hueShift}
+      atmosphereBrightnessShift={property?.globe?.atmosphere?.brightnessShift}
       terrainProvider={terrainProvider}
-      depthTestAgainstTerrain={!!terrainProperty.depthTestAgainstTerrain}
+      depthTestAgainstTerrain={!!property?.globe?.depthTestAgainstTerrain}
     />
   );
 }
 
-const terrainPropertyKeys = objKeys<TerrainProperty>({
-  terrain: 0,
-  terrainType: 0,
-  terrainExaggeration: 0,
-  terrainExaggerationRelativeHeight: 0,
-  depthTestAgainstTerrain: 0,
-  terrainCesiumIonAsset: 0,
-  terrainCesiumIonAccessToken: 0,
-  terrainCesiumIonUrl: 0,
-  terrainUrl: 0,
-});
-
 const defaultTerrainProvider = new EllipsoidTerrainProvider();
 
 const terrainProviders: {
-  [k in NonNullable<TerrainProperty["terrainType"]>]:
+  [k in NonNullable<TerrainProperty["type"]>]:
     | TerrainProvider
     | ((
-        opts: Pick<
-          TerrainProperty,
-          | "terrainCesiumIonAccessToken"
-          | "terrainCesiumIonAsset"
-          | "terrainCesiumIonUrl"
-          | "terrainNormal"
-        >,
+        opts: Pick<TerrainProperty, "normal"> & AssetsCesiumProperty["terrian"],
       ) => Promise<TerrainProvider> | TerrainProvider | null);
 } = {
-  cesium: ({ terrainCesiumIonAccessToken, terrainNormal }) =>
+  cesium: ({ ionAccessToken, normal }) =>
     CesiumTerrainProvider.fromUrl(
       IonResource.fromAssetId(1, {
-        accessToken: terrainCesiumIonAccessToken,
+        accessToken: ionAccessToken,
       }),
       {
-        requestVertexNormals: terrainNormal,
+        requestVertexNormals: normal,
         requestWaterMask: false,
       },
     ),
@@ -116,20 +89,15 @@ const terrainProviders: {
     ArcGISTiledElevationTerrainProvider.fromUrl(
       "https://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer",
     ),
-  cesiumion: ({
-    terrainCesiumIonAccessToken,
-    terrainCesiumIonAsset,
-    terrainCesiumIonUrl,
-    terrainNormal,
-  }) =>
-    terrainCesiumIonAsset
+  cesiumion: ({ ionAccessToken, ionAsset, ionUrl, normal }) =>
+    ionAsset
       ? CesiumTerrainProvider.fromUrl(
-          terrainCesiumIonUrl ||
-            IonResource.fromAssetId(parseInt(terrainCesiumIonAsset, 10), {
-              accessToken: terrainCesiumIonAccessToken,
+          ionUrl ||
+            IonResource.fromAssetId(parseInt(ionAsset, 10), {
+              accessToken: ionAccessToken,
             }),
           {
-            requestVertexNormals: terrainNormal,
+            requestVertexNormals: normal,
           },
         )
       : null,

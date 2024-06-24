@@ -1,11 +1,6 @@
 import { createContext } from "react";
 
-import {
-  LayerEditEvent,
-  LayerSelectionReason,
-  LayerVisibilityEvent,
-  SceneProperty,
-} from "../engines";
+import { LayerEditEvent, LayerSelectionReason, LayerVisibilityEvent } from "../engines";
 import { ComputedFeature, ComputedLayer } from "../mantle";
 import {
   LayerLoadEvent,
@@ -28,8 +23,6 @@ type CoreContext = {
   };
   selectedComputedFeature?: ComputedFeature | undefined;
   viewport?: Viewport;
-  overriddenSceneProperty?: SceneProperty;
-  overrideSceneProperty?: (pluginId: string, property: SceneProperty) => void;
   handleCameraForceHorizontalRollChange?: (enable?: boolean) => void;
   handleInteractionModeChange?: (mode?: InteractionModeType | undefined) => void;
   onSketchPluginFeatureCreate?: (cb: SketchEventCallback) => void;

@@ -9,7 +9,6 @@ import type {
   LayerSelectionReason,
   ComputedLayer,
   RequestingRenderMode,
-  SceneProperty,
   SketchRef,
 } from "./types";
 import useTimelineManager, { TimelineManagerRef } from "./useTimelineManager";
@@ -24,13 +23,11 @@ export const REQUEST_RENDER_ONCE = 1;
 
 export default function ({
   ref,
-  sceneProperty,
   timelineManagerRef,
   cursor,
   onLayerSelect,
 }: {
   ref: Ref<MapRef>;
-  sceneProperty?: SceneProperty;
   timelineManagerRef?: TimelineManagerRef;
   cursor?: CursorType;
   onLayerSelect?: (
@@ -104,7 +101,6 @@ export default function ({
   );
 
   useTimelineManager({
-    init: sceneProperty?.timeline,
     engineRef,
     timelineManagerRef,
   });

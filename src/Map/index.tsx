@@ -8,7 +8,7 @@ import Sketch, { SketchProps } from "./Sketch";
 import type { Engine, EngineProps } from "./types";
 
 export * from "./types";
-export { useGet, type WrappedRef, type Undefinable, useOverriddenProperty } from "./utils";
+export { useGet, type WrappedRef, type Undefinable } from "./utils";
 
 export type {
   NaiveLayer,
@@ -36,7 +36,12 @@ export type Props = {
   engine?: string;
 } & Omit<
   LayersProps,
-  "Feature" | "clusterComponent" | "selectionReason" | "delegatedDataTypes" | "selectedLayerId"
+  | "Feature"
+  | "clusterComponent"
+  | "selectionReason"
+  | "delegatedDataTypes"
+  | "selectedLayerId"
+  | "viewerProperty"
 > &
   Omit<EngineProps, "onLayerSelect" | "layerSelectionReason" | "selectedLayerId"> &
   Omit<SketchProps, "layersRef" | "engineRef" | "SketchComponent"> & {
@@ -54,7 +59,6 @@ function MapFn(
     layers,
     overrides,
     timelineManagerRef,
-    sceneProperty,
     interactionMode,
     selectedFeature,
     cursor,
@@ -80,7 +84,6 @@ function MapFn(
     handleEngineLayerSelect,
   } = useHooks({
     ref,
-    sceneProperty,
     timelineManagerRef,
     cursor,
     onLayerSelect,
@@ -123,7 +126,7 @@ function MapFn(
         clusterComponent={currentEngine?.clusterComponent}
         delegatedDataTypes={currentEngine.delegatedDataTypes}
         meta={props.meta}
-        sceneProperty={props.property}
+        viewerProperty={props.property}
         requestingRenderMode={requestingRenderMode}
         onLayerSelect={handleLayerSelect}
       />

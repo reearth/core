@@ -1,4 +1,4 @@
-import { SceneProperty } from "@reearth/core";
+import { ViewerProperty } from "@reearth/core";
 
 // Ref: https://github.com/eukarya-inc/PLATEAU-VIEW-3.0/blob/cfcb4b6a444fc9695b4089c8224016d9650cf2b7/extension/src/shared/reearth/scene/Scene.tsx#L13
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -27,16 +27,21 @@ const sphericalHarmonicCoefficients: [x: number, y: number, z: number][] = [
   [0.114833705127239, 0.114355310797691, 0.067587599158287],
 ];
 
-export const SCENE: SceneProperty = {
+export const VIEWER: ViewerProperty = {
   tiles: [
     {
       id: "default",
-      tile_type: "open_street_map",
+      type: "open_street_map",
     },
   ],
-  atmosphere: {
-    enable_lighting: true,
-    globeImageBasedLighting: true,
+  globe: {
+    enableLighting: true,
+  },
+  scene: {
+    imageBasedLighting: {
+      enabled: true,
+      sphericalHarmonicCoefficients,
+    },
   },
   camera: {
     camera: {
@@ -50,10 +55,7 @@ export const SCENE: SceneProperty = {
     },
   },
   terrain: {
-    terrain: true,
-    terrainNormal: true,
-  },
-  light: {
-    sphericalHarmonicCoefficients,
+    enabled: true,
+    normal: true,
   },
 };

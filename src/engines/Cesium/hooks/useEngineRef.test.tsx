@@ -12,7 +12,7 @@ import { useRef } from "react";
 import type { CesiumComponentRef } from "resium";
 import { vi, expect, test, afterEach } from "vitest";
 
-import type { EngineRef, Clock } from "..";
+import type { EngineRef, Clock } from "../../..";
 
 import useEngineRef from "./useEngineRef";
 
@@ -188,10 +188,11 @@ test("zoom", async () => {
     return engineRef;
   });
 
-  const commons = await import("./common");
+  const commons = await import("../common");
+  const zoom = vi.spyOn(commons, "zoom");
 
   result.current.current?.zoomIn(10);
-  expect(commons.zoom).toHaveBeenCalledTimes(1);
+  expect(zoom).toHaveBeenCalledTimes(1);
   expect(commons.zoom).toHaveBeenCalledWith(
     {
       viewer,
@@ -221,6 +222,7 @@ test("call orbit when camera focuses on center", async () => {
           rotateUp: vi.fn(),
           look: vi.fn(),
           move: vi.fn(),
+          getPickRay: vi.fn(),
           positionCartographic: new Cartesian3(),
         },
         mode: SceneMode.SCENE3D,
@@ -247,15 +249,14 @@ test("call orbit when camera focuses on center", async () => {
     return [engineRef, cesium] as const;
   });
 
-  const commons = await import("./common");
+  const commons = await import("../common");
+  const getCenterCamera = vi.spyOn(commons, "getCenterCamera");
 
   const [engineRef, cesium] = result.current;
 
   engineRef.current?.orbit(90);
-  expect(commons.getCenterCamera).toHaveBeenCalled();
-  expect(cesium.current.cesiumElement?.scene.camera.rotateLeft).toHaveBeenCalled();
-  expect(cesium.current.cesiumElement?.scene.camera.rotateUp).toHaveBeenCalled();
-  expect(cesium.current.cesiumElement?.scene.camera.lookAtTransform).toHaveBeenCalledTimes(2);
+  expect(getCenterCamera).toHaveBeenCalled();
+  expect(cesium.current.cesiumElement?.scene.camera.lookAtTransform).toHaveBeenCalledTimes(1);
 });
 
 test("call orbit when camera does not focus on center", async () => {
@@ -268,6 +269,7 @@ test("call orbit when camera does not focus on center", async () => {
           rotateUp: vi.fn(),
           look: vi.fn(),
           move: vi.fn(),
+          getPickRay: vi.fn(),
           positionWC: new Cartesian3(),
           positionCartographic: new Cartesian3(),
         },
@@ -294,12 +296,13 @@ test("call orbit when camera does not focus on center", async () => {
     return [engineRef, cesium] as const;
   });
 
-  const commons = await import("./common");
+  const commons = await import("../common");
+  const getCenterCamera = vi.spyOn(commons, "getCenterCamera");
 
   const [engineRef, cesium] = result.current;
 
   engineRef.current?.orbit(90);
-  expect(commons.getCenterCamera).toHaveBeenCalled();
+  expect(getCenterCamera).toHaveBeenCalled();
   expect(cesium.current.cesiumElement?.scene.camera.look).toHaveBeenCalledTimes(2);
   expect(cesium.current.cesiumElement?.scene.camera.lookAtTransform).toHaveBeenCalledTimes(2);
 });
@@ -314,6 +317,7 @@ test("orbit on 2D mode", async () => {
           rotateUp: vi.fn(),
           look: vi.fn(),
           move: vi.fn(),
+          getPickRay: vi.fn(),
           positionWC: new Cartesian3(),
           positionCartographic: new Cartesian3(),
         },

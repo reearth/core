@@ -2,7 +2,7 @@ import { useCallback, useRef, useState } from "react";
 
 import { CoreVisualizer, MapRef } from "@reearth/core";
 
-import { SCENE } from "./scene";
+import { VIEWER } from "./scene";
 import { TEST_LAYERS } from "./testLayers";
 import { CESIUM_ION_ACCESS_TOKEN } from "./token";
 
@@ -37,7 +37,7 @@ function App() {
           cesiumIonAccessToken: CESIUM_ION_ACCESS_TOKEN || undefined,
         }}
         // FIXME: Terrain isn't rendered in initial render.
-        sceneProperty={isReady ? SCENE : undefined}
+        viewerProperty={isReady ? VIEWER : undefined}
         layers={[
           {
             id: "marker",

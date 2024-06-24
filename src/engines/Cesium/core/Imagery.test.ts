@@ -14,7 +14,7 @@ test("useImageryProviders", () => {
         presets,
         cesiumIonAccessToken,
       }),
-    { initialProps: { tiles: [{ id: "1", tile_type: "default" }] } },
+    { initialProps: { tiles: [{ id: "1", type: "default" }] } },
   );
 
   expect(result.current.providers).toEqual({ "1": ["default", undefined, { hoge: undefined }] });
@@ -23,14 +23,14 @@ test("useImageryProviders", () => {
   const prevImageryProvider = result.current.providers["1"][2];
 
   // re-render with same tiles
-  rerender({ tiles: [{ id: "1", tile_type: "default" }] });
+  rerender({ tiles: [{ id: "1", type: "default" }] });
 
   expect(result.current.providers).toEqual({ "1": ["default", undefined, { hoge: undefined }] });
   expect(result.current.providers["1"][2]).toBe(prevImageryProvider); // 1's provider should be reused
   expect(provider).toBeCalledTimes(1);
 
   // update a tile URL
-  rerender({ tiles: [{ id: "1", tile_type: "default", tile_url: "a" }] });
+  rerender({ tiles: [{ id: "1", type: "default", url: "a" }] });
 
   expect(result.current.providers).toEqual({ "1": ["default", "a", { hoge: "a" }] });
   expect(result.current.providers["1"][2]).not.toBe(prevImageryProvider);
@@ -42,8 +42,8 @@ test("useImageryProviders", () => {
   // add a tile with URL
   rerender({
     tiles: [
-      { id: "2", tile_type: "default" },
-      { id: "1", tile_type: "default", tile_url: "a" },
+      { id: "2", type: "default" },
+      { id: "1", type: "default", url: "a" },
     ],
   });
 
@@ -58,8 +58,8 @@ test("useImageryProviders", () => {
   // sort tiles
   rerender({
     tiles: [
-      { id: "1", tile_type: "default", tile_url: "a" },
-      { id: "2", tile_type: "default" },
+      { id: "1", type: "default", url: "a" },
+      { id: "2", type: "default" },
     ],
   });
 
@@ -73,7 +73,7 @@ test("useImageryProviders", () => {
 
   // delete a tile
   rerender({
-    tiles: [{ id: "1", tile_type: "default", tile_url: "a" }],
+    tiles: [{ id: "1", type: "default", url: "a" }],
     cesiumIonAccessToken: "a",
   });
 
@@ -86,7 +86,7 @@ test("useImageryProviders", () => {
 
   // update a tile type
   rerender({
-    tiles: [{ id: "1", tile_type: "foobar", tile_url: "u" }],
+    tiles: [{ id: "1", type: "foobar", url: "u" }],
     cesiumIonAccessToken: "a",
   });
 
