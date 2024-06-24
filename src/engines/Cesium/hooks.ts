@@ -379,7 +379,11 @@ export default ({
     const viewer = cesium.current?.cesiumElement;
     if (!viewer || viewer.isDestroyed()) return;
 
-    if (prevSelectedImageryFeatureId.current === selectedLayerId?.featureId) return;
+    if (
+      prevSelectedImageryFeatureId.current === selectedLayerId?.featureId &&
+      selectedLayerId?.featureId !== undefined
+    )
+      return;
 
     const prevTag = getTag(prevSelectedEntity.current);
     if (
