@@ -117,14 +117,10 @@ const layersRefKeys: FunctionKeys<LayersRef> = {
 };
 
 const sketchRefKeys: FunctionKeys<SketchRef> = {
+  getType: 1,
   setType: 1,
-  setColor: 1,
-  setDefaultAppearance: 1,
-  createDataOnly: 1,
-  disableShadow: 1,
-  enableRelativeHeight: 1,
-  allowRightClickToAbort: 1,
-  allowAutoResetInteractionMode: 1,
+  getOptions: 1,
+  overrideOptions: 1,
 };
 
 export function mapRef({

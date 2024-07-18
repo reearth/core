@@ -30,9 +30,9 @@ export default function Globe({ property, cesiumIonAccessToken }: Props): JSX.El
       terrain: terrainProperty?.enabled,
       terrainType: terrainProperty?.type,
       normal: terrainProperty?.normal,
-      ionAccessToken: property?.assets?.cesium?.terrian?.ionAccessToken || cesiumIonAccessToken,
-      ionAsset: property?.assets?.cesium?.terrian?.ionAsset,
-      ionUrl: property?.assets?.cesium?.terrian?.ionUrl,
+      ionAccessToken: property?.assets?.cesium?.terrain?.ionAccessToken || cesiumIonAccessToken,
+      ionAsset: property?.assets?.cesium?.terrain?.ionAsset,
+      ionUrl: property?.assets?.cesium?.terrain?.ionUrl,
     };
     const provider = opts.terrain ? terrainProviders[opts.terrainType || "cesium"] : undefined;
     return (typeof provider === "function" ? provider(opts) : provider) ?? defaultTerrainProvider;
@@ -40,9 +40,9 @@ export default function Globe({ property, cesiumIonAccessToken }: Props): JSX.El
     terrainProperty?.enabled,
     terrainProperty?.type,
     terrainProperty?.normal,
-    property?.assets?.cesium?.terrian?.ionAccessToken,
-    property?.assets?.cesium?.terrian?.ionAsset,
-    property?.assets?.cesium?.terrian?.ionUrl,
+    property?.assets?.cesium?.terrain?.ionAccessToken,
+    property?.assets?.cesium?.terrain?.ionAsset,
+    property?.assets?.cesium?.terrain?.ionUrl,
     cesiumIonAccessToken,
   ]);
 
@@ -72,7 +72,7 @@ const terrainProviders: {
   [k in NonNullable<TerrainProperty["type"]>]:
     | TerrainProvider
     | ((
-        opts: Pick<TerrainProperty, "normal"> & AssetsCesiumProperty["terrian"],
+        opts: Pick<TerrainProperty, "normal"> & AssetsCesiumProperty["terrain"],
       ) => Promise<TerrainProvider> | TerrainProvider | null);
 } = {
   cesium: ({ ionAccessToken, normal }) =>

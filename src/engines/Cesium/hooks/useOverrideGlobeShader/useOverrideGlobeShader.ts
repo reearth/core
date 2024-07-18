@@ -133,7 +133,7 @@ const useTerrainHeatmap = ({
     minHeight: heatmapMinHeight,
     logarithmic: heatmapLogarithmic,
     colorLUT: heatmapColorLUT,
-  } = terrain?.heightMap ?? {};
+  } = terrain?.elevationHeatMap ?? {};
 
   const isCustomHeatmapEnabled = useMemo(() => heatmapType === "custom", [heatmapType]);
 
