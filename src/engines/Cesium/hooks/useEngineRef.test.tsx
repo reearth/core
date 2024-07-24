@@ -57,86 +57,86 @@ test("bind mouse events", () => {
   expect(mockMouseEventCallback).toHaveBeenCalledWith(props);
 
   result.current.current?.onDoubleClick(mockMouseEventCallback);
-  expect(result.current.current?.mouseEventCallbacks.doubleclick[0]).toBe(mockMouseEventCallback);
+  expect(result.current.current?.mouseEventCallbacks.doubleClick[0]).toBe(mockMouseEventCallback);
 
-  result.current.current?.mouseEventCallbacks.doubleclick[0]?.(props);
+  result.current.current?.mouseEventCallbacks.doubleClick[0]?.(props);
   expect(mockMouseEventCallback).toHaveBeenCalledTimes(2);
   expect(mockMouseEventCallback).toHaveBeenCalledWith(props);
 
   result.current.current?.onMouseDown(mockMouseEventCallback);
-  expect(result.current.current?.mouseEventCallbacks.mousedown[0]).toBe(mockMouseEventCallback);
+  expect(result.current.current?.mouseEventCallbacks.mouseDown[0]).toBe(mockMouseEventCallback);
 
-  result.current.current?.mouseEventCallbacks.mousedown[0]?.(props);
+  result.current.current?.mouseEventCallbacks.mouseDown[0]?.(props);
   expect(mockMouseEventCallback).toHaveBeenCalledTimes(3);
   expect(mockMouseEventCallback).toHaveBeenCalledWith(props);
 
   result.current.current?.onMouseUp(mockMouseEventCallback);
-  expect(result.current.current?.mouseEventCallbacks.mouseup[0]).toBe(mockMouseEventCallback);
+  expect(result.current.current?.mouseEventCallbacks.mouseUp[0]).toBe(mockMouseEventCallback);
 
-  result.current.current?.mouseEventCallbacks.mouseup[0]?.(props);
+  result.current.current?.mouseEventCallbacks.mouseUp[0]?.(props);
   expect(mockMouseEventCallback).toHaveBeenCalledTimes(4);
   expect(mockMouseEventCallback).toHaveBeenCalledWith(props);
 
   result.current.current?.onRightClick(mockMouseEventCallback);
-  expect(result.current.current?.mouseEventCallbacks.rightclick[0]).toBe(mockMouseEventCallback);
+  expect(result.current.current?.mouseEventCallbacks.rightClick[0]).toBe(mockMouseEventCallback);
 
-  result.current.current?.mouseEventCallbacks.rightclick[0]?.(props);
+  result.current.current?.mouseEventCallbacks.rightClick[0]?.(props);
   expect(mockMouseEventCallback).toHaveBeenCalledTimes(5);
   expect(mockMouseEventCallback).toHaveBeenCalledWith(props);
 
   result.current.current?.onRightDown(mockMouseEventCallback);
-  expect(result.current.current?.mouseEventCallbacks.rightdown[0]).toBe(mockMouseEventCallback);
+  expect(result.current.current?.mouseEventCallbacks.rightDown[0]).toBe(mockMouseEventCallback);
 
-  result.current.current?.mouseEventCallbacks.rightdown[0]?.(props);
+  result.current.current?.mouseEventCallbacks.rightDown[0]?.(props);
   expect(mockMouseEventCallback).toHaveBeenCalledTimes(6);
   expect(mockMouseEventCallback).toHaveBeenCalledWith(props);
 
   result.current.current?.onRightUp(mockMouseEventCallback);
-  expect(result.current.current?.mouseEventCallbacks.rightup[0]).toBe(mockMouseEventCallback);
+  expect(result.current.current?.mouseEventCallbacks.rightUp[0]).toBe(mockMouseEventCallback);
 
-  result.current.current?.mouseEventCallbacks.rightup[0]?.(props);
+  result.current.current?.mouseEventCallbacks.rightUp[0]?.(props);
   expect(mockMouseEventCallback).toHaveBeenCalledTimes(7);
   expect(mockMouseEventCallback).toHaveBeenCalledWith(props);
 
   result.current.current?.onMiddleClick(mockMouseEventCallback);
-  expect(result.current.current?.mouseEventCallbacks.middleclick[0]).toBe(mockMouseEventCallback);
+  expect(result.current.current?.mouseEventCallbacks.middleClick[0]).toBe(mockMouseEventCallback);
 
-  result.current.current?.mouseEventCallbacks.middleclick[0]?.(props);
+  result.current.current?.mouseEventCallbacks.middleClick[0]?.(props);
   expect(mockMouseEventCallback).toHaveBeenCalledTimes(8);
   expect(mockMouseEventCallback).toHaveBeenCalledWith(props);
 
   result.current.current?.onMiddleDown(mockMouseEventCallback);
-  expect(result.current.current?.mouseEventCallbacks.middledown[0]).toBe(mockMouseEventCallback);
+  expect(result.current.current?.mouseEventCallbacks.middleDown[0]).toBe(mockMouseEventCallback);
 
-  result.current.current?.mouseEventCallbacks.middledown[0]?.(props);
+  result.current.current?.mouseEventCallbacks.middleDown[0]?.(props);
   expect(mockMouseEventCallback).toHaveBeenCalledTimes(9);
   expect(mockMouseEventCallback).toHaveBeenCalledWith(props);
 
   result.current.current?.onMiddleUp(mockMouseEventCallback);
-  expect(result.current.current?.mouseEventCallbacks.middleup[0]).toBe(mockMouseEventCallback);
+  expect(result.current.current?.mouseEventCallbacks.middleUp[0]).toBe(mockMouseEventCallback);
 
-  result.current.current?.mouseEventCallbacks.middleup[0]?.(props);
+  result.current.current?.mouseEventCallbacks.middleUp[0]?.(props);
   expect(mockMouseEventCallback).toHaveBeenCalledTimes(10);
   expect(mockMouseEventCallback).toHaveBeenCalledWith(props);
 
   result.current.current?.onMouseMove(mockMouseEventCallback);
-  expect(result.current.current?.mouseEventCallbacks.mousemove[0]).toBe(mockMouseEventCallback);
+  expect(result.current.current?.mouseEventCallbacks.mouseMove[0]).toBe(mockMouseEventCallback);
 
-  result.current.current?.mouseEventCallbacks.mousemove[0]?.(props);
+  result.current.current?.mouseEventCallbacks.mouseMove[0]?.(props);
   expect(mockMouseEventCallback).toHaveBeenCalledTimes(11);
   expect(mockMouseEventCallback).toHaveBeenCalledWith(props);
 
   result.current.current?.onMouseEnter(mockMouseEventCallback);
-  expect(result.current.current?.mouseEventCallbacks.mouseenter[0]).toBe(mockMouseEventCallback);
+  expect(result.current.current?.mouseEventCallbacks.mouseEnter[0]).toBe(mockMouseEventCallback);
 
-  result.current.current?.mouseEventCallbacks.mouseenter[0]?.(props);
+  result.current.current?.mouseEventCallbacks.mouseEnter[0]?.(props);
   expect(mockMouseEventCallback).toHaveBeenCalledTimes(12);
   expect(mockMouseEventCallback).toHaveBeenCalledWith(props);
 
   result.current.current?.onMouseLeave(mockMouseEventCallback);
-  expect(result.current.current?.mouseEventCallbacks.mouseleave[0]).toBe(mockMouseEventCallback);
+  expect(result.current.current?.mouseEventCallbacks.mouseLeave[0]).toBe(mockMouseEventCallback);
 
-  result.current.current?.mouseEventCallbacks.mouseleave[0]?.(props);
+  result.current.current?.mouseEventCallbacks.mouseLeave[0]?.(props);
   expect(mockMouseEventCallback).toHaveBeenCalledTimes(13);
   expect(mockMouseEventCallback).toHaveBeenCalledWith(props);
 

@@ -1,37 +1,15 @@
 // Reference: Sketch feature is basically referenced from https://github.com/takram-design-engineering/plateau-view/blob/main/libs/sketch/src/SketchTool.tsx
 
-import { type LineString, type MultiPolygon, type Polygon } from "geojson";
-import { ComponentType, ForwardRefRenderFunction, RefObject, forwardRef } from "react";
-import { RequireExactlyOne } from "type-fest";
+import { ForwardRefRenderFunction, RefObject, forwardRef } from "react";
 
 import { ComputedLayer, SelectedFeatureInfo } from "../../mantle";
-import { Position3d } from "../../types";
 import { InteractionModeType } from "../../Visualizer/interactionMode";
 import { EngineRef, Feature, LayerSelectionReason, LayersRef, SketchRef } from "../types";
 
 import useHooks from "./hooks";
-import { SketchEventProps, SketchFeature, SketchType } from "./types";
+import { SketchComponentType, SketchEventProps, SketchFeature, SketchType } from "./types";
 
 export * from "./types";
-
-export type SketchComponentType = ComponentType<SketchComponentProps>;
-
-type GeometryOptions = {
-  type: SketchType;
-  controlPoints: readonly Position3d[];
-};
-
-type SketchComponentProps = RequireExactlyOne<
-  {
-    geometry?: LineString | Polygon | MultiPolygon | null;
-    geometryOptions?: GeometryOptions | null;
-    extrudedHeight?: number;
-    disableShadow?: boolean;
-    enableRelativeHeight?: boolean;
-    color?: string;
-  },
-  "geometry" | "geometryOptions"
->;
 
 export type OnLayerSelectType = (
   layerId: string | undefined,

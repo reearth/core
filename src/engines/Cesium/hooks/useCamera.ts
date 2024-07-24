@@ -84,21 +84,12 @@ export default ({
       initialCameraFlight.current = true;
       if (property?.camera?.limiter?.enabled && property?.camera?.limiter?.targetArea) {
         engineAPI.flyTo(property?.camera?.limiter?.targetArea, { duration: 0 });
-      } else if (property?.camera?.camera) {
-        const camera = property?.camera?.camera;
-        engineAPI.flyTo(camera as Camera, { duration: 0 });
-      }
-      const camera = getCamera(cesium?.current?.cesiumElement);
-      if (camera) {
-        onCameraChange?.(camera);
+      } else if (camera) {
+        engineAPI.flyTo(camera, { duration: 0 });
       }
     },
-    [engineAPI, property?.camera?.camera, property?.camera?.limiter?.enabled, onCameraChange],
-    (prevDeps, nextDeps) =>
-      prevDeps[0] === nextDeps[0] &&
-      isEqual(prevDeps[1], nextDeps[1]) &&
-      prevDeps[2] === nextDeps[2] &&
-      prevDeps[3] === nextDeps[3],
+    [engineAPI, property?.camera?.limiter?.enabled],
+    (prevDeps, nextDeps) => prevDeps[0] === nextDeps[0] && prevDeps[1] === nextDeps[1],
   );
 
   const unmountCamera = useCallback(() => {
