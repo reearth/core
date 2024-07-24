@@ -666,16 +666,15 @@ export default ({
     [selectionReason, engineAPI, onLayerEdit, onLayerVisibility, onLayerLoad, timelineManagerRef],
   );
 
-  const globe = cesium.current?.cesiumElement?.scene.globe;
-
   useEffect(() => {
+    const globe = cesium.current?.cesiumElement?.scene.globe;
     if (globe) {
       const surface = (globe as any)._surface as CustomGlobeSurface;
       if (surface) {
         surface.tileProvider._debug.wireframe = property?.debug?.showGlobeWireframe ?? false;
       }
     }
-  }, [globe, property?.debug?.showGlobeWireframe]);
+  }, [property?.debug?.showGlobeWireframe]);
 
   useEffect(() => {
     if (!time) return;
