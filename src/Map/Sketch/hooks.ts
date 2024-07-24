@@ -94,17 +94,6 @@ export default function useHooks({
     }));
   }, []);
 
-  // const [color, updateColor] = useState<string>();
-  // const [disableShadow, updateDisableShadow] = useState(false);
-  // const [enableRelativeHeight, updateEnableRelativeHeight] = useState(false);
-
-  // const [defaultAppearance, updateDefaultAppearance] = useState<SketchAppearance | undefined>(
-  //   PRESET_APPEARANCE,
-  // );
-  // const createDataOnlyForPluginEnabledRef = useRef(false);
-  // const allowRightClickToAbortEnabledRef = useRef(true);
-  // const allowAutoResetInteractionModeRef = useRef(true);
-
   const [geometryOptions, setGeometryOptions] = useState<GeometryOptionsXYZ | null>(null);
   const [extrudedHeight, setExtrudedHeight] = useState(0);
   const markerGeometryRef = useRef<GeometryOptionsXYZ | null>(null);
@@ -114,34 +103,6 @@ export default function useHooks({
     updateType(type);
     updateFrom(from ?? "editor");
   }, []);
-
-  // const setColor = useCallback((color: string) => {
-  //   updateColor(color);
-  // }, []);
-
-  // const setDisableShadow = useCallback((disable: boolean) => {
-  //   updateDisableShadow(!!disable);
-  // }, []);
-
-  // const setEnableRelativeHeight = useCallback((enable: boolean) => {
-  //   updateEnableRelativeHeight(!!enable);
-  // }, []);
-
-  // const setDefaultAppearance = useCallback((appearance: SketchAppearance) => {
-  //   updateDefaultAppearance(merge(cloneDeep(PRESET_APPEARANCE), appearance));
-  // }, []);
-
-  // const createDataOnly = useCallback((dataOnly: boolean) => {
-  //   createDataOnlyForPluginEnabledRef.current = !!dataOnly;
-  // }, []);
-
-  // const allowRightClickToAbort = useCallback((allow: boolean) => {
-  //   allowRightClickToAbortEnabledRef.current = !!allow;
-  // }, []);
-
-  // const allowAutoResetInteractionMode = useCallback((allow: boolean) => {
-  //   allowAutoResetInteractionModeRef.current = !!allow;
-  // }, []);
 
   const createFeature = useCallback(() => {
     const geoOptions = type === "marker" ? markerGeometryRef.current : geometryOptions;
