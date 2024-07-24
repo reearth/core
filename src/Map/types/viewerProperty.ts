@@ -69,10 +69,10 @@ export type TerrainProperty = {
   type?: "cesium" | "arcgis" | "cesiumion";
   url?: string;
   normal?: boolean;
-  heightMap?: HeightMapProperty;
+  elevationHeatMap?: ElevationHeatMapProperty;
 };
 
-export type HeightMapProperty = {
+export type ElevationHeatMapProperty = {
   type?: "custom";
   colorLUT?: LUT;
   minHeight?: number;
@@ -167,7 +167,6 @@ export type SkyAtmosphereProperty = {
 };
 
 export type CameraProperty = {
-  camera?: Camera;
   allowEnterGround?: boolean;
   limiter?: CameraLimiterProperty;
 };
@@ -203,7 +202,7 @@ export type AssetsProperty = {
 };
 
 export type AssetsCesiumProperty = {
-  terrian?: {
+  terrain?: {
     ionAccessToken?: string;
     ionAsset?: string;
     ionUrl?: string;

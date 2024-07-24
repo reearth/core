@@ -27,3 +27,5 @@ export const PRESET_APPEARANCE: SketchAppearance = {
     strokeWidth: 2,
   },
 };
+
+export const PRESET_COLOR: string = "#FFFFFF";

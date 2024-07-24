@@ -53,18 +53,18 @@ export default function useEngineRef(
   const cancelCameraFlight = useRef<() => void>();
   const mouseEventCallbacks = useRef<MouseEventCallbacks>({
     click: [],
-    doubleclick: [],
-    mousedown: [],
-    mouseup: [],
-    rightclick: [],
-    rightdown: [],
-    rightup: [],
-    middleclick: [],
-    middledown: [],
-    middleup: [],
-    mousemove: [],
-    mouseenter: [],
-    mouseleave: [],
+    doubleClick: [],
+    mouseDown: [],
+    mouseUp: [],
+    rightClick: [],
+    rightDown: [],
+    rightUp: [],
+    middleClick: [],
+    middleDown: [],
+    middleUp: [],
+    mouseMove: [],
+    mouseEnter: [],
+    mouseLeave: [],
     wheel: [],
   });
   const tickEventCallback = useRef<TickEventCallback[]>([]);
@@ -237,6 +237,8 @@ export default function useEngineRef(
       setView: camera => {
         const viewer = cesium.current?.cesiumElement;
         if (!viewer || viewer.isDestroyed()) return false;
+        if (camera.lat === undefined || camera.lng === undefined || camera.height === undefined)
+          return false;
         const scene = viewer.scene;
         if (camera.lng || camera.lat || camera.height) {
           const xyz = Cesium.Cartesian3.fromDegrees(camera.lng, camera.lat, camera.height);
@@ -675,40 +677,40 @@ export default function useEngineRef(
         mouseEventCallbacks.current.click.push(cb);
       },
       onDoubleClick: (cb: (props: MouseEventProps) => void) => {
-        mouseEventCallbacks.current.doubleclick.push(cb);
+        mouseEventCallbacks.current.doubleClick.push(cb);
       },
       onMouseDown: (cb: (props: MouseEventProps) => void) => {
-        mouseEventCallbacks.current.mousedown.push(cb);
+        mouseEventCallbacks.current.mouseDown.push(cb);
       },
       onMouseUp: (cb: (props: MouseEventProps) => void) => {
-        mouseEventCallbacks.current.mouseup.push(cb);
+        mouseEventCallbacks.current.mouseUp.push(cb);
       },
       onRightClick: (cb: (props: MouseEventProps) => void) => {
-        mouseEventCallbacks.current.rightclick.push(cb);
+        mouseEventCallbacks.current.rightClick.push(cb);
       },
       onRightDown: (cb: (props: MouseEventProps) => void) => {
-        mouseEventCallbacks.current.rightdown.push(cb);
+        mouseEventCallbacks.current.rightDown.push(cb);
       },
       onRightUp: (cb: (props: MouseEventProps) => void) => {
-        mouseEventCallbacks.current.rightup.push(cb);
+        mouseEventCallbacks.current.rightUp.push(cb);
       },
       onMiddleClick: (cb: (props: MouseEventProps) => void) => {
-        mouseEventCallbacks.current.middleclick.push(cb);
+        mouseEventCallbacks.current.middleClick.push(cb);
       },
       onMiddleDown: (cb: (props: MouseEventProps) => void) => {
-        mouseEventCallbacks.current.middledown.push(cb);
+        mouseEventCallbacks.current.middleDown.push(cb);
       },
       onMiddleUp: (cb: (props: MouseEventProps) => void) => {
-        mouseEventCallbacks.current.middleup.push(cb);
+        mouseEventCallbacks.current.middleUp.push(cb);
       },
       onMouseMove: (cb: (props: MouseEventProps) => void) => {
-        mouseEventCallbacks.current.mousemove.push(cb);
+        mouseEventCallbacks.current.mouseMove.push(cb);
       },
       onMouseEnter: (cb: (props: MouseEventProps) => void) => {
-        mouseEventCallbacks.current.mouseenter.push(cb);
+        mouseEventCallbacks.current.mouseEnter.push(cb);
       },
       onMouseLeave: (cb: (props: MouseEventProps) => void) => {
-        mouseEventCallbacks.current.mouseleave.push(cb);
+        mouseEventCallbacks.current.mouseLeave.push(cb);
       },
       onWheel: (cb: (props: MouseEventProps) => void) => {
         mouseEventCallbacks.current.wheel.push(cb);

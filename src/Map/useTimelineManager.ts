@@ -193,7 +193,9 @@ export default ({ init, engineRef, timelineManagerRef }: Props) => {
       onCommit,
       offCommit,
       handleTick,
-      tick: engineRef?.current?.tick,
+      get tick() {
+        return engineRef?.current?.tick;
+      },
     };
   }, [
     options,

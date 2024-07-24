@@ -24,15 +24,16 @@ import {
   MouseEventProps,
   SketchRef,
 } from "../types";
+import { useGet } from "../utils";
 
-import { PRESET_APPEARANCE } from "./preset";
+import { PRESET_APPEARANCE, PRESET_COLOR } from "./preset";
 import { Position3d, createSketchMachine } from "./sketchMachine";
 import {
   GeometryOptionsXYZ,
   SketchType,
   SketchFeature,
-  SketchAppearance,
   SketchEventProps,
+  SketchOptions,
 } from "./types";
 import { useWindowEvent } from "./utils";
 
@@ -73,16 +74,25 @@ export default function useHooks({
   const [state, send] = useMachine(sketchMachine);
   const [type, updateType] = useState<SketchType | undefined>();
   const [from, updateFrom] = useState<"editor" | "plugin">("editor");
-  const [color, updateColor] = useState<string>();
-  const [disableShadow, updateDisableShadow] = useState(false);
-  const [enableRelativeHeight, updateEnableRelativeHeight] = useState(false);
   const [disableInteraction, setDisableInteraction] = useState(false);
-  const [defaultAppearance, updateDefaultAppearance] = useState<SketchAppearance | undefined>(
-    PRESET_APPEARANCE,
-  );
-  const createDataOnlyForPluginEnabledRef = useRef(false);
-  const allowRightClickToAbortEnabledRef = useRef(true);
-  const allowAutoResetInteractionModeRef = useRef(true);
+
+  const [sketchOptions, setSketchOptions] = useState<SketchOptions>({
+    color: PRESET_COLOR,
+    appearance: PRESET_APPEARANCE,
+    dataOnly: false,
+    disableShadow: false,
+    enableRelativeHeight: false,
+    rightClickToAbort: true,
+    autoResetInteractionMode: true,
+  });
+
+  const overrideOptions = useCallback((options: SketchOptions) => {
+    setSketchOptions(prev => ({
+      ...prev,
+      ...options,
+      appearance: merge(cloneDeep(prev.appearance), options.appearance),
+    }));
+  }, []);
 
   const [geometryOptions, setGeometryOptions] = useState<GeometryOptionsXYZ | null>(null);
   const [extrudedHeight, setExtrudedHeight] = useState(0);
@@ -92,34 +102,6 @@ export default function useHooks({
   const setType = useCallback((type: SketchType | undefined, from?: "editor" | "plugin") => {
     updateType(type);
     updateFrom(from ?? "editor");
-  }, []);
-
-  const setColor = useCallback((color: string) => {
-    updateColor(color);
-  }, []);
-
-  const setDisableShadow = useCallback((disable: boolean) => {
-    updateDisableShadow(!!disable);
-  }, []);
-
-  const setEnableRelativeHeight = useCallback((enable: boolean) => {
-    updateEnableRelativeHeight(!!enable);
-  }, []);
-
-  const setDefaultAppearance = useCallback((appearance: SketchAppearance) => {
-    updateDefaultAppearance(merge(cloneDeep(PRESET_APPEARANCE), appearance));
-  }, []);
-
-  const createDataOnly = useCallback((dataOnly: boolean) => {
-    createDataOnlyForPluginEnabledRef.current = !!dataOnly;
-  }, []);
-
-  const allowRightClickToAbort = useCallback((allow: boolean) => {
-    allowRightClickToAbortEnabledRef.current = !!allow;
-  }, []);
-
-  const allowAutoResetInteractionMode = useCallback((allow: boolean) => {
-    allowAutoResetInteractionModeRef.current = !!allow;
   }, []);
 
   const createFeature = useCallback(() => {
@@ -169,11 +151,11 @@ export default function useHooks({
             features: [{ ...feature, id: feature.properties.id }],
           },
         },
-        ...defaultAppearance,
+        ...sketchOptions.appearance,
       });
       return { layerId: newLayer?.id, featureId: feature.properties.id };
     },
-    [layersRef, defaultAppearance],
+    [layersRef, sketchOptions.appearance],
   );
 
   const pluginSketchLayerFeatureAdd = useCallback(
@@ -226,7 +208,7 @@ export default function useHooks({
         return;
       }
 
-      if (!createDataOnlyForPluginEnabledRef.current) {
+      if (!sketchOptions.dataOnly) {
         const selectedLayer = layersRef.current?.selectedLayer();
         const { layerId, featureId } =
           selectedLayer?.id?.length !== PLUGIN_LAYER_ID_LENGTH ||
@@ -262,6 +244,7 @@ export default function useHooks({
     [
       layersRef,
       from,
+      sketchOptions.dataOnly,
       pluginSketchLayerCreate,
       pluginSketchLayerFeatureAdd,
       onSketchFeatureCreate,
@@ -481,7 +464,7 @@ export default function useHooks({
   );
 
   const handleRightClick = useCallback(() => {
-    if (!allowRightClickToAbortEnabledRef.current) {
+    if (!sketchOptions.rightClickToAbort) {
       return;
     }
     if (type !== undefined) {
@@ -490,7 +473,7 @@ export default function useHooks({
     if (state.matches("idle")) return;
     send({ type: "ABORT" });
     updateGeometryOptions(undefined);
-  }, [type, state, send, updateGeometryOptions]);
+  }, [type, state, sketchOptions.rightClickToAbort, send, updateGeometryOptions]);
 
   const mouseDownEventRef = useRef<MouseEventCallback>(handleLeftDown);
   mouseDownEventRef.current = handleLeftDown;
@@ -586,44 +569,41 @@ export default function useHooks({
   useEffect(() => {
     if (type) {
       overrideInteractionMode?.("sketch");
-    } else if (allowAutoResetInteractionModeRef.current) {
+    } else if (sketchOptions.autoResetInteractionMode) {
       overrideInteractionMode?.("default");
     }
 
     onSketchTypeChange?.(type, from);
-  }, [type, from, overrideInteractionMode, onSketchTypeChange]);
+  }, [
+    type,
+    from,
+    sketchOptions.autoResetInteractionMode,
+    overrideInteractionMode,
+    onSketchTypeChange,
+  ]);
+
+  // API
+  const getType = useGet(type);
+  const getOptions = useGet(sketchOptions);
 
   useImperativeHandle(
     ref,
     () => ({
+      getType,
       setType,
-      setColor,
-      setDefaultAppearance,
-      createDataOnly,
-      disableShadow: setDisableShadow,
-      enableRelativeHeight: setEnableRelativeHeight,
-      allowRightClickToAbort,
-      allowAutoResetInteractionMode,
+      getOptions,
+      overrideOptions,
     }),
-    [
-      setType,
-      setColor,
-      setDisableShadow,
-      setEnableRelativeHeight,
-      setDefaultAppearance,
-      createDataOnly,
-      allowRightClickToAbort,
-      allowAutoResetInteractionMode,
-    ],
+    [getType, setType, getOptions, overrideOptions],
   );
 
   return {
     state,
     extrudedHeight,
     geometryOptions,
-    color,
-    disableShadow,
-    enableRelativeHeight,
+    color: sketchOptions.color,
+    disableShadow: sketchOptions.disableShadow,
+    enableRelativeHeight: sketchOptions.enableRelativeHeight,
   } as any;
 }
 

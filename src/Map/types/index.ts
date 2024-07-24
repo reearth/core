@@ -38,8 +38,7 @@ import type {
   LayerSelectionReason,
   Ref as LayersRef,
 } from "../Layers";
-import { SketchComponentType } from "../Sketch";
-import { SketchAppearance, SketchType } from "../Sketch/types";
+import { SketchType, SketchOptions, SketchComponentType } from "../Sketch/types";
 import type { TimelineManagerRef } from "../useTimelineManager";
 
 import type { SceneMode, ViewerProperty } from "./viewerProperty";
@@ -89,7 +88,7 @@ export type EngineRef = {
   getLocationFromScreen: (x: number, y: number, withTerrain?: boolean) => LatLngHeight | undefined;
   sampleTerrainHeight: (lng: number, lat: number) => Promise<number | undefined>;
   computeGlobeHeight: (lng: number, lat: number, height?: number) => number | undefined;
-  getGlobeHeight: () => void;
+  getGlobeHeight: () => number | undefined;
   toXYZ: (
     lng: number,
     lat: number,
@@ -300,18 +299,18 @@ export type MouseEventCallback = (props: MouseEventProps) => void;
 export type MouseWheelEventCallback = (props: MouseEventProps) => void;
 export type MouseEventTypes =
   | "click"
-  | "doubleclick"
-  | "mousedown"
-  | "mouseup"
-  | "rightclick"
-  | "rightdown"
-  | "rightup"
-  | "middleclick"
-  | "middledown"
-  | "middleup"
-  | "mousemove"
-  | "mouseenter"
-  | "mouseleave"
+  | "doubleClick"
+  | "mouseDown"
+  | "mouseUp"
+  | "rightClick"
+  | "rightDown"
+  | "rightUp"
+  | "middleClick"
+  | "middleDown"
+  | "middleUp"
+  | "mouseMove"
+  | "mouseEnter"
+  | "mouseLeave"
   | "wheel";
 
 export type MouseEvents = {
@@ -322,18 +321,18 @@ export type MouseEvents = {
 
 export type MouseEventHandles = {
   onClick: (fn: MouseEvents["click"]) => void;
-  onDoubleClick: (fn: MouseEvents["doubleclick"]) => void;
-  onMouseDown: (fn: MouseEvents["mousedown"]) => void;
-  onMouseUp: (fn: MouseEvents["mouseup"]) => void;
-  onRightClick: (fn: MouseEvents["rightclick"]) => void;
-  onRightDown: (fn: MouseEvents["rightdown"]) => void;
-  onRightUp: (fn: MouseEvents["rightup"]) => void;
-  onMiddleClick: (fn: MouseEvents["middleclick"]) => void;
-  onMiddleDown: (fn: MouseEvents["middledown"]) => void;
-  onMiddleUp: (fn: MouseEvents["middleup"]) => void;
-  onMouseMove: (fn: MouseEvents["mousemove"]) => void;
-  onMouseEnter: (fn: MouseEvents["mouseenter"]) => void;
-  onMouseLeave: (fn: MouseEvents["mouseleave"]) => void;
+  onDoubleClick: (fn: MouseEvents["doubleClick"]) => void;
+  onMouseDown: (fn: MouseEvents["mouseDown"]) => void;
+  onMouseUp: (fn: MouseEvents["mouseUp"]) => void;
+  onRightClick: (fn: MouseEvents["rightClick"]) => void;
+  onRightDown: (fn: MouseEvents["rightDown"]) => void;
+  onRightUp: (fn: MouseEvents["rightUp"]) => void;
+  onMiddleClick: (fn: MouseEvents["middleClick"]) => void;
+  onMiddleDown: (fn: MouseEvents["middleDown"]) => void;
+  onMiddleUp: (fn: MouseEvents["middleUp"]) => void;
+  onMouseMove: (fn: MouseEvents["mouseMove"]) => void;
+  onMouseEnter: (fn: MouseEvents["mouseEnter"]) => void;
+  onMouseLeave: (fn: MouseEvents["mouseLeave"]) => void;
   onWheel: (fn: MouseEvents["wheel"]) => void;
 };
 
@@ -357,12 +356,8 @@ export type Engine = {
 export type RequestingRenderMode = -1 | 0 | 1; // -1: force render on every postUpdate, 0: no request to render, 1: request one frame
 
 export type SketchRef = {
+  getType: () => SketchType | undefined;
   setType: (type: SketchType | undefined, from?: "editor" | "plugin") => void;
-  setColor: (color: string) => void;
-  setDefaultAppearance: (appearance: SketchAppearance) => void;
-  disableShadow: (disable: boolean) => void;
-  enableRelativeHeight: (enable: boolean) => void;
-  createDataOnly: (dataOnly: boolean) => void;
-  allowRightClickToAbort: (allow: boolean) => void;
-  allowAutoResetInteractionMode: (allow: boolean) => void;
+  getOptions: () => SketchOptions;
+  overrideOptions: (options: SketchOptions) => void;
 };

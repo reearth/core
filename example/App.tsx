@@ -15,6 +15,16 @@ function App() {
     });
   }, []);
 
+  const camera = {
+    fov: 1.0471975511965976,
+    heading: 6.075482442126033,
+    height: 4065.852019268935,
+    lat: 35.608034008903225,
+    lng: 139.7728554580092,
+    pitch: -0.45804512978428535,
+    roll: 6.2830631767616465,
+  };
+
   // TODO: use onLayerSelect props (core should export a type for selection).
   const handleSelect = useCallback(() => {
     console.log("Selected feature: ", ref.current?.layers.selectedFeature());
@@ -38,6 +48,7 @@ function App() {
         }}
         // FIXME: Terrain isn't rendered in initial render.
         viewerProperty={isReady ? VIEWER : undefined}
+        camera={camera}
         layers={[
           {
             id: "marker",

@@ -5,7 +5,7 @@ import { ViewerProperty } from "../engines";
 
 interface CoreAPI {
   readonly version: string;
-  readonly property?: ViewerProperty;
+  readonly viewerProperty?: ViewerProperty;
 }
 
 export default ({ viewerProperty }: { viewerProperty?: ViewerProperty }) => {
@@ -17,7 +17,7 @@ export default ({ viewerProperty }: { viewerProperty?: ViewerProperty }) => {
       get version() {
         return version;
       },
-      get property() {
+      get viewerProperty() {
         return viewerPropertyRef.current;
       },
     }),
