@@ -31,7 +31,7 @@ export const VIEWER: ViewerProperty = {
   tiles: [
     {
       id: "default",
-      type: "default",
+      type: "open_street_map",
     },
   ],
   globe: {
