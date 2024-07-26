@@ -105,6 +105,7 @@ function EntityExtComponent(
     props.id,
     unselectable,
     hideIndicator,
+    r.current?.cesiumElement,
   ]);
 
   return <Entity ref={composeRefs(ref, r)} {...props} />;
