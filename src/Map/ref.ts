@@ -103,6 +103,7 @@ const layersRefKeys: FunctionKeys<LayersRef> = {
   findByTags: 1,
   hide: 1,
   isLayer: 1,
+  isComputedLayer: 1,
   layers: 1,
   override: 1,
   replace: 1,
