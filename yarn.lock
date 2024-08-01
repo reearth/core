@@ -1076,10 +1076,10 @@
   resolved "https://registry.yarnpkg.com/@base2/pretty-print-object/-/pretty-print-object-1.0.1.tgz#371ba8be66d556812dc7fb169ebc3c08378f69d4"
   integrity sha512-4iri8i1AqYHJE2DstZYkyEprg6Pq6sKx3xn5FpySk9sNhH7qN2LLlHJCfDTZRILNwQNPD7mATWM0TBui7uC1pA==
 
-"@cesium/engine@^9.0.0":
-  version "9.0.0"
-  resolved "https://registry.yarnpkg.com/@cesium/engine/-/engine-9.0.0.tgz#74573f52100ef84ba5fcde9cd1084c07f7fe2fa7"
-  integrity sha512-GIeBitHo1t6OwgWnxAsCoHuCcJEfdki2G0hbKfaP87r2EapbnDLBmfxZziscl1ksv7kQiQ6x2FOOSPuV9QFvhA==
+"@cesium/engine@^9.2.0":
+  version "9.2.0"
+  resolved "https://registry.yarnpkg.com/@cesium/engine/-/engine-9.2.0.tgz#6b92d422bf8fc9498e3f7a54851f6c4ebe7ff04f"
+  integrity sha512-vFVITo7UwIY1H8zK53etljv1w0CVaFSzOcLyItrM88r47zyPL7/RgooVKqZXnM5V8prs33S5TO/JSqJmvpyMTQ==
   dependencies:
     "@tweenjs/tween.js" "^23.1.1"
     "@zip.js/zip.js" "^2.7.34"
@@ -1101,12 +1101,12 @@
     topojson-client "^3.1.0"
     urijs "^1.19.7"
 
-"@cesium/widgets@^6.0.0":
-  version "6.0.0"
-  resolved "https://registry.yarnpkg.com/@cesium/widgets/-/widgets-6.0.0.tgz#be68f2b696bd6239cd37d63abd429e0608a9a0cb"
-  integrity sha512-zq0UqHji4PgPWTVdUB2hNb/FXe60eNDB11oW35/Z3REQfE4LBOkeR/RGck7hBOfYaubMiqwuwOw2lbl54OXzIA==
+"@cesium/widgets@^6.1.0":
+  version "6.1.2"
+  resolved "https://registry.yarnpkg.com/@cesium/widgets/-/widgets-6.1.2.tgz#3eab3d8bf298b863d78a60c0ca5eaa177bffdab7"
+  integrity sha512-RNgogbRqlzjZxxG7icAUIDFZ0rm4OpHJ9b9lS/TGVm44PVVNG0Umhp4Tlf9U6r4ggwayKUkGV5dDIDa+pJGcVQ==
   dependencies:
-    "@cesium/engine" "^9.0.0"
+    "@cesium/engine" "^9.2.0"
     nosleep.js "^0.12.0"
 
 "@chromatic-com/storybook@^1.3.3":
@@ -5246,13 +5246,13 @@ cesium-dnd@1.1.0:
   resolved "https://registry.yarnpkg.com/cesium-dnd/-/cesium-dnd-1.1.0.tgz#30c7232eec9f84ad0d4f2c959cbd61ac29028086"
   integrity sha512-Peo0bGIg5eOO/BrVDCovkPhQnWW3GBAjVnghh5NVmavDZjqS+A5R4Yj3IOG9tmYNSdtunsDqj5yxnMxQWx/KAA==
 
-cesium@1.116.0:
-  version "1.116.0"
-  resolved "https://registry.yarnpkg.com/cesium/-/cesium-1.116.0.tgz#34c025babb49dfc4eeb98f9c83c37094a2083388"
-  integrity sha512-RZOOMePztCVb74JU/DTCTfuha7xTsJtEm3FRZeMUXyZABeRhbYjT1GwtAtoaPPJ5/IoqNjLvZnTNJdnU3LVE5g==
+cesium@1.118.0:
+  version "1.118.0"
+  resolved "https://registry.yarnpkg.com/cesium/-/cesium-1.118.0.tgz#2c553131346799d3d3d1aec0a80b631b983ce224"
+  integrity sha512-au+WQ67bDZUw25kFFod/qtWfpxNoQPg2VQXU1XMr/64Gj1ZdvDSmuxO8sbum8tHieKDt9ER7JssSbefH/C3YSg==
   dependencies:
-    "@cesium/engine" "^9.0.0"
-    "@cesium/widgets" "^6.0.0"
+    "@cesium/engine" "^9.2.0"
+    "@cesium/widgets" "^6.1.0"
 
 chai@^4.3.10, chai@^4.4.1:
   version "4.4.1"
