@@ -6,8 +6,7 @@
 // https://github.com/CesiumGS/cesium/blob/1.106/packages/engine/Source/Shaders/Model/ImageBasedLightingStageFS.glsl
 // Specular term was removed, as I never apply it on terrain.
 vec3 reearth_imageBasedLightingStage(vec3 positionEC, vec3 normalEC,
-                                     vec3 lightDirectionEC, vec3 lightColorHdr,
-                                     czm_pbrParameters pbrParameters) {
+                                     vec3 lightDirectionEC, czm_modelMaterial material) {
   vec3 v = -positionEC;
   vec3 n = normalEC;
   vec3 l = normalize(lightDirectionEC);
@@ -24,21 +23,18 @@ vec3 reearth_imageBasedLightingStage(vec3 positionEC, vec3 normalEC,
   vec3 diffuseIrradiance =
       czm_sphericalHarmonics(cubeDir, u_reearth_sphericalHarmonicCoefficients);
 
-  return pbrParameters.diffuseColor * diffuseIrradiance;
+  return material.diffuse * diffuseIrradiance;
 }
 
 vec4 reearth_computeImageBasedLightingColor(vec4 color) {
   if (u_reearth_globeImageBasedLighting) {
-    czm_pbrParameters pbrParameters;
-    pbrParameters.diffuseColor = color.rgb;
+    czm_modelMaterial material;
+    material.diffuse = color.rgb;
 
     vec3 normalEC = normalize(v_normalEC);
     vec3 lighting =
-        czm_pbrLighting(v_positionEC, normalEC, czm_lightDirectionEC,
-                        czm_lightColorHdr, pbrParameters);
-    lighting += reearth_imageBasedLightingStage(
-                    v_positionEC, normalEC, czm_lightDirectionEC,
-                    czm_lightColorHdr, pbrParameters) *
+        czm_pbrLighting(v_positionEC, normalEC, czm_lightDirectionEC, material) * czm_lightColorHdr;
+    lighting += reearth_imageBasedLightingStage(v_positionEC, normalEC, czm_lightDirectionEC, material) *
                 u_vertexShadowDarkness;
 
 #ifndef HDR
