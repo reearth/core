@@ -89,13 +89,13 @@
     "@types/lodash-es": "4.17.12",
     "@types/node": "20.12.7",
     "@types/pbf": "3.0.5",
-    "@types/react": "18.2.6",
-    "@types/react-dom": "18.2.6",
+    "@types/react": "18.3.0",
+    "@types/react-dom": "18.3.0",
     "@types/uuid": "9.0.8",
     "@typescript-eslint/eslint-plugin": "7.2.0",
     "@typescript-eslint/parser": "7.2.0",
     "@vitejs/plugin-react": "4.2.1",
-    "cesium": "1.116.0",
+    "cesium": "1.118.0",
     "eslint": "8.57.0",
     "eslint-config-reearth": "0.3.0",
     "eslint-plugin-react-hooks": "4.6.0",
@@ -117,5 +117,6 @@
   },
   "resolutions": {
     "jackspeak": "2.1.1"
-  }
+  },
+  "packageManager": "yarn@1.22.17+sha512.1f4a76e35057687d1437d21e1fffd14fcdad9793df36b695a52a44a16f844fb966a29342eb5799f80f880ef53c14ce86a39bf1d7ad929dc0cbf09d598d106b89"
 }
