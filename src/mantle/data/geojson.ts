@@ -20,6 +20,14 @@ export function processGeoJSON(geojson: GeoJSON, range?: DataRange): Feature[] {
 
   if (geojson.type === "Feature") {
     const geo = geojson.geometry;
+    if (geo.type === "GeometryCollection") {
+      return geo.geometries.flatMap(geometry => {
+        return processGeoJSON({
+          ...geojson,
+          geometry,
+        });
+      });
+    }
     if (geo.type === "MultiPoint") {
       return geo.coordinates.flatMap(coord => {
         return processGeoJSON({
