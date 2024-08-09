@@ -31,7 +31,10 @@ export async function fetchData(
   options?: FetchOptions,
 ): Promise<Feature[] | void> {
   const ext = !data.type || (data.type as string) === "auto" ? guessType(data.url) : undefined;
-  return registry[ext || data.type]?.(data, range, options);
+  return registry[ext || data.type]?.(data, range, {
+    ...options,
+    isSketchLayer: data.isSketchLayer,
+  });
 }
 
 export function guessType(url: string | undefined): DataType | undefined {

@@ -2,6 +2,7 @@ export { generateRandomString } from "../../utils";
 
 export type FetchOptions = {
   signal?: AbortSignal;
+  isSketchLayer?: boolean;
 };
 
 export async function f(url: string, options?: FetchOptions): Promise<Response> {
