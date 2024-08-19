@@ -10,16 +10,16 @@ export async function fetchGeoJSON(
   options?: FetchOptions,
 ): Promise<Feature[] | void> {
   const d = data.url ? await (await f(data.url, options)).json() : data.value;
-  return processGeoJSON(d, range, options?.isSketchLayer);
+  return processGeoJSON(d, range, data.idProperty);
 }
 
 export function processGeoJSON(
   geojson: GeoJSON,
   range?: DataRange,
-  usePropertyId?: boolean,
+  idProperty?: string,
 ): Feature[] {
   if (geojson.type === "FeatureCollection") {
-    return geojson.features.flatMap(f => processGeoJSON(f, range, usePropertyId));
+    return geojson.features.flatMap(f => processGeoJSON(f, range, idProperty));
   }
 
   if (geojson.type === "Feature") {
@@ -32,7 +32,7 @@ export function processGeoJSON(
             geometry,
           },
           undefined,
-          usePropertyId,
+          idProperty,
         );
       });
     }
@@ -47,7 +47,7 @@ export function processGeoJSON(
             },
           },
           undefined,
-          usePropertyId,
+          idProperty,
         );
       });
     }
@@ -62,7 +62,7 @@ export function processGeoJSON(
             },
           },
           undefined,
-          usePropertyId,
+          idProperty,
         );
       });
     }
@@ -77,7 +77,7 @@ export function processGeoJSON(
             },
           },
           undefined,
-          usePropertyId,
+          idProperty,
         );
       });
     }
@@ -85,7 +85,10 @@ export function processGeoJSON(
     return [
       {
         type: "feature",
-        id: usePropertyId ? geojson?.properties?.id : generateRandomString(12),
+        id:
+          idProperty && geojson.properties && idProperty in geojson.properties
+            ? geojson?.properties?.id
+            : generateRandomString(12),
         geometry:
           geo.type === "Point" || geo.type === "LineString" || geo.type === "Polygon"
             ? geo
