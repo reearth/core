@@ -33,7 +33,6 @@ export async function fetchData(
   const ext = !data.type || (data.type as string) === "auto" ? guessType(data.url) : undefined;
   return registry[ext || data.type]?.(data, range, {
     ...options,
-    isSketchLayer: data.isSketchLayer,
   });
 }
 
