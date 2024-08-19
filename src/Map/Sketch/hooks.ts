@@ -202,7 +202,10 @@ export default function useHooks({
 
   const handleFeatureCreate = useCallback(
     (feature: SketchFeature) => {
-      updateType(undefined);
+      if (sketchOptions.autoResetInteractionMode) {
+        updateType(undefined);
+      }
+
       if (from === "editor") {
         onSketchFeatureCreate?.(feature);
         return;
@@ -245,6 +248,7 @@ export default function useHooks({
       layersRef,
       from,
       sketchOptions.dataOnly,
+      sketchOptions.autoResetInteractionMode,
       pluginSketchLayerCreate,
       pluginSketchLayerFeatureAdd,
       onSketchFeatureCreate,
@@ -566,21 +570,17 @@ export default function useHooks({
     }
   }, [type, send, updateGeometryOptions]);
 
-  useEffect(() => {
-    if (type) {
-      overrideInteractionMode?.("sketch");
-    } else if (sketchOptions.autoResetInteractionMode) {
-      overrideInteractionMode?.("default");
-    }
+  const fromRef = useRef(from);
+  fromRef.current = from;
+  const overrideInteractionModeRef = useRef(overrideInteractionMode);
+  overrideInteractionModeRef.current = overrideInteractionMode;
+  const onSketchTypeChangeRef = useRef(onSketchTypeChange);
+  onSketchTypeChangeRef.current = onSketchTypeChange;
 
-    onSketchTypeChange?.(type, from);
-  }, [
-    type,
-    from,
-    sketchOptions.autoResetInteractionMode,
-    overrideInteractionMode,
-    onSketchTypeChange,
-  ]);
+  useEffect(() => {
+    overrideInteractionModeRef.current?.(type ? "sketch" : "default");
+    onSketchTypeChangeRef.current?.(type, fromRef.current);
+  }, [type]);
 
   // API
   const getType = useGet(type);

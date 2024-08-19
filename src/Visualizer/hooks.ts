@@ -82,12 +82,24 @@ export default function useHooks(
       reason: LayerSelectionReason | undefined,
       info: SelectedFeatureInfo | undefined,
     ) => {
-      if (selectedLayer.layerId === layerId && selectedLayer.featureId === featureId) return;
+      const isSketchLayer =
+        selectedLayer.layer?.layer.type === "simple" &&
+        selectedLayer.layer?.layer?.data?.isSketchLayer;
+      // Sketch layer feature has a fixed featureId, we need to exclude it from the skip condition
+      if (
+        selectedLayer.layerId === layerId &&
+        selectedLayer.featureId === featureId &&
+        !isSketchLayer
+      )
+        return;
 
       const computedLayer = await layer?.();
       const computedFeature =
         layerId && featureId
-          ? mapRef.current?.engine.findComputedFeatureById?.(layerId, featureId) ?? info?.feature
+          ? (isSketchLayer
+              ? computedLayer?.features?.find(f => f.id === featureId)
+              : mapRef.current?.engine.findComputedFeatureById?.(layerId, featureId)) ??
+            info?.feature
           : undefined;
 
       selectFeature(
