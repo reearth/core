@@ -86,8 +86,8 @@ export function processGeoJSON(
       {
         type: "feature",
         id:
-          idProperty && geojson.properties && idProperty in geojson.properties
-            ? geojson.properties.id
+          idProperty && geojson.properties && geojson.properties[idProperty]
+            ? geojson.properties[idProperty]
             : generateRandomString(12),
         geometry:
           geo.type === "Point" || geo.type === "LineString" || geo.type === "Polygon"
