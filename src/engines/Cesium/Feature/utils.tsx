@@ -17,7 +17,7 @@ import {
   GroundPrimitive,
 } from "cesium";
 import md5 from "js-md5";
-import { pick } from "lodash-es";
+import { isEqual, pick } from "lodash-es";
 import {
   ComponentProps,
   ComponentType,
@@ -87,8 +87,17 @@ function EntityExtComponent(
   ref: ForwardedRef<CesiumComponentRef<CesiumEntity>>,
 ) {
   const r = useRef<CesiumComponentRef<CesiumEntity>>(null);
+  const entityRef = useRef<CesiumEntity | undefined>(r?.current?.cesiumElement);
 
   useLayoutEffect(() => {
+    // Note: Sketch feature's tag cannot be attached properly when first load
+    // The cesiumElement is undefined when attach, and doesn't have a chance to attach again.
+    // Root cause is still not clear.
+    // Here we add r.current as a dependency and check cesiumElement instead.
+    if (entityRef.current !== undefined && isEqual(entityRef.current, r.current?.cesiumElement))
+      return;
+    entityRef.current = r.current?.cesiumElement;
+
     attachTag(r.current?.cesiumElement, {
       layerId: layerId || props.id,
       featureId,
@@ -97,6 +106,7 @@ function EntityExtComponent(
       legacyLocationPropertyKey,
       hideIndicator,
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     draggable,
     featureId,
@@ -105,7 +115,7 @@ function EntityExtComponent(
     props.id,
     unselectable,
     hideIndicator,
-    r.current?.cesiumElement,
+    r.current,
   ]);
 
   return <Entity ref={composeRefs(ref, r)} {...props} />;
