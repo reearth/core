@@ -1,6 +1,7 @@
 /// <reference types="vite/client" />
 /// <reference types="vitest" />
 
+import { readFileSync } from "fs";
 import { resolve } from "path";
 
 import react from "@vitejs/plugin-react";
@@ -9,12 +10,17 @@ import cesium from "vite-plugin-cesium";
 import dts from "vite-plugin-dts";
 import svgr from "vite-plugin-svgr";
 import { configDefaults } from "vitest/config";
+
+const cesiumPackageJson = JSON.parse(
+  readFileSync(resolve(__dirname, "node_modules", "cesium", "package.json"), "utf-8"),
+);
+
 // https://vitejs.dev/config/
 export default defineConfig(() => ({
   plugins: [
     svgr(),
     react(),
-    cesium({ rebuildCesium: true }),
+    cesium({ rebuildCesium: true, cesiumBaseUrl: `cesium-${cesiumPackageJson.version}/` }),
     dts({ rollupTypes: true }),
   ],
   build: {
