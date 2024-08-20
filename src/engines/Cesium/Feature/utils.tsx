@@ -90,6 +90,10 @@ function EntityExtComponent(
   const entityRef = useRef<CesiumEntity | undefined>(r?.current?.cesiumElement);
 
   useLayoutEffect(() => {
+    // Note: Sketch feature's tag cannot be attached properly when first load
+    // The cesiumElement is undefined when attach, and doesn't have a chance to attach again.
+    // Root cause is still not clear.
+    // Here we add r.current as a dependency and check cesiumElement instead.
     if (entityRef.current !== undefined && isEqual(entityRef.current, r.current?.cesiumElement))
       return;
     entityRef.current = r.current?.cesiumElement;
