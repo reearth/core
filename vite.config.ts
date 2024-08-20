@@ -11,16 +11,12 @@ import dts from "vite-plugin-dts";
 import svgr from "vite-plugin-svgr";
 import { configDefaults } from "vitest/config";
 
-const cesiumPackageJson = JSON.parse(
-  readFileSync(resolve(__dirname, "node_modules", "cesium", "package.json"), "utf-8"),
-);
-
 // https://vitejs.dev/config/
 export default defineConfig(() => ({
   plugins: [
     svgr(),
     react(),
-    cesium({ rebuildCesium: true, cesiumBaseUrl: `cesium-${cesiumPackageJson.version}/` }),
+    cesium({ rebuildCesium: true }),
     dts({ rollupTypes: true }),
   ],
   build: {
