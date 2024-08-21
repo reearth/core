@@ -76,7 +76,7 @@ function App() {
         {
           id: "asdflajslf",
           type: currentTile,
-          opacity: 0.5,
+          opacity: 1,
         },
       ],
       terrain: {
@@ -98,8 +98,6 @@ function App() {
     }),
     [],
   );
-
-  console.log(layers);
 
   return (
     <>
