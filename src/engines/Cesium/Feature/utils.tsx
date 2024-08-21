@@ -17,12 +17,13 @@ import {
   GroundPrimitive,
 } from "cesium";
 import md5 from "js-md5";
-import { isEqual, pick } from "lodash-es";
+import { pick } from "lodash-es";
 import {
   ComponentProps,
   ComponentType,
   ForwardedRef,
   forwardRef,
+  useCallback,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -74,6 +75,8 @@ export type Tag = {
 
 export const EntityExt = forwardRef(EntityExtComponent);
 
+const ATTACH_TRY_MAX = 5;
+
 function EntityExtComponent(
   {
     layerId,
@@ -87,26 +90,28 @@ function EntityExtComponent(
   ref: ForwardedRef<CesiumComponentRef<CesiumEntity>>,
 ) {
   const r = useRef<CesiumComponentRef<CesiumEntity>>(null);
-  const entityRef = useRef<CesiumEntity | undefined>(r?.current?.cesiumElement);
+  const attachTryCount = useRef(0);
 
-  useLayoutEffect(() => {
-    // Note: Sketch feature's tag cannot be attached properly when first load
-    // The cesiumElement is undefined when attach, and doesn't have a chance to attach again.
-    // Root cause is still not clear.
-    // Here we add r.current as a dependency and check cesiumElement instead.
-    if (entityRef.current !== undefined && isEqual(entityRef.current, r.current?.cesiumElement))
-      return;
-    entityRef.current = r.current?.cesiumElement;
-
-    attachTag(r.current?.cesiumElement, {
-      layerId: layerId || props.id,
-      featureId,
-      draggable,
-      unselectable,
-      legacyLocationPropertyKey,
-      hideIndicator,
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  // NOTE: Entity is load asynchronously and cesiumElement could be undefined.
+  // Currently, we don't have a good way to detect when it's loaded.
+  // Here we use a simple counter to retry attaching tag.
+  const attach = useCallback(() => {
+    attachTryCount.current += 1;
+    if (attachTryCount.current > ATTACH_TRY_MAX) return;
+    if (!r.current?.cesiumElement) {
+      setTimeout(() => {
+        attach();
+      }, 10);
+    } else {
+      attachTag(r.current.cesiumElement, {
+        layerId: layerId || props.id,
+        featureId,
+        draggable,
+        unselectable,
+        legacyLocationPropertyKey,
+        hideIndicator,
+      });
+    }
   }, [
     draggable,
     featureId,
@@ -115,8 +120,12 @@ function EntityExtComponent(
     props.id,
     unselectable,
     hideIndicator,
-    r.current,
   ]);
+
+  useLayoutEffect(() => {
+    attachTryCount.current = 0;
+    attach();
+  }, [attach, r.current?.cesiumElement]);
 
   return <Entity ref={composeRefs(ref, r)} {...props} />;
 }
