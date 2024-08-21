@@ -1,5 +1,5 @@
 import { readFileSync } from "fs";
-import { resolve } from "path";
+import path, { resolve } from "path";
 
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
@@ -17,4 +17,9 @@ export default defineConfig({
     react(),
     cesium({ cesiumBaseUrl: `cesium-${cesiumPackageJson.version}/` }),
   ],
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./example"),
+    },
+  },
 });

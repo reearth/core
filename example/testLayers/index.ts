@@ -1,6 +1,6 @@
 import { Layer } from "@reearth/core";
 
+import { GEOJSON_MARKER } from "./geojson_marker";
 import { LAND_USE } from "./mvt";
 
-// TODO: Make an UI to select a shown layer.
-export const TEST_LAYERS: Layer[] = [LAND_USE];
+export const TEST_LAYERS: Layer[] = [LAND_USE, GEOJSON_MARKER];

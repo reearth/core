@@ -45,6 +45,6 @@ export const VIEWER: ViewerProperty = {
   },
   terrain: {
     enabled: true,
-    normal: true,
+    normal: false,
   },
 };
