@@ -36,7 +36,7 @@ import {
   CameraEventType,
   KeyboardEventModifier,
 } from "cesium";
-import { MutableRefObject } from "react";
+import { MutableRefObject, useMemo } from "react";
 
 import type { Camera, Clock } from "..";
 import { ClassificationType } from "../../mantle";
@@ -139,16 +139,9 @@ export const useIcon = ({
       ? Math.floor(img.height * imageSize)
       : Math.floor((w / img.width) * img.height);
 
-  const canvas = drawIcon(
-    img,
-    w,
-    h,
-    crop,
-    shadow,
-    shadowColor,
-    shadowBlur,
-    shadowOffsetX,
-    shadowOffsetY,
+  const canvas = useMemo(
+    () => drawIcon(img, w, h, crop, shadow, shadowColor, shadowBlur, shadowOffsetX, shadowOffsetY),
+    [crop, h, img, shadow, shadowBlur, shadowColor, shadowOffsetX, shadowOffsetY, w],
   );
   return [canvas ?? "", w, h];
 };
