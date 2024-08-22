@@ -90,8 +90,6 @@ function EntityExtComponent(
   const [entity, setEntity] = useState<CesiumComponentRef<CesiumEntity> | null>(null);
 
   useLayoutEffect(() => {
-    console.log("attach", entity?.cesiumElement, layerId, featureId);
-
     if (!entity?.cesiumElement) return;
     attachTag(entity.cesiumElement, {
       layerId: layerId || props.id,
