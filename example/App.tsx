@@ -101,9 +101,9 @@ function App() {
 
   return (
     <>
-      <div className="tw-absolute tw-right-2 tw-top-2 tw-z-10">
+      <div className="absolute right-2 top-2 z-10">
         <Sheet>
-          <SheetTrigger className="tw-bg-white tw-rounded-sm tw-pl-2 tw-pr-2">Options</SheetTrigger>
+          <SheetTrigger className="bg-white rounded-sm pl-2 pr-2">Options</SheetTrigger>
           <SheetContent>
             <SheetHeader>
               <SheetTitle>Tile</SheetTitle>
@@ -121,16 +121,14 @@ function App() {
               </Select>
               <Separator />
               <SheetTitle>Terrain</SheetTitle>
-              <div className="tw-flex tw-items-center tw-gap-2 tw-justify-between tw-w-full">
-                <label className="tw-text-sm tw-font-medium tw-leading-none tw-opacity-70">
-                  Enabled
-                </label>
+              <div className="flex items-center gap-2 justify-between w-full">
+                <label className="text-sm font-medium leading-none opacity-70">Enabled</label>
                 <Switch checked={terrainEnabled} onCheckedChange={setTerrainEnabled} />
               </div>
               <Separator />
               <SheetTitle>Layers</SheetTitle>
               {TEST_LAYERS.map(layer => (
-                <div key={layer.id} className="tw-flex tw-items-center tw-gap-2">
+                <div key={layer.id} className="flex items-center gap-2">
                   <Checkbox
                     checked={activeLayerIds.includes(layer.id)}
                     onCheckedChange={() => {
@@ -141,9 +139,7 @@ function App() {
                       );
                     }}
                   />
-                  <label className="tw-text-sm tw-font-medium tw-leading-none tw-opacity-70">
-                    {layer.id}
-                  </label>
+                  <label className="text-sm font-medium leading-none opacity-70">{layer.id}</label>
                 </div>
               ))}
             </SheetHeader>
@@ -151,7 +147,7 @@ function App() {
           </SheetContent>
         </Sheet>
       </div>
-      <div className="tw-w-screen tw-h-screen">
+      <div className="w-screen h-screen">
         <CoreVisualizer
           ref={ref}
           ready={isReady}

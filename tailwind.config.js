@@ -3,7 +3,7 @@ import tailwindcssAnimate from "tailwindcss-animate";
 
 export const darkMode = ["class"];
 export const content = ["./example/**/*.{ts,tsx}", "./example/*.{ts,tsx}"];
-export const prefix = "tw-";
+export const prefix = "";
 export const theme = {
   container: {
     center: true,
