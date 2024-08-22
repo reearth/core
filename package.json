@@ -1,6 +1,6 @@
 {
   "name": "@reearth/core",
-  "version": "0.0.7-alpha.12",
+  "version": "0.0.7-alpha.13",
   "author": "Re:Earth contributors <community@reearth.io>",
   "license": "Apache-2.0",
   "description": "A library that abstracts a map engine as one common API.",
