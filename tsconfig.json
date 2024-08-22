@@ -15,7 +15,8 @@
     "sourceMap": true,
     "jsx": "react-jsx",
     "paths": {
-      "@reearth/core": ["./src/index.ts"]
+      "@reearth/core": ["./src/index.ts"],
+      "@/*": ["./example/*"]
     },
 
     /* Linting */
