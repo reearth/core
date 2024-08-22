@@ -23,9 +23,10 @@ import {
   ComponentType,
   ForwardedRef,
   forwardRef,
+  useCallback,
   useLayoutEffect,
   useMemo,
-  useRef,
+  useState,
 } from "react";
 import { type CesiumComponentRef, Entity } from "resium";
 
@@ -86,12 +87,13 @@ function EntityExtComponent(
   }: ComponentProps<typeof Entity> & Tag,
   ref: ForwardedRef<CesiumComponentRef<CesiumEntity>>,
 ) {
-  const r = useRef<CesiumComponentRef<CesiumEntity>>(null);
+  const [entity, setEntity] = useState<CesiumComponentRef<CesiumEntity> | null>(null);
 
   useLayoutEffect(() => {
-    console.log("attach", r.current?.cesiumElement, layerId, featureId);
+    console.log("attach", entity?.cesiumElement, layerId, featureId);
 
-    attachTag(r.current?.cesiumElement, {
+    if (!entity?.cesiumElement) return;
+    attachTag(entity.cesiumElement, {
       layerId: layerId || props.id,
       featureId,
       draggable,
@@ -107,10 +109,12 @@ function EntityExtComponent(
     props.id,
     unselectable,
     hideIndicator,
-    r.current?.cesiumElement,
+    entity,
   ]);
 
-  return <Entity ref={composeRefs(ref, r)} {...props} />;
+  const handleRef = useCallback((r: CesiumComponentRef<CesiumEntity>) => setEntity(r), []);
+
+  return <Entity ref={composeRefs(ref, handleRef)} {...props} />;
 }
 
 export function attachTag(
