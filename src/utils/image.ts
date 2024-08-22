@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 
 export const useImage = (src?: string): HTMLImageElement | undefined => {
   const imgRef = useRef<HTMLImageElement>();
@@ -22,14 +22,4 @@ export const useImage = (src?: string): HTMLImageElement | undefined => {
   }, [src]);
 
   return img;
-};
-
-export const useCanvas = (cb: (canvas: HTMLCanvasElement) => void): string => {
-  const can = useMemo(() => document.createElement("canvas"), []);
-  const [data, setData] = useState<string>("");
-  useEffect(() => {
-    cb(can);
-    setData(can.toDataURL());
-  }, [can, cb]);
-  return data;
 };
