@@ -94,6 +94,9 @@ function EntityExtComponent(
     // The cesiumElement is undefined when attach, and doesn't have a chance to attach again.
     // Root cause is still not clear.
     // Here we add r.current as a dependency and check cesiumElement instead.
+
+    console.log("attach", r.current?.cesiumElement, layerId, featureId);
+
     if (entityRef.current !== undefined && isEqual(entityRef.current, r.current?.cesiumElement))
       return;
     entityRef.current = r.current?.cesiumElement;
@@ -106,7 +109,6 @@ function EntityExtComponent(
       legacyLocationPropertyKey,
       hideIndicator,
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     draggable,
     featureId,
@@ -115,7 +117,7 @@ function EntityExtComponent(
     props.id,
     unselectable,
     hideIndicator,
-    r.current,
+    r.current?.cesiumElement,
   ]);
 
   return <Entity ref={composeRefs(ref, r)} {...props} />;

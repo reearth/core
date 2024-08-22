@@ -38,7 +38,7 @@ const TILES = [
 
 const DEFAULT_TILE = "open_street_map";
 
-const DEFAULT_LAYERS = ["land_use_mvt", "geojson_marker"];
+const DEFAULT_LAYERS: string[] = ["geojson_simple"];
 
 const DEFAULT_CAMERA = {
   fov: 1.0471975511965976,
