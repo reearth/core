@@ -12,6 +12,7 @@ import {
   type Ellipsoid,
   type Label,
 } from "@cesium/engine";
+import { DistanceDisplayCondition } from "cesium";
 import { merge, omit } from "lodash-es";
 import { type Feature } from "protomaps";
 import { memo, useCallback, useEffect, useMemo, useRef, type FC } from "react";
@@ -170,6 +171,8 @@ export interface JapanGSIOptimalBVmapLabelImageryProps {
   height?: number;
   style?: AnnotationStyle;
   labelCollection?: LabelCollection;
+  near?: number;
+  far?: number;
 }
 
 export const JapanGSIOptimalBVmapLabelImagery: FC<JapanGSIOptimalBVmapLabelImageryProps> = memo(
@@ -180,6 +183,8 @@ export const JapanGSIOptimalBVmapLabelImagery: FC<JapanGSIOptimalBVmapLabelImage
     height = 50,
     style = defaultStyle,
     labelCollection,
+    near,
+    far,
   }) => {
     const cesiumContext = useCesium();
 
@@ -282,6 +287,8 @@ export const JapanGSIOptimalBVmapLabelImagery: FC<JapanGSIOptimalBVmapLabelImage
             horizontalOrigin: HorizontalOrigin.CENTER,
             verticalOrigin: VerticalOrigin.BOTTOM,
             heightReference: HeightReference.CLAMP_TO_GROUND,
+            distanceDisplayCondition:
+              near || far ? new DistanceDisplayCondition(near, far) : undefined,
             disableDepthTestDistance: Infinity,
             ...styleOptions,
           };
@@ -308,7 +315,7 @@ export const JapanGSIOptimalBVmapLabelImagery: FC<JapanGSIOptimalBVmapLabelImage
           scene?.postRender.addEventListener(removeLabels);
         }
       };
-    }, [style, annotations, scene, labelCollection]);
+    }, [style, annotations, scene, labelCollection, near, far]);
 
     useEffect(() => {
       updateVisibility();
