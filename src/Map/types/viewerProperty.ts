@@ -132,6 +132,8 @@ export type TileLabelProperty = {
   id: string;
   labelType: "japan_gsi_optimal_bvmap";
   style: Record<string, any>;
+  near?: number;
+  far?: number;
 };
 
 export type SkyProperty = {

@@ -27,6 +27,27 @@ const sphericalHarmonicCoefficients: [x: number, y: number, z: number][] = [
   [0.114833705127239, 0.114355310797691, 0.067587599158287],
 ];
 
+const TILE_LABELS: ViewerProperty["tileLabels"] = [
+  {
+    id: `label`,
+    labelType: "japan_gsi_optimal_bvmap",
+    near: 0,
+    far: 3000,
+    style: {
+      municipalities: {
+        fillColor: "#000000",
+        outlineColor: "rgba(255, 255, 255, 0.8)",
+      },
+      towns: {
+        fillColor: "rgba(0, 0, 0, 0.6)",
+      },
+      topography: {
+        fillColor: "rgba(0, 0, 0, 0.6)",
+      },
+    },
+  },
+];
+
 export const VIEWER: ViewerProperty = {
   tiles: [
     {
@@ -34,6 +55,7 @@ export const VIEWER: ViewerProperty = {
       type: "open_street_map",
     },
   ],
+  tileLabels: TILE_LABELS,
   globe: {
     enableLighting: true,
   },

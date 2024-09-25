@@ -8,6 +8,8 @@ export interface TileLabelConfig {
   labelType: "japan_gsi_optimal_bvmap";
   fillColor?: string;
   outlineColor?: string;
+  near?: number;
+  far?: number;
   style: Record<string, any>;
 }
 
@@ -23,7 +25,14 @@ const LabelImageryLayers = memo(
           if (!label) return null;
           switch (label.labelType) {
             case "japan_gsi_optimal_bvmap":
-              return <JapanGSIOptimalBVmapVectorMapLabel key={label.id} style={label.style} />;
+              return (
+                <JapanGSIOptimalBVmapVectorMapLabel
+                  key={label.id}
+                  style={label.style}
+                  near={label.near}
+                  far={label.far}
+                />
+              );
             default:
               return null;
           }
