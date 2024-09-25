@@ -1,26 +1,9 @@
 import { Feature as GeojsonFeature, MultiPolygon, Polygon, Point, LineString } from "geojson";
 import { ComponentType } from "react";
-import { RequireExactlyOne } from "type-fest";
 
-import { LayerAppearanceTypes } from "../../mantle";
+import { SketchComponentProps } from "../../engines/Cesium/Sketch";
+import { ComputedFeature, LayerAppearanceTypes } from "../../mantle";
 import { Position3d } from "../../types";
-
-type GeometryOptions = {
-  type: SketchType;
-  controlPoints: readonly Position3d[];
-};
-
-type SketchComponentProps = RequireExactlyOne<
-  {
-    geometry?: LineString | Polygon | MultiPolygon | null;
-    geometryOptions?: GeometryOptions | null;
-    extrudedHeight?: number;
-    disableShadow?: boolean;
-    enableRelativeHeight?: boolean;
-    color?: string;
-  },
-  "geometry" | "geometryOptions"
->;
 
 export type SketchComponentType = ComponentType<SketchComponentProps>;
 
@@ -39,9 +22,9 @@ export type SketchOptions = {
   appearance?: SketchAppearance;
   dataOnly?: boolean;
   disableShadow?: boolean;
-  enableRelativeHeight?: boolean;
   rightClickToAbort?: boolean;
   autoResetInteractionMode?: boolean;
+  useCentroidExtrudedHeight?: boolean;
 };
 
 export type GeometryOptionsXYZ = {
@@ -81,3 +64,10 @@ export function isSketchType(value: unknown): value is SketchType {
     value === "extrudedPolygon"
   );
 }
+
+export type SketchEditingFeature = {
+  layerId: string;
+  feature: ComputedFeature;
+};
+
+export type SketchEditFeatureChangeCb = (feature: SketchEditingFeature | undefined) => void;

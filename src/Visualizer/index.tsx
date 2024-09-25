@@ -58,7 +58,9 @@ export type CoreVisualizerProps = {
   onMount?: () => void;
   onSketchTypeChangeProp?: (type: SketchType | undefined) => void;
   onSketchFeatureCreate?: (feature: SketchFeature | null) => void;
+  onSketchFeatureUpdate?: (feature: SketchFeature | null) => void;
   onInteractionModeChange?: (mode: InteractionModeType) => void;
+  onAPIReady?: () => void;
 };
 
 export const CoreVisualizer = memo(
@@ -90,6 +92,8 @@ export const CoreVisualizer = memo(
         onMount,
         onSketchTypeChangeProp,
         onSketchFeatureCreate,
+        onSketchFeatureUpdate,
+        onAPIReady,
       },
       ref: Ref<MapRef | null>,
     ) => {
@@ -112,6 +116,7 @@ export const CoreVisualizer = memo(
         handleCameraChange,
         handleInteractionModeChange,
         handleSketchPluginFeatureCreate,
+        handleSketchPluginFeatureUpdate,
         handleSketchTypeChange,
         handleLayerVisibility,
         handleLayerLoad,
@@ -171,6 +176,8 @@ export const CoreVisualizer = memo(
                 overrideInteractionMode={handleInteractionModeChange}
                 onSketchFeatureCreate={onSketchFeatureCreate}
                 onSketchPluginFeatureCreate={handleSketchPluginFeatureCreate}
+                onSketchFeatureUpdate={onSketchFeatureUpdate}
+                onSketchPluginFeatureUpdate={handleSketchPluginFeatureUpdate}
                 onSketchTypeChange={handleSketchTypeChange}
                 onMount={onMount}
                 onLayerVisibility={handleLayerVisibility}
@@ -178,6 +185,7 @@ export const CoreVisualizer = memo(
                 onLayerSelectWithRectStart={handleLayerSelectWithRectStart}
                 onLayerSelectWithRectMove={handleLayerSelectWithRectMove}
                 onLayerSelectWithRectEnd={handleLayerSelectWithRectEnd}
+                onAPIReady={onAPIReady}
               />
               <coreContext.Provider value={coreContextValue}>{children}</coreContext.Provider>
             </div>

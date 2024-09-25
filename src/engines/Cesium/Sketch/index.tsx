@@ -2,46 +2,61 @@
 
 import { Color } from "@cesium/engine";
 import { Cartesian3 } from "cesium";
-import { type LineString, type MultiPolygon, type Polygon } from "geojson";
 import { memo, useMemo, type FC } from "react";
-import { type RequireExactlyOne } from "type-fest";
 
 import { SketchType } from "../../../Map/Sketch/types";
 import { Position3d } from "../../../types";
 import { convertGeometryToPositionsArray, convertPolygonToHierarchyArray } from "../utils/polygon";
 
+import { DEFAULT_SKETCH_COLOR } from "./constants";
 import { createGeometry, GeometryOptions } from "./createGeometry";
 import ExtrudedControlPoints from "./ExtrudedControlPoints";
 import { ExtrudedPolygonEntity } from "./ExtrudedPolygonEntity";
 import { PolygonEntity } from "./PolygonEntity";
 import { PolylineEntity } from "./PolylineEntity";
+import SurfaceAddingPoints from "./SurfaceAddingPoints";
 import SurfaceControlPoints from "./SurfaceControlPoints";
 
-export type SketchComponentProps = RequireExactlyOne<
-  {
-    geometry?: LineString | Polygon | MultiPolygon | null;
-    geometryOptions?: {
-      type: SketchType;
-      controlPoints: readonly Position3d[];
-    } | null;
-    extrudedHeight?: number;
-    disableShadow?: boolean;
-    color?: string;
-    enableRelativeHeight?: boolean;
-  },
-  "geometry" | "geometryOptions"
->;
+export type SketchComponentProps = {
+  geometryOptions?: {
+    type: SketchType;
+    controlPoints: readonly Position3d[];
+  } | null;
+  extrudedHeight?: number;
+  extrudedPoint?: Position3d;
+  centroidBasePoint?: Position3d;
+  centroidExtrudedPoint?: Position3d;
+  disableShadow?: boolean;
+  color?: string;
+  isEditing?: boolean;
+  catchedControlPointIndex?: number;
+  catchedExtrudedPoint?: boolean;
+  selectedControlPointIndex?: number;
+  handleControlPointMouseEvent?: ControlPointMouseEventHandler;
+  handleAddControlPoint?: (position: Position3d, index: number) => void;
+};
 
-const DEFAULT_SKETCH_COLOR = "#00bebe";
+export type ControlPointMouseEventHandler = (
+  index: number,
+  isExtrudedPoint: boolean,
+  type: "mousedown" | "click",
+) => void;
 
 const SketchComponent: FC<SketchComponentProps> = memo(
   ({
-    geometry,
     geometryOptions,
     extrudedHeight,
     disableShadow,
     color: stringColor,
-    enableRelativeHeight,
+    isEditing,
+    extrudedPoint,
+    centroidBasePoint,
+    centroidExtrudedPoint,
+    catchedControlPointIndex,
+    catchedExtrudedPoint,
+    selectedControlPointIndex,
+    handleControlPointMouseEvent,
+    handleAddControlPoint,
   }) => {
     const cartesianGeometryOptions: GeometryOptions | null = useMemo(
       () =>
@@ -55,9 +70,8 @@ const SketchComponent: FC<SketchComponentProps> = memo(
     );
 
     const g = useMemo(
-      () =>
-        geometry ?? (cartesianGeometryOptions ? createGeometry(cartesianGeometryOptions) : null),
-      [geometry, cartesianGeometryOptions],
+      () => (cartesianGeometryOptions ? createGeometry(cartesianGeometryOptions) : null),
+      [cartesianGeometryOptions],
     );
 
     const { positionsArray, hierarchyArray } = useMemo(() => {
@@ -82,31 +96,56 @@ const SketchComponent: FC<SketchComponentProps> = memo(
     return (
       <>
         {positionsArray?.map((positions, index) => (
-          <PolylineEntity key={index} dynamic positions={positions} color={color} />
+          <PolylineEntity
+            key={index}
+            dynamic
+            positions={positions}
+            color={color}
+            isEditing={isEditing}
+          />
         ))}
         {hierarchyArray?.map((hierarchy, index) => (
           <PolygonEntity key={index} dynamic hierarchy={hierarchy} color={color} />
         ))}
-        {cartesianGeometryOptions != null && extrudedHeight == null && (
-          <SurfaceControlPoints geometryOptions={cartesianGeometryOptions} color={color} />
+        {cartesianGeometryOptions != null && (!extrudedHeight || isEditing) && (
+          <SurfaceControlPoints
+            geometryOptions={cartesianGeometryOptions}
+            color={color}
+            isEditing={isEditing}
+            catchedControlPointIndex={catchedControlPointIndex}
+            selectedControlPointIndex={selectedControlPointIndex}
+            handleControlPointMouseEvent={handleControlPointMouseEvent}
+          />
         )}
-        {cartesianGeometryOptions != null && extrudedHeight != null && (
+        {cartesianGeometryOptions != null && isEditing && (
+          <SurfaceAddingPoints
+            geometryOptions={cartesianGeometryOptions}
+            isEditing={isEditing}
+            handleAddControlPoint={handleAddControlPoint}
+          />
+        )}
+        {cartesianGeometryOptions != null && extrudedHeight && (
           <ExtrudedControlPoints
             geometryOptions={cartesianGeometryOptions}
             extrudedHeight={extrudedHeight}
+            extrudedPoint={extrudedPoint}
+            centroidBasePoint={centroidBasePoint}
+            centroidExtrudedPoint={centroidExtrudedPoint}
+            catchedExtrudedPoint={catchedExtrudedPoint}
             color={color}
+            isEditing={isEditing}
+            handleControlPointMouseEvent={handleControlPointMouseEvent}
           />
         )}
-        {extrudedHeight != null &&
+        {extrudedHeight &&
           hierarchyArray?.map((hierarchy, index) => (
             <ExtrudedPolygonEntity
               key={index}
-              dynamic
               hierarchy={hierarchy}
               extrudedHeight={extrudedHeight}
               disableShadow={disableShadow}
               color={color}
-              enableRelativeHeight={enableRelativeHeight}
+              isEditing={isEditing}
             />
           ))}
       </>

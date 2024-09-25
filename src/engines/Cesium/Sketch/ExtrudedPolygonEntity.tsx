@@ -1,10 +1,10 @@
 import {
   CallbackProperty,
   ClassificationType,
+  Color,
   ColorMaterialProperty,
   HeightReference,
   ShadowMode,
-  type Color,
   type PolygonHierarchy,
 } from "@cesium/engine";
 import { useMemo, useRef, type FC } from "react";
@@ -12,60 +12,65 @@ import { useMemo, useRef, type FC } from "react";
 import { useConstant } from "../../../utils";
 import { useContext } from "../Feature/context";
 
+import { DEFAULT_EDIT_COLOR } from "./constants";
 import { Entity, type EntityProps } from "./Entity";
 
 export interface ExtrudedPolygonEntityProps {
-  dynamic?: boolean;
   id?: string;
   hierarchy: PolygonHierarchy;
   extrudedHeight: number;
   color?: Color;
   disableShadow?: boolean;
-  enableRelativeHeight?: boolean;
+  isEditing?: boolean;
 }
 
 export const ExtrudedPolygonEntity: FC<ExtrudedPolygonEntityProps> = ({
-  dynamic = false,
   id,
   hierarchy: hierarchyProp,
   extrudedHeight: extrudedHeightProp,
   color,
   disableShadow = false,
-  enableRelativeHeight = false,
+  isEditing,
 }) => {
   const hierarchyRef = useRef(hierarchyProp);
   hierarchyRef.current = hierarchyProp;
   const hierarchyProperty = useConstant(
     () => new CallbackProperty(() => hierarchyRef.current, false),
   );
-  const hierarchy = dynamic ? hierarchyProperty : hierarchyProp;
+  const hierarchy = hierarchyProperty;
 
   const extrudedHeightRef = useRef(extrudedHeightProp);
   extrudedHeightRef.current = extrudedHeightProp;
   const extrudedHeightProperty = useConstant(
     () => new CallbackProperty(() => extrudedHeightRef.current, false),
   );
-  const extrudedHeight = dynamic ? extrudedHeightProperty : extrudedHeightProp;
+  const extrudedHeight = extrudedHeightProperty;
 
   const options = useMemo(
     (): EntityProps => ({
       polygon: {
         hierarchy,
+        heightReference: HeightReference.RELATIVE_TO_TERRAIN,
         extrudedHeight,
-        extrudedHeightReference: HeightReference.RELATIVE_TO_GROUND,
+        extrudedHeightReference: HeightReference.RELATIVE_TO_TERRAIN,
+        // extrudedHeightReference: HeightReference.NONE,
         fill: true,
         outline: true,
         outlineWidth: 1,
-        outlineColor: color?.withAlpha(1),
-        material: new ColorMaterialProperty(color),
+        outlineColor: isEditing
+          ? Color.fromCssColorString(DEFAULT_EDIT_COLOR)
+          : color?.withAlpha(1),
+        material: new ColorMaterialProperty(isEditing ? color?.withAlpha(0.2) : color),
         classificationType: ClassificationType.TERRAIN,
         shadows: disableShadow ? ShadowMode.DISABLED : ShadowMode.ENABLED,
-        ...(enableRelativeHeight
-          ? { height: 0, heightReference: HeightReference.RELATIVE_TO_GROUND }
-          : undefined),
+
+        // heightReference: HeightReference.NONE,
+        // ...(enableRelativeHeight
+        //   ? { height: 0, heightReference: HeightReference.RELATIVE_TO_TERRAIN }
+        //   : undefined),
       },
     }),
-    [extrudedHeight, disableShadow, hierarchy, color, enableRelativeHeight],
+    [extrudedHeight, disableShadow, hierarchy, color, isEditing],
   );
 
   const { requestRender } = useContext();

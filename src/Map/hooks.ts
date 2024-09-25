@@ -13,7 +13,7 @@ import type {
 } from "./types";
 import useTimelineManager, { TimelineManagerRef } from "./useTimelineManager";
 
-import { CursorType } from ".";
+import { CursorType, SketchEditingFeature } from ".";
 
 export type { MapRef } from "./ref";
 
@@ -26,6 +26,8 @@ export default function ({
   timelineManagerRef,
   cursor,
   onLayerSelect,
+  onMount,
+  onAPIReady,
 }: {
   ref: Ref<MapRef>;
   timelineManagerRef?: TimelineManagerRef;
@@ -37,7 +39,10 @@ export default function ({
     options?: LayerSelectionReason,
     info?: SelectedFeatureInfo,
   ) => void;
+  onMount?: () => void;
+  onAPIReady?: () => void;
 }) {
+  const [mapAPIReady, setMapAPIReady] = useState({ engine: false, layers: false, sketch: false });
   const engineRef = useRef<EngineRef>(null);
   const layersRef = useRef<LayersRef>(null);
   const sketchRef = useRef<SketchRef>(null);
@@ -54,6 +59,12 @@ export default function ({
       }),
     [timelineManagerRef],
   );
+
+  useEffect(() => {
+    if (onAPIReady && mapAPIReady.engine && mapAPIReady.layers && mapAPIReady.sketch) {
+      onAPIReady?.();
+    }
+  }, [onAPIReady, mapAPIReady]);
 
   // selectLayer logic
   // 1. Map/hooks(here) is the source
@@ -111,6 +122,21 @@ export default function ({
     }
   }, [cursor]);
 
+  const [sketchEditingFeature, setSketchEditingFeature] = useState<
+    SketchEditingFeature | undefined
+  >();
+
+  const handleEngineMount = useCallback(() => {
+    setMapAPIReady(s => ({ ...s, engine: true }));
+    onMount?.();
+  }, [onMount]);
+  const handleLayersMount = useCallback(() => {
+    setMapAPIReady(s => ({ ...s, layers: true }));
+  }, []);
+  const handleSketchMount = useCallback(() => {
+    setMapAPIReady(s => ({ ...s, sketch: true }));
+  }, []);
+
   return {
     engineRef,
     layersRef,
@@ -119,5 +145,10 @@ export default function ({
     requestingRenderMode,
     handleLayerSelect,
     handleEngineLayerSelect,
+    sketchEditingFeature,
+    setSketchEditingFeature,
+    handleEngineMount,
+    handleLayersMount,
+    handleSketchMount,
   };
 }

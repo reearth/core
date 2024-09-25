@@ -206,6 +206,14 @@ export default function useHooks(
     onSketchPluginFeatureCreateCallbacksRef.current.forEach(fn => fn(props));
   }, []);
 
+  const onSketchPluginFeatureUpdateCallbacksRef = useRef<SketchEventCallback[]>([]);
+  const onSketchPluginFeatureUpdate = useCallback((cb: SketchEventCallback) => {
+    onSketchPluginFeatureUpdateCallbacksRef.current.push(cb);
+  }, []);
+  const handleSketchPluginFeatureUpdate = useCallback((props: SketchEventProps) => {
+    onSketchPluginFeatureUpdateCallbacksRef.current.forEach(fn => fn(props));
+  }, []);
+
   const onSketchTypeChangeCallbacksRef = useRef<((type: SketchType | undefined) => void)[]>([]);
   const onSketchTypeChange = useCallback((cb: (type: SketchType | undefined) => void) => {
     onSketchTypeChangeCallbacksRef.current.push(cb);
@@ -256,6 +264,7 @@ export default function useHooks(
       handleCameraForceHorizontalRollChange,
       handleInteractionModeChange: changeInteractionMode,
       onSketchPluginFeatureCreate,
+      onSketchPluginFeatureUpdate,
       onSketchTypeChange,
       onLayerVisibility,
       onLayerLoad,
@@ -273,6 +282,7 @@ export default function useHooks(
       handleCameraForceHorizontalRollChange,
       onLayerEdit,
       onSketchPluginFeatureCreate,
+      onSketchPluginFeatureUpdate,
       onSketchTypeChange,
       onLayerVisibility,
       onLayerLoad,
@@ -313,6 +323,7 @@ export default function useHooks(
     handleCameraChange: changeCamera,
     handleInteractionModeChange: changeInteractionMode,
     handleSketchPluginFeatureCreate,
+    handleSketchPluginFeatureUpdate,
     handleSketchTypeChange,
     handleLayerVisibility,
     handleLayerLoad,

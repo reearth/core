@@ -82,6 +82,7 @@ const engineRefKeys: FunctionKeys<EngineRef> = {
   unselectFeatures: 1,
   pickManyFromViewport: 1,
   getExtrudedHeight: 1,
+  getExtrudedPoint: 1,
   getSurfaceDistance: 1,
   equalsEpsilon2d: 1,
   equalsEpsilon3d: 1,
@@ -89,6 +90,7 @@ const engineRefKeys: FunctionKeys<EngineRef> = {
   setCursor: 1,
   bringToFront: 1,
   sendToBack: 1,
+  calcRectangleControlPoint: 1,
 };
 
 const layersRefKeys: FunctionKeys<LayersRef> = {
@@ -122,6 +124,11 @@ const sketchRefKeys: FunctionKeys<SketchRef> = {
   setType: 1,
   getOptions: 1,
   overrideOptions: 1,
+  editFeature: 1,
+  applyEdit: 1,
+  cancelEdit: 1,
+  deleteFeature: 1,
+  onEditFeatureChange: 1,
 };
 
 export function mapRef({

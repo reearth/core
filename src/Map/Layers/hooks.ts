@@ -119,6 +119,7 @@ export default function useHooks({
   requestingRenderMode,
   onLayerSelect,
   engineRef,
+  onMount,
 }: {
   layers?: Layer[];
   ref?: ForwardedRef<Ref>;
@@ -137,6 +138,7 @@ export default function useHooks({
     info: SelectedFeatureInfo | undefined,
   ) => void;
   engineRef?: RefObject<EngineRef>;
+  onMount?: () => void;
 }) {
   const layerMap = useMemo(() => new Map<string, Layer>(), []);
   const [overriddenLayers, setOverridenLayers] = useState<OverriddenLayer[]>([]);
@@ -601,6 +603,10 @@ export default function useHooks({
       overriddenLayersGetter,
     ],
   );
+
+  useEffect(() => {
+    onMount?.();
+  }, [onMount]);
 
   const prevLayers = useRef<Layer[] | undefined>([]);
   useLayoutEffect(() => {

@@ -1,46 +1,95 @@
-import { Cartesian3, type Color } from "@cesium/engine";
+import { Cartesian3, Color } from "@cesium/engine";
 import { memo, type FC } from "react";
-import { useCesium } from "resium";
-import invariant from "tiny-invariant";
 
+import { Position3d } from "../../../types";
+
+import { DEFAULT_EDIT_COLOR } from "./constants";
 import { ControlPoint } from "./ControlPoint";
 import { type GeometryOptions } from "./createGeometry";
 import { ExtrudedMeasurement } from "./ExtrudedMeasurement";
 
+import { ControlPointMouseEventHandler } from ".";
+
 export interface ExtrudedControlPointsProps {
   geometryOptions: GeometryOptions;
   extrudedHeight: number;
+  extrudedPoint?: Position3d;
+  centroidBasePoint?: Position3d;
+  centroidExtrudedPoint?: Position3d;
+  catchedExtrudedPoint?: boolean;
   color?: Color;
+  isEditing?: boolean;
+  handleControlPointMouseEvent?: ControlPointMouseEventHandler;
 }
 
-const cartesianScratch = new Cartesian3();
-
 const ExtrudedControlPoints: FC<ExtrudedControlPointsProps> = memo(
-  ({ geometryOptions: { controlPoints }, extrudedHeight, color }) => {
-    const { viewer } = useCesium();
+  ({
+    geometryOptions: { controlPoints, type },
+    extrudedHeight,
+    color,
+    isEditing,
+    extrudedPoint: extrudedPointPosition,
+    centroidBasePoint: extrudeBasePointPosition,
+    centroidExtrudedPoint: extrudeControlPointPosition,
+    catchedExtrudedPoint,
+    handleControlPointMouseEvent,
+  }) => {
     const controlPoint = controlPoints[controlPoints.length - 1];
-    const normal = viewer?.scene?.globe.ellipsoid.geodeticSurfaceNormal(
-      controlPoint,
-      cartesianScratch,
-    );
 
-    invariant(normal !== undefined);
-    const extrudedPoint = Cartesian3.add(
-      controlPoint,
-      Cartesian3.multiplyByScalar(normal, extrudedHeight, cartesianScratch),
-      cartesianScratch,
-    );
+    const extrudedPoint = extrudedPointPosition
+      ? new Cartesian3(...extrudedPointPosition)
+      : undefined;
+
+    const heightBasePoint = extrudeBasePointPosition
+      ? new Cartesian3(...extrudeBasePointPosition)
+      : undefined;
+
+    const centroidExtrudedPoint = extrudeControlPointPosition
+      ? new Cartesian3(...extrudeControlPointPosition)
+      : undefined;
+
+    // get extruded point
+    // height is extrudedHeight
+    // const extrudedBasePoint = heightBasePoint;
 
     return (
       <>
-        <ControlPoint position={controlPoint} clampToGround />
-        <ControlPoint position={extrudedPoint} />
-        <ExtrudedMeasurement
-          a={controlPoint}
-          b={extrudedPoint}
-          extrudedHeight={extrudedHeight}
-          color={color}
-        />
+        {extrudedPoint && (
+          <>
+            <ControlPoint
+              index={-1}
+              position={extrudedPoint}
+              isEditing={isEditing}
+              isExtrudedControlPoint
+              handleControlPointMouseEvent={handleControlPointMouseEvent}
+            />
+            {(!isEditing || catchedExtrudedPoint) && (
+              <ExtrudedMeasurement
+                a={controlPoint}
+                b={extrudedPoint}
+                extrudedHeight={extrudedHeight}
+                color={isEditing ? Color.fromCssColorString(DEFAULT_EDIT_COLOR) : color}
+                showLine={type !== "extrudedPolygon"}
+              />
+            )}
+          </>
+        )}
+        {heightBasePoint && (
+          <ControlPoint
+            index={-1}
+            position={heightBasePoint}
+            isEditing={isEditing}
+            isExtrudedControlPoint
+          />
+        )}
+        {centroidExtrudedPoint && (
+          <ControlPoint
+            index={-1}
+            position={centroidExtrudedPoint}
+            isEditing={isEditing}
+            isExtrudedControlPoint
+          />
+        )}
       </>
     );
   },

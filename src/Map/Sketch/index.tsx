@@ -7,7 +7,13 @@ import { InteractionModeType } from "../../Visualizer/interactionMode";
 import { EngineRef, Feature, LayerSelectionReason, LayersRef, SketchRef } from "../types";
 
 import useHooks from "./hooks";
-import { SketchComponentType, SketchEventProps, SketchFeature, SketchType } from "./types";
+import {
+  SketchComponentType,
+  SketchEditingFeature,
+  SketchEventProps,
+  SketchFeature,
+  SketchType,
+} from "./types";
 
 export * from "./types";
 
@@ -29,7 +35,12 @@ export type SketchProps = {
   onSketchTypeChange?: (type: SketchType | undefined, from?: "editor" | "plugin") => void;
   onSketchFeatureCreate?: (feature: SketchFeature | null) => void;
   onSketchPluginFeatureCreate?: (props: SketchEventProps) => void;
+  onSketchFeatureUpdate?: (feature: SketchFeature | null) => void;
+  onSketchPluginFeatureUpdate?: (props: SketchEventProps) => void;
   onLayerSelect?: OnLayerSelectType;
+  sketchEditingFeature?: SketchEditingFeature;
+  onSketchEditFeature?: (feature: SketchEditingFeature | undefined) => void;
+  onMount?: () => void;
 };
 
 const Sketch: ForwardRefRenderFunction<SketchRef, SketchProps> = (
@@ -43,23 +54,47 @@ const Sketch: ForwardRefRenderFunction<SketchRef, SketchProps> = (
     onSketchTypeChange,
     onSketchFeatureCreate,
     onSketchPluginFeatureCreate,
+    onSketchFeatureUpdate,
+    onSketchPluginFeatureUpdate,
     onLayerSelect,
+    sketchEditingFeature,
+    onSketchEditFeature,
+    onMount,
   },
   ref,
 ) => {
-  const { state, extrudedHeight, geometryOptions, color, disableShadow, enableRelativeHeight } =
-    useHooks({
-      ref,
-      layersRef,
-      engineRef,
-      interactionMode,
-      selectedFeature,
-      overrideInteractionMode,
-      onSketchTypeChange,
-      onSketchFeatureCreate,
-      onSketchPluginFeatureCreate,
-      onLayerSelect,
-    });
+  const {
+    state,
+    isEditing,
+    catchedControlPointIndex,
+    catchedExtrudedPoint,
+    extrudedHeight,
+    extrudedPoint,
+    centroidBasePoint,
+    centroidExtrudedPoint,
+    geometryOptions,
+    color,
+    disableShadow,
+    handleControlPointMouseEvent,
+    handleAddControlPoint,
+    selectedControlPointIndex,
+  } = useHooks({
+    ref,
+    layersRef,
+    engineRef,
+    interactionMode,
+    selectedFeature,
+    overrideInteractionMode,
+    onSketchTypeChange,
+    onSketchFeatureCreate,
+    onSketchPluginFeatureCreate,
+    onSketchFeatureUpdate,
+    onSketchPluginFeatureUpdate,
+    onLayerSelect,
+    sketchEditingFeature,
+    onSketchEditFeature,
+    onMount,
+  });
   if (state.matches("idle")) {
     return null;
   }
@@ -68,10 +103,16 @@ const Sketch: ForwardRefRenderFunction<SketchRef, SketchProps> = (
       geometryOptions={geometryOptions}
       color={color}
       disableShadow={disableShadow}
-      enableRelativeHeight={enableRelativeHeight}
-      {...(state.matches("extruding") && {
-        extrudedHeight,
-      })}
+      isEditing={isEditing}
+      catchedControlPointIndex={catchedControlPointIndex}
+      catchedExtrudedPoint={catchedExtrudedPoint}
+      extrudedHeight={extrudedHeight}
+      extrudedPoint={extrudedPoint}
+      centroidBasePoint={centroidBasePoint}
+      centroidExtrudedPoint={centroidExtrudedPoint}
+      handleControlPointMouseEvent={handleControlPointMouseEvent}
+      handleAddControlPoint={handleAddControlPoint}
+      selectedControlPointIndex={selectedControlPointIndex}
     />
   ) : null;
 };

@@ -9,6 +9,7 @@ import type {
   ComputedFeature,
   LayerSimple,
 } from "../../mantle";
+import { SketchEditingFeature } from "../Sketch";
 import { ViewerProperty } from "../types";
 
 import useHooks, { type Atom, type EvalFeature } from "./hooks";
@@ -25,6 +26,7 @@ export type CommonProps = {
   isHidden?: boolean;
   isSelected?: boolean;
   meta?: Record<string, unknown>;
+  sketchEditingFeature?: SketchEditingFeature;
 };
 
 export type FeatureComponentProps = {

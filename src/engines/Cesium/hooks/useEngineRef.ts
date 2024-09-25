@@ -268,6 +268,21 @@ export default function useEngineRef(
           new Cesium.Cartesian2(windowPosition[0], windowPosition[1]),
         );
       },
+      getExtrudedPoint: (position, extrudedHeight) => {
+        if (!position || !extrudedHeight) return;
+        const viewer = cesium.current?.cesiumElement;
+        if (!viewer || viewer.isDestroyed()) return;
+        const point = new Cesium.Cartesian3(position[0], position[1], position[2]);
+        const cartesianScratch = new Cesium.Cartesian3();
+        const normal = viewer.scene?.globe.ellipsoid.geodeticSurfaceNormal(point, cartesianScratch);
+        if (!normal) return;
+        const extrudedPoint = Cesium.Cartesian3.add(
+          point,
+          Cesium.Cartesian3.multiplyByScalar(normal, extrudedHeight, cartesianScratch),
+          cartesianScratch,
+        );
+        return [extrudedPoint.x, extrudedPoint.y, extrudedPoint.z];
+      },
       getSurfaceDistance: (point1, point2) => {
         const viewer = cesium.current?.cesiumElement;
         if (!viewer || viewer.isDestroyed()) return;
@@ -938,6 +953,27 @@ export default function useEngineRef(
         tickEventCallback.current = tickEventCallback.current.filter(c => c !== cb) || [];
       },
       tickEventCallback,
+      calcRectangleControlPoint: (p1: Position3d, p2: Position3d, p3: Position3d) => {
+        const pp1 = new Cesium.Cartesian3(...p1);
+        const pp2 = new Cesium.Cartesian3(...p2);
+        const pp3 = new Cesium.Cartesian3(...p3);
+        const cartesianScratch1 = new Cesium.Cartesian3();
+        const cartesianScratch2 = new Cesium.Cartesian3();
+        const projection = Cesium.Cartesian3.projectVector(
+          Cesium.Cartesian3.subtract(pp3, pp1, cartesianScratch1),
+          Cesium.Cartesian3.subtract(pp2, pp1, cartesianScratch2),
+          cartesianScratch1,
+        );
+        const offset = Cesium.Cartesian3.subtract(
+          pp3,
+          Cesium.Cartesian3.add(pp1, projection, cartesianScratch1),
+          cartesianScratch2,
+        );
+        const pp4 = Cesium.Cartesian3.midpoint(pp1, pp2, cartesianScratch1);
+        const pp5 = Cesium.Cartesian3.add(pp4, offset, cartesianScratch2);
+        const p5 = [pp5.x, pp5.y, pp5.z] as Position3d;
+        return [p1, p2, p5];
+      },
     };
   }, [cesium]);
 
