@@ -99,6 +99,7 @@ export default function ({
     disableShadow: false,
     rightClickToAbort: true,
     autoResetInteractionMode: true,
+    // NOTE: Centroid extrude is not finalized yet
     useCentroidExtrudedHeight: false,
   });
 

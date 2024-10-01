@@ -63,11 +63,6 @@ export const ExtrudedPolygonEntity: FC<ExtrudedPolygonEntityProps> = ({
         material: new ColorMaterialProperty(isEditing ? color?.withAlpha(0.2) : color),
         classificationType: ClassificationType.TERRAIN,
         shadows: disableShadow ? ShadowMode.DISABLED : ShadowMode.ENABLED,
-
-        // heightReference: HeightReference.NONE,
-        // ...(enableRelativeHeight
-        //   ? { height: 0, heightReference: HeightReference.RELATIVE_TO_TERRAIN }
-        //   : undefined),
       },
     }),
     [extrudedHeight, disableShadow, hierarchy, color, isEditing],

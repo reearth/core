@@ -48,10 +48,6 @@ const ExtrudedControlPoints: FC<ExtrudedControlPointsProps> = memo(
       ? new Cartesian3(...extrudeControlPointPosition)
       : undefined;
 
-    // get extruded point
-    // height is extrudedHeight
-    // const extrudedBasePoint = heightBasePoint;
-
     return (
       <>
         {extrudedPoint && (

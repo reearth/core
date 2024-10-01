@@ -30,30 +30,6 @@ const SurfaceControlPoints: FC<SurfaceControlPointsProps> = memo(
     handleControlPointMouseEvent,
   }) => {
     const measurements: { points: [Cartesian3, Cartesian3]; showLine: boolean }[] = [];
-    // let measurementPoints: [Cartesian3, Cartesian3] | undefined;
-
-    // if ((type === "rectangle" || type === "extrudedRectangle") && controlPoints.length >= 3) {
-    //   const [p1, p2, p3] = controlPoints;
-    //   // const projection = Cartesian3.projectVector(
-    //   //   Cartesian3.subtract(p3, p1, cartesianScratch1),
-    //   //   Cartesian3.subtract(p2, p1, cartesianScratch2),
-    //   //   cartesianScratch1,
-    //   // );
-    //   // const offset = Cartesian3.subtract(
-    //   //   p3,
-    //   //   Cartesian3.add(p1, projection, cartesianScratch1),
-    //   //   cartesianScratch2,
-    //   // );
-    //   // const p4 = Cartesian3.midpoint(p1, p2, cartesianScratch1);
-    //   // const p5 = Cartesian3.add(p4, offset, cartesianScratch2);
-    //   // controlPoints = [p1, p2, p5];
-    //   const p4 = Cartesian3.midpoint(p1, p2, cartesianScratch1);
-    //   measurements.push({ points: [p4, p3], showLine: true });
-
-    //   if (isEditing) {
-    //     measurements.push({ points: [p1, p2], showLine: false });
-    //   }
-    // } else
 
     if (controlPoints.length >= 2) {
       if (isEditing) {
@@ -126,16 +102,6 @@ const SurfaceControlPoints: FC<SurfaceControlPointsProps> = memo(
               break;
           }
         }
-        // for (let i = 0; i < controlPoints.length - 1; i++) {
-        //   measurementPoints = controlPoints.slice(i, i + 2) as [Cartesian3, Cartesian3];
-        //   measurements.push({ points: measurementPoints, showLine: type === "circle" });
-        // }
-        // if (type === "polygon") {
-        //   measurements.push({
-        //     points: [controlPoints[0], controlPoints[controlPoints.length - 1]],
-        //     showLine: false,
-        //   });
-        // }
       } else {
         switch (type) {
           case "rectangle" || "extrudedRectangle":

@@ -18,26 +18,19 @@ import {
 type Props = {
   state: sketchState;
   send: SketchInterpreter["send"];
-
   engineRef: RefObject<EngineRef>;
   disableInteraction: boolean;
-
   type: SketchType | undefined;
   updateType: Dispatch<SetStateAction<SketchType | undefined>>;
-
   geometryOptions: GeometryOptionsXYZ | null;
   setGeometryOptions: Dispatch<SetStateAction<GeometryOptionsXYZ | null>>;
   updateGeometryOptions: (controlPoint?: Position3d) => void;
-
   sketchEditingFeature?: SketchEditingFeature;
   setSelectedControlPointIndex: Dispatch<SetStateAction<number | undefined>>;
-
   markerGeometryRef: MutableRefObject<GeometryOptionsXYZ | null>;
   pointerLocationRef: MutableRefObject<[lng: number, lat: number, height: number] | undefined>;
-
   extrudedHeight: number;
   setExtrudedHeight: (height: number) => void;
-
   setExtrudedPoint: (point: Position3d | undefined) => void;
   updateCentroidPoints: (controlPoints: Position3d[]) => void;
   createFeature: () => Feature<
