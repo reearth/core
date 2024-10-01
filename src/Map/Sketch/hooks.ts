@@ -54,6 +54,8 @@ type Props = {
   onSketchPluginFeatureCreate?: (props: SketchEventProps) => void;
   onSketchFeatureUpdate?: (feature: SketchFeature) => void;
   onSketchPluginFeatureUpdate?: (props: SketchEventProps) => void;
+  onSketchFeatureDelete?: (layerId: string, featureId: string) => void;
+  onSketchPluginFeatureDelete?: (props: { layerId: string; featureId: string }) => void;
   onLayerSelect?: OnLayerSelectType;
   sketchEditingFeature?: SketchEditingFeature;
   onSketchEditFeature?: (feature: SketchEditingFeature | undefined) => void;
@@ -76,6 +78,8 @@ export default function ({
   onSketchPluginFeatureCreate,
   onSketchFeatureUpdate,
   onSketchPluginFeatureUpdate,
+  onSketchFeatureDelete,
+  onSketchPluginFeatureDelete,
   onLayerSelect,
   sketchEditingFeature,
   onSketchEditFeature,
@@ -216,7 +220,9 @@ export default function ({
     pluginSketchLayerFeatureRemove,
     onSketchPluginFeatureCreate,
     onSketchPluginFeatureUpdate,
+    onSketchPluginFeatureDelete,
     onSketchFeatureUpdate,
+    onSketchFeatureDelete,
     onLayerSelect,
   });
 

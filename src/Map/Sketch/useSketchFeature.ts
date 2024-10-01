@@ -43,8 +43,10 @@ type Props = {
   pluginSketchLayerFeatureRemove: (layer: LazyLayer, featureId: string) => void;
   onSketchFeatureCreate?: (feature: SketchFeature | null) => void;
   onSketchFeatureUpdate?: (feature: SketchFeature) => void;
+  onSketchFeatureDelete?: (layerId: string, featureId: string) => void;
   onSketchPluginFeatureCreate?: (props: SketchEventProps) => void;
   onSketchPluginFeatureUpdate?: (props: SketchEventProps) => void;
+  onSketchPluginFeatureDelete?: (props: { layerId: string; featureId: string }) => void;
   onLayerSelect?: OnLayerSelectType;
 };
 
@@ -60,7 +62,9 @@ export default ({
   pluginSketchLayerFeatureRemove,
   onSketchPluginFeatureCreate,
   onSketchPluginFeatureUpdate,
+  onSketchPluginFeatureDelete,
   onSketchFeatureUpdate,
+  onSketchFeatureDelete,
   onLayerSelect,
 }: Props) => {
   const handleFeatureCreate = useCallback(
@@ -164,7 +168,7 @@ export default ({
   const handleFeatureDelete = useCallback(
     (layerId: string, featureId: string) => {
       if (from === "editor" && sketchOptions.dataOnly) {
-        // onSketchFeatureDelete?.(layerId, featureId);
+        onSketchFeatureDelete?.(layerId, featureId);
         return;
       }
 
@@ -173,12 +177,17 @@ export default ({
         if (!layer) return;
         pluginSketchLayerFeatureRemove(layer, featureId);
         layersRef.current?.selectFeatures([]);
-        // onSketchPluginFeatureDelete(layerId, featureId);
-      } else {
-        // onSketchPluginFeatureDelete(layerId, featureId);
       }
+      onSketchPluginFeatureDelete?.({ layerId, featureId });
     },
-    [from, sketchOptions.dataOnly, layersRef, pluginSketchLayerFeatureRemove],
+    [
+      from,
+      sketchOptions.dataOnly,
+      layersRef,
+      pluginSketchLayerFeatureRemove,
+      onSketchFeatureDelete,
+      onSketchPluginFeatureDelete,
+    ],
   );
 
   return {

@@ -70,6 +70,8 @@ function MapFn(
     onSketchPluginFeatureCreate,
     onSketchFeatureUpdate,
     onSketchPluginFeatureUpdate,
+    onSketchFeatureDelete,
+    onSketchPluginFeatureDelete,
     featureFlags = INTERACTION_MODES.default,
     onMount,
     onAPIReady,
@@ -159,6 +161,8 @@ function MapFn(
         onSketchPluginFeatureCreate={onSketchPluginFeatureCreate}
         onSketchFeatureUpdate={onSketchFeatureUpdate}
         onSketchPluginFeatureUpdate={onSketchPluginFeatureUpdate}
+        onSketchFeatureDelete={onSketchFeatureDelete}
+        onSketchPluginFeatureDelete={onSketchPluginFeatureDelete}
         sketchEditingFeature={sketchEditingFeature}
         onSketchEditFeature={setSketchEditingFeature}
         onMount={handleSketchMount}

@@ -214,6 +214,17 @@ export default function useHooks(
     onSketchPluginFeatureUpdateCallbacksRef.current.forEach(fn => fn(props));
   }, []);
 
+  const onSketchPluginFeatureDeleteCallbacksRef = useRef<SketchEventCallback[]>([]);
+  const onSketchPluginFeatureDelete = useCallback((cb: SketchEventCallback) => {
+    onSketchPluginFeatureDeleteCallbacksRef.current.push(cb);
+  }, []);
+  const handleSketchPluginFeatureDelete = useCallback(
+    (props: { layerId: string; featureId: string }) => {
+      onSketchPluginFeatureDeleteCallbacksRef.current.forEach(fn => fn(props));
+    },
+    [],
+  );
+
   const onSketchTypeChangeCallbacksRef = useRef<((type: SketchType | undefined) => void)[]>([]);
   const onSketchTypeChange = useCallback((cb: (type: SketchType | undefined) => void) => {
     onSketchTypeChangeCallbacksRef.current.push(cb);
@@ -265,6 +276,7 @@ export default function useHooks(
       handleInteractionModeChange: changeInteractionMode,
       onSketchPluginFeatureCreate,
       onSketchPluginFeatureUpdate,
+      onSketchPluginFeatureDelete,
       onSketchTypeChange,
       onLayerVisibility,
       onLayerLoad,
@@ -283,6 +295,7 @@ export default function useHooks(
       onLayerEdit,
       onSketchPluginFeatureCreate,
       onSketchPluginFeatureUpdate,
+      onSketchPluginFeatureDelete,
       onSketchTypeChange,
       onLayerVisibility,
       onLayerLoad,
@@ -324,6 +337,7 @@ export default function useHooks(
     handleInteractionModeChange: changeInteractionMode,
     handleSketchPluginFeatureCreate,
     handleSketchPluginFeatureUpdate,
+    handleSketchPluginFeatureDelete,
     handleSketchTypeChange,
     handleLayerVisibility,
     handleLayerLoad,

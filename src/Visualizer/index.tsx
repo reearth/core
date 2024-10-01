@@ -59,6 +59,7 @@ export type CoreVisualizerProps = {
   onSketchTypeChangeProp?: (type: SketchType | undefined) => void;
   onSketchFeatureCreate?: (feature: SketchFeature | null) => void;
   onSketchFeatureUpdate?: (feature: SketchFeature | null) => void;
+  onSketchFeatureDelete?: (layerId: string, featureId: string) => void;
   onInteractionModeChange?: (mode: InteractionModeType) => void;
   onAPIReady?: () => void;
 };
@@ -93,6 +94,7 @@ export const CoreVisualizer = memo(
         onSketchTypeChangeProp,
         onSketchFeatureCreate,
         onSketchFeatureUpdate,
+        onSketchFeatureDelete,
         onAPIReady,
       },
       ref: Ref<MapRef | null>,
@@ -117,6 +119,7 @@ export const CoreVisualizer = memo(
         handleInteractionModeChange,
         handleSketchPluginFeatureCreate,
         handleSketchPluginFeatureUpdate,
+        handleSketchPluginFeatureDelete,
         handleSketchTypeChange,
         handleLayerVisibility,
         handleLayerLoad,
@@ -178,6 +181,8 @@ export const CoreVisualizer = memo(
                 onSketchPluginFeatureCreate={handleSketchPluginFeatureCreate}
                 onSketchFeatureUpdate={onSketchFeatureUpdate}
                 onSketchPluginFeatureUpdate={handleSketchPluginFeatureUpdate}
+                onSketchFeatureDelete={onSketchFeatureDelete}
+                onSketchPluginFeatureDelete={handleSketchPluginFeatureDelete}
                 onSketchTypeChange={handleSketchTypeChange}
                 onMount={onMount}
                 onLayerVisibility={handleLayerVisibility}

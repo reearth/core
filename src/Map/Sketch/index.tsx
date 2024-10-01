@@ -37,6 +37,8 @@ export type SketchProps = {
   onSketchPluginFeatureCreate?: (props: SketchEventProps) => void;
   onSketchFeatureUpdate?: (feature: SketchFeature | null) => void;
   onSketchPluginFeatureUpdate?: (props: SketchEventProps) => void;
+  onSketchFeatureDelete?: (layerId: string, featureId: string) => void;
+  onSketchPluginFeatureDelete?: (props: { layerId: string; featureId: string }) => void;
   onLayerSelect?: OnLayerSelectType;
   sketchEditingFeature?: SketchEditingFeature;
   onSketchEditFeature?: (feature: SketchEditingFeature | undefined) => void;
@@ -56,6 +58,8 @@ const Sketch: ForwardRefRenderFunction<SketchRef, SketchProps> = (
     onSketchPluginFeatureCreate,
     onSketchFeatureUpdate,
     onSketchPluginFeatureUpdate,
+    onSketchFeatureDelete,
+    onSketchPluginFeatureDelete,
     onLayerSelect,
     sketchEditingFeature,
     onSketchEditFeature,
@@ -90,6 +94,8 @@ const Sketch: ForwardRefRenderFunction<SketchRef, SketchProps> = (
     onSketchPluginFeatureCreate,
     onSketchFeatureUpdate,
     onSketchPluginFeatureUpdate,
+    onSketchFeatureDelete,
+    onSketchPluginFeatureDelete,
     onLayerSelect,
     sketchEditingFeature,
     onSketchEditFeature,

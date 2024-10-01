@@ -27,6 +27,7 @@ type CoreContext = {
   handleInteractionModeChange?: (mode?: InteractionModeType | undefined) => void;
   onSketchPluginFeatureCreate?: (cb: SketchEventCallback) => void;
   onSketchPluginFeatureUpdate?: (cb: SketchEventCallback) => void;
+  onSketchPluginFeatureDelete?: (cb: SketchEventCallback) => void;
   onSketchTypeChange?: (cb: (type: SketchType | undefined) => void) => void;
   onLayerVisibility?: (cb: (e: LayerVisibilityEvent) => void) => void;
   onLayerLoad?: (cb: (e: LayerLoadEvent) => void) => void;
