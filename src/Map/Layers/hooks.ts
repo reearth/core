@@ -268,7 +268,7 @@ export default function useHooks({
       const rawLayer = compat(layer);
       if (!rawLayer) return;
 
-      const newLayer = { ...rawLayer, id: uuidv4(), isTempLayer: true };
+      const newLayer = { ...rawLayer, id: uuidv4() };
 
       // generate ids for layers and blocks
       walkLayers([newLayer], l => {
