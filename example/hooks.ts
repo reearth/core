@@ -10,7 +10,7 @@ import {
 } from "@reearth/core";
 
 import { DEFAULT_CAMERA, DEFAULT_LAYERS, DEFAULT_TILE } from "./constants";
-import { VIEWER } from "./scene";
+import { DEFAULT_VIEWER_PROPERTY } from "./scene";
 import { TEST_LAYERS } from "./testLayers";
 import { CESIUM_ION_ACCESS_TOKEN } from "./token";
 
@@ -53,19 +53,20 @@ export default () => {
 
   const viewerProperty: ViewerProperty = useMemo(
     () => ({
-      ...VIEWER,
+      ...DEFAULT_VIEWER_PROPERTY,
       tiles: [
         {
-          id: "asdflajslf",
+          id: "default",
           type: currentTile,
           opacity: 1,
         },
       ],
       terrain: {
-        ...VIEWER.terrain,
+        ...DEFAULT_VIEWER_PROPERTY.terrain,
         enabled: terrainEnabled,
       },
       globe: {
+        ...DEFAULT_VIEWER_PROPERTY.globe,
         depthTestAgainstTerrain: hideUnderground,
       },
     }),

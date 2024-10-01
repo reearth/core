@@ -48,13 +48,7 @@ const TILE_LABELS: ViewerProperty["tileLabels"] = [
   },
 ];
 
-export const VIEWER: ViewerProperty = {
-  tiles: [
-    {
-      id: "default",
-      type: "open_street_map",
-    },
-  ],
+export const DEFAULT_VIEWER_PROPERTY: ViewerProperty = {
   tileLabels: TILE_LABELS,
   globe: {
     enableLighting: true,
