@@ -1,7 +1,5 @@
 import { useEffect, useRef } from "react";
 
-export const PLUGIN_LAYER_ID_LENGTH = 36;
-
 export function useWindowEvent<K extends keyof WindowEventMap>(
   eventName: K,
   callback: (event: WindowEventMap[K]) => void,

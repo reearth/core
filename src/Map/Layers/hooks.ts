@@ -35,6 +35,7 @@ export type { Layer, NaiveLayer } from "../../mantle";
  */
 export type LazyLayer = Readonly<Layer> & {
   computed?: Readonly<ComputedLayer>;
+  isTempLayer?: boolean;
   // compat
   pluginId?: string;
   extensionId?: string;
@@ -53,6 +54,7 @@ export type Ref = {
   deleteLayer: (...ids: string[]) => void;
   isLayer: (obj: any) => obj is LazyLayer;
   isComputedLayer: (obj: any) => obj is ComputedLayer;
+  isTempLayer: (layerId?: string) => boolean;
   layers: () => LazyLayer[];
   walk: <T>(
     fn: (layer: LazyLayer, index: number, parents: LazyLayer[]) => T | void,
@@ -266,7 +268,7 @@ export default function useHooks({
       const rawLayer = compat(layer);
       if (!rawLayer) return;
 
-      const newLayer = { ...rawLayer, id: uuidv4() };
+      const newLayer = { ...rawLayer, id: uuidv4(), isTempLayer: true };
 
       // generate ids for layers and blocks
       walkLayers([newLayer], l => {
@@ -458,6 +460,13 @@ export default function useHooks({
     [lazyLayerPrototype],
   );
 
+  const isTempLayer = useCallback(
+    (layerId?: string) => {
+      return tempLayersRef.current.some(l => l.id === layerId);
+    },
+    [tempLayersRef],
+  );
+
   const isComputedLayer = useCallback(
     (obj: any): obj is ComputedLayer => {
       return typeof obj === "object" && Object.getPrototypeOf(obj) === lazyComputedLayerPrototype;
@@ -562,6 +571,7 @@ export default function useHooks({
       findByIds,
       isLayer,
       isComputedLayer,
+      isTempLayer,
       layers: rootLayers,
       walk,
       find,
@@ -587,6 +597,7 @@ export default function useHooks({
       findByIds,
       isLayer,
       isComputedLayer,
+      isTempLayer,
       rootLayers,
       walk,
       find,

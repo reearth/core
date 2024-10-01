@@ -18,7 +18,6 @@ export interface SurfaceControlPointsProps {
 }
 
 const cartesianScratch1 = new Cartesian3();
-// const cartesianScratch2 = new Cartesian3();
 
 const SurfaceControlPoints: FC<SurfaceControlPointsProps> = memo(
   ({

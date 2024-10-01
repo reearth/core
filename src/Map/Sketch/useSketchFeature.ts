@@ -4,7 +4,6 @@ import { LazyLayer } from "../Layers";
 import { LayersRef } from "../types";
 
 import { SketchEventProps, SketchFeature, SketchOptions, SketchType } from "./types";
-import { PLUGIN_LAYER_ID_LENGTH } from "./utils";
 
 import { OnLayerSelectType } from ".";
 
@@ -78,8 +77,8 @@ export default ({
       if (!sketchOptions.dataOnly) {
         const selectedLayer = layersRef.current?.selectedLayer();
         const { layerId, featureId } =
-          selectedLayer?.id?.length !== PLUGIN_LAYER_ID_LENGTH ||
-          selectedLayer.type !== "simple" ||
+          !layersRef?.current?.isTempLayer(selectedLayer?.id) ||
+          selectedLayer?.type !== "simple" ||
           selectedLayer.computed?.layer.type !== "simple"
             ? pluginSketchLayerCreate(feature)
             : pluginSketchLayerFeatureAdd(selectedLayer, feature);

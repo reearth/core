@@ -34,7 +34,7 @@ import {
 import usePluginSketchLayer from "./usePluginSketchLayer";
 import useSketch from "./useSketch";
 import useSketchFeature from "./useSketchFeature";
-import { PLUGIN_LAYER_ID_LENGTH, useWindowEvent } from "./utils";
+import { useWindowEvent } from "./utils";
 
 import { OnLayerSelectType } from ".";
 
@@ -336,7 +336,7 @@ export default function ({
         updateGeometryOptions(controlPoint);
       } else if (event.key === "Delete" && state.matches("idle") && selectedFeature?.id) {
         const selectedLayer = layersRef.current?.selectedLayer();
-        if (selectedLayer?.id?.length === PLUGIN_LAYER_ID_LENGTH) {
+        if (selectedLayer && layersRef.current?.isTempLayer(selectedLayer?.id)) {
           pluginSketchLayerFeatureRemove(selectedLayer, selectedFeature.id);
         }
       }
