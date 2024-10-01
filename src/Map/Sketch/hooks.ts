@@ -266,11 +266,17 @@ export default function ({
     [engineRef, state, onSketchEditFeature, send],
   );
 
-  const cancelEdit = useCallback(() => {
-    send({ type: "EXIT_EDIT" });
-    updateGeometryOptions(undefined);
-    onSketchEditFeature?.(undefined);
-  }, [onSketchEditFeature, send, updateGeometryOptions]);
+  const cancelEdit = useCallback(
+    (ignoreAutoReSelect?: boolean) => {
+      send({ type: "EXIT_EDIT" });
+      updateGeometryOptions(undefined);
+      onSketchEditFeature?.(undefined);
+      if (ignoreAutoReSelect) {
+        ignoreAutoReSelectRef.current = true;
+      }
+    },
+    [onSketchEditFeature, send, updateGeometryOptions],
+  );
 
   const applyEdit = useCallback(() => {
     if (sketchEditingFeature) {
@@ -407,6 +413,8 @@ export default function ({
     [state.context.catchedExtrudedPoint],
   );
 
+  const ignoreAutoReSelectRef = useRef(false);
+
   useEffect(() => {
     onEditFeatureChangeCbs.current.forEach(cb => {
       cb(sketchEditingFeature);
@@ -414,6 +422,10 @@ export default function ({
     if (sketchEditingFeature) lastSketchEditingFeature.current = sketchEditingFeature;
     else {
       // Select the feature after editing
+      if (ignoreAutoReSelectRef.current) {
+        ignoreAutoReSelectRef.current = false;
+        return;
+      }
       layersRef.current?.selectFeatures([
         {
           layerId: undefined,
