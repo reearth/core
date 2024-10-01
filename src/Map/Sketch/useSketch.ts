@@ -7,6 +7,7 @@ import { Position3d } from "../../types";
 import { EngineRef, MouseEventCallback, MouseEventProps } from "../types";
 
 import { SketchInterpreter, sketchState } from "./hooks";
+import { Typegen0 } from "./sketchMachine.typegen";
 import {
   GeometryOptionsXYZ,
   SketchEditingFeature,
@@ -49,7 +50,7 @@ type Props = {
   sketchOptions: SketchOptions;
 };
 
-const movingStatus = [
+const movingStatus: Typegen0["matchesStates"][] = [
   "editing.marker.moving",
   "editing.polyline.moving",
   "editing.polygon.moving",
