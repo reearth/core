@@ -29,7 +29,7 @@
   "peerDependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "cesium": "1.116.x"
+    "cesium": "1.122.0"
   },
   "dependencies": {
     "@reearth/cesium-mvt-imagery-provider": "1.5.4",
@@ -95,7 +95,7 @@
     "@typescript-eslint/eslint-plugin": "7.2.0",
     "@typescript-eslint/parser": "7.2.0",
     "@vitejs/plugin-react": "4.2.1",
-    "cesium": "1.118.0",
+    "cesium": "1.122.0",
     "eslint": "8.57.0",
     "eslint-config-reearth": "0.3.0",
     "eslint-plugin-react-hooks": "4.6.0",
