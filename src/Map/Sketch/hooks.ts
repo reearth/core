@@ -8,22 +8,16 @@ import {
   useCallback,
   useEffect,
   useImperativeHandle,
+  useMemo,
   useRef,
   useState,
 } from "react";
-import invariant from "tiny-invariant";
 import { v4 as uuidv4 } from "uuid";
+import { InterpreterFrom, StateFrom } from "xstate";
 
+import { ControlPointMouseEventHandler } from "../../engines/Cesium/Sketch";
 import { InteractionModeType } from "../../Visualizer/interactionMode";
-import { LayerSimple, LazyLayer } from "../Layers";
-import {
-  Feature,
-  EngineRef,
-  LayersRef,
-  MouseEventCallback,
-  MouseEventProps,
-  SketchRef,
-} from "../types";
+import { Feature, EngineRef, LayersRef, SketchRef } from "../types";
 import { useGet } from "../utils";
 
 import { PRESET_APPEARANCE, PRESET_COLOR } from "./preset";
@@ -34,7 +28,12 @@ import {
   SketchFeature,
   SketchEventProps,
   SketchOptions,
+  SketchEditingFeature,
+  SketchEditFeatureChangeCb,
 } from "./types";
+import usePluginSketchLayer from "./usePluginSketchLayer";
+import useSketch from "./useSketch";
+import useSketchFeature from "./useSketchFeature";
 import { useWindowEvent } from "./utils";
 
 import { OnLayerSelectType } from ".";
@@ -53,14 +52,22 @@ type Props = {
   onSketchTypeChange?: (type: SketchType | undefined, from?: "editor" | "plugin") => void;
   onSketchFeatureCreate?: (feature: SketchFeature | null) => void;
   onSketchPluginFeatureCreate?: (props: SketchEventProps) => void;
+  onSketchFeatureUpdate?: (feature: SketchFeature) => void;
+  onSketchPluginFeatureUpdate?: (props: SketchEventProps) => void;
+  onSketchFeatureDelete?: (layerId: string, featureId: string) => void;
+  onSketchPluginFeatureDelete?: (props: { layerId: string; featureId: string }) => void;
   onLayerSelect?: OnLayerSelectType;
+  sketchEditingFeature?: SketchEditingFeature;
+  onSketchEditFeature?: (feature: SketchEditingFeature | undefined) => void;
+  onMount?: () => void;
 };
-
-const PLUGIN_LAYER_ID_LENGTH = 36;
 
 const sketchMachine = createSketchMachine();
 
-export default function useHooks({
+export type sketchState = StateFrom<typeof sketchMachine>;
+export type SketchInterpreter = InterpreterFrom<typeof sketchMachine>;
+
+export default function ({
   ref,
   engineRef,
   layersRef,
@@ -69,11 +76,24 @@ export default function useHooks({
   onSketchTypeChange,
   onSketchFeatureCreate,
   onSketchPluginFeatureCreate,
+  onSketchFeatureUpdate,
+  onSketchPluginFeatureUpdate,
+  onSketchFeatureDelete,
+  onSketchPluginFeatureDelete,
   onLayerSelect,
+  sketchEditingFeature,
+  onSketchEditFeature,
+  onMount,
 }: Props) {
   const [state, send] = useMachine(sketchMachine);
   const [type, updateType] = useState<SketchType | undefined>();
   const [from, updateFrom] = useState<"editor" | "plugin">("editor");
+
+  const setType = useCallback((type: SketchType | undefined, from?: "editor" | "plugin") => {
+    updateType(type);
+    updateFrom(from ?? "editor");
+  }, []);
+
   const [disableInteraction, setDisableInteraction] = useState(false);
 
   const [sketchOptions, setSketchOptions] = useState<SketchOptions>({
@@ -81,9 +101,10 @@ export default function useHooks({
     appearance: PRESET_APPEARANCE,
     dataOnly: false,
     disableShadow: false,
-    enableRelativeHeight: false,
     rightClickToAbort: true,
     autoResetInteractionMode: true,
+    // NOTE: Centroid extrude is not finalized yet
+    useCentroidExtrudedHeight: false,
   });
 
   const overrideOptions = useCallback((options: SketchOptions) => {
@@ -96,13 +117,16 @@ export default function useHooks({
 
   const [geometryOptions, setGeometryOptions] = useState<GeometryOptionsXYZ | null>(null);
   const [extrudedHeight, setExtrudedHeight] = useState(0);
+  const [extrudedPoint, setExtrudedPoint] = useState<Position3d | undefined>();
+
+  const [centroidBasePoint, setCentroidBasePoint] = useState<Position3d | undefined>();
+  const [centroidExtrudedPoint, setCentroidExtrudedPoint] = useState<Position3d | undefined>();
+
+  const [selectedControlPointIndex, setSelectedControlPointIndex] = useState<number | undefined>();
   const markerGeometryRef = useRef<GeometryOptionsXYZ | null>(null);
   const pointerLocationRef = useRef<[lng: number, lat: number, height: number]>();
 
-  const setType = useCallback((type: SketchType | undefined, from?: "editor" | "plugin") => {
-    updateType(type);
-    updateFrom(from ?? "editor");
-  }, []);
+  const isEditing = useMemo(() => state.matches("editing"), [state]);
 
   const createFeature = useCallback(() => {
     const geoOptions = type === "marker" ? markerGeometryRef.current : geometryOptions;
@@ -121,9 +145,26 @@ export default function useHooks({
     });
   }, [extrudedHeight, geometryOptions, markerGeometryRef, type, engineRef]);
 
+  const updateFeature = useCallback(() => {
+    if (geometryOptions == null || !selectedFeature?.id) {
+      return null;
+    }
+    const geometry = engineRef.current?.createGeometry(geometryOptions);
+    if (geometry == null) {
+      return null;
+    }
+    return feature(geometry, {
+      id: selectedFeature?.id,
+      type: geometryOptions?.type,
+      positions: geometryOptions?.controlPoints,
+      extrudedHeight,
+    });
+  }, [extrudedHeight, geometryOptions, selectedFeature, engineRef]);
+
   const updateGeometryOptions = useCallback(
     (controlPoint?: Position3d) => {
       setExtrudedHeight(0);
+      setExtrudedPoint(undefined);
       if (state.context.type == null || state.context.controlPoints == null) {
         setGeometryOptions(null);
         return;
@@ -139,396 +180,155 @@ export default function useHooks({
     [state, setGeometryOptions, setExtrudedHeight],
   );
 
-  const pluginSketchLayerCreate = useCallback(
-    (feature: SketchFeature) => {
-      const newLayer = layersRef.current?.add({
-        type: "simple",
-        data: {
-          type: "geojson",
-          isSketchLayer: true,
-          value: {
-            type: "FeatureCollection",
-            features: [{ ...feature, id: feature.properties.id }],
-          },
-        },
-        ...sketchOptions.appearance,
-      });
-      return { layerId: newLayer?.id, featureId: feature.properties.id };
+  const updateGeometryOptionsRef = useRef(updateGeometryOptions);
+  updateGeometryOptionsRef.current = updateGeometryOptions;
+
+  const updateCentroidPoints = useCallback(
+    async (controlPoints: Position3d[]) => {
+      const newExtrudeBasePoint = await getCentroid(controlPoints, engineRef);
+      setCentroidBasePoint(newExtrudeBasePoint);
+
+      if (!newExtrudeBasePoint) return;
+      const centroidExtrudedPoint = engineRef.current?.getExtrudedPoint(
+        newExtrudeBasePoint,
+        extrudedHeight,
+      );
+      setCentroidExtrudedPoint(centroidExtrudedPoint);
     },
-    [layersRef, sketchOptions.appearance],
+    [engineRef, extrudedHeight],
   );
 
-  const pluginSketchLayerFeatureAdd = useCallback(
-    (layer: LazyLayer, feature: SketchFeature) => {
-      if (layer.type !== "simple") return {};
-      layersRef.current?.override(layer.id, {
-        data: {
-          ...layer.data,
-          type: "geojson",
-          value: {
-            type: "FeatureCollection",
-            features: [
-              ...((layer.computed?.layer as LayerSimple)?.data?.value?.features ?? []),
-              { ...feature, id: feature.properties.id },
-            ],
-          },
-        },
-      });
-      return { layerId: layer.id, featureId: feature.properties.id };
-    },
-    [layersRef],
-  );
+  const {
+    pluginSketchLayerCreate,
+    pluginSketchLayerFeatureAdd,
+    pluginSketchLayerFeatureUpdate,
+    pluginSketchLayerFeatureRemove,
+  } = usePluginSketchLayer({
+    layersRef,
+    sketchOptions,
+  });
 
-  const pluginSketchLayerFeatureRemove = useCallback(
-    (layer: LazyLayer, featureId: string) => {
-      if (layer.type !== "simple" || layer.computed?.layer.type !== "simple") return;
-      layersRef.current?.override(layer.id, {
-        data: {
-          ...layer.data,
-          type: "geojson",
-          value: {
-            type: "FeatureCollection",
-            features: [
-              ...(layer.computed?.layer?.data?.value?.features ?? []).filter(
-                (feature: GeojsonFeature) => feature.id !== featureId,
-              ),
-            ],
-          },
-        },
-      });
-    },
-    [layersRef],
-  );
+  const { handleFeatureCreate, handleFeatureUpdate, handleFeatureDelete } = useSketchFeature({
+    layersRef,
+    sketchOptions,
+    from,
+    updateType,
+    onSketchFeatureCreate,
+    pluginSketchLayerCreate,
+    pluginSketchLayerFeatureAdd,
+    pluginSketchLayerFeatureUpdate,
+    pluginSketchLayerFeatureRemove,
+    onSketchPluginFeatureCreate,
+    onSketchPluginFeatureUpdate,
+    onSketchPluginFeatureDelete,
+    onSketchFeatureUpdate,
+    onSketchFeatureDelete,
+    onLayerSelect,
+  });
 
-  const handleFeatureCreate = useCallback(
-    (feature: SketchFeature) => {
-      if (sketchOptions.autoResetInteractionMode) {
-        updateType(undefined);
-      }
+  const editFeature = useCallback(
+    (feature: SketchEditingFeature | undefined) => {
+      onSketchEditFeature?.(feature);
 
-      if (from === "editor") {
-        onSketchFeatureCreate?.(feature);
-        return;
-      }
+      if (!state.matches("idle") || !feature) return;
 
-      if (!sketchOptions.dataOnly) {
-        const selectedLayer = layersRef.current?.selectedLayer();
-        const { layerId, featureId } =
-          selectedLayer?.id?.length !== PLUGIN_LAYER_ID_LENGTH ||
-          selectedLayer.type !== "simple" ||
-          selectedLayer.computed?.layer.type !== "simple"
-            ? pluginSketchLayerCreate(feature)
-            : pluginSketchLayerFeatureAdd(selectedLayer, feature);
-
-        if (layerId && featureId) {
-          requestAnimationFrame(() => {
-            onLayerSelect?.(
-              layerId,
-              featureId,
-              layerId
-                ? () =>
-                    new Promise(resolve => {
-                      // Wait until computed feature is ready
-                      queueMicrotask(() => {
-                        resolve(layersRef.current?.findById?.(layerId)?.computed);
-                      });
-                    })
-                : undefined,
-              undefined,
-              undefined,
-            );
-          });
-          onSketchPluginFeatureCreate?.({ layerId, featureId, feature });
-        }
-      } else {
-        onSketchPluginFeatureCreate?.({ feature });
-      }
-    },
-    [
-      layersRef,
-      from,
-      sketchOptions.dataOnly,
-      sketchOptions.autoResetInteractionMode,
-      pluginSketchLayerCreate,
-      pluginSketchLayerFeatureAdd,
-      onSketchFeatureCreate,
-      onSketchPluginFeatureCreate,
-      onLayerSelect,
-    ],
-  );
-
-  const handleLeftDown = useCallback(
-    (props: MouseEventProps) => {
-      if (
-        disableInteraction ||
-        !type ||
-        props.lng === undefined ||
-        props.lat === undefined ||
-        props.height === undefined ||
-        props.x === undefined ||
-        props.y === undefined
-      ) {
-        return;
-      }
-      if (!state.matches("idle")) {
-        return;
-      }
-      invariant(state.context.lastControlPoint == null);
-      const controlPoint = engineRef.current?.toXYZ(props.lng, props.lat, props.height);
-      if (controlPoint == null) {
-        return;
-      }
-
+      const type = feature?.feature?.properties?.type as SketchType;
       send({
         type: {
-          marker: "MARKER" as const,
-          polyline: "POLYLINE" as const,
-          circle: "CIRCLE" as const,
-          rectangle: "RECTANGLE" as const,
-          polygon: "POLYGON" as const,
-          extrudedCircle: "EXTRUDED_CIRCLE" as const,
-          extrudedRectangle: "EXTRUDED_RECTANGLE" as const,
-          extrudedPolygon: "EXTRUDED_POLYGON" as const,
+          marker: "EDIT_MARKER" as const,
+          polyline: "EDIT_POLYLINE" as const,
+          circle: "EDIT_CIRCLE" as const,
+          rectangle: "EDIT_RECTANGLE" as const,
+          polygon: "EDIT_POLYGON" as const,
+          extrudedCircle: "EDIT_EXTRUDED_CIRCLE" as const,
+          extrudedRectangle: "EDIT_EXTRUDED_RECTANGLE" as const,
+          extrudedPolygon: "EDIT_EXTRUDED_POLYGON" as const,
         }[type],
-        pointerPosition: [props.x, props.y],
-        controlPoint,
+        controlPoints: feature?.feature?.properties?.positions,
+        extrudedHeight: feature?.feature?.properties?.extrudedHeight,
       });
-      setGeometryOptions(null);
-      markerGeometryRef.current = null;
-    },
-    [state, disableInteraction, type, engineRef, send],
-  );
-
-  const handleMouseMove = useCallback(
-    (props: MouseEventProps) => {
-      if (
-        disableInteraction ||
-        props.lng === undefined ||
-        props.lat === undefined ||
-        props.height === undefined ||
-        props.x === undefined ||
-        props.y === undefined ||
-        !engineRef.current
-      ) {
-        return;
-      }
-      pointerLocationRef.current = [props.lng, props.lat, props.height];
-      if (state.matches("drawing")) {
-        invariant(state.context.type != null);
-        invariant(state.context.controlPoints != null);
-        const controlPoint = engineRef.current?.toXYZ(props.lng, props.lat, props.height);
-        if (
-          controlPoint == null ||
-          hasDuplicate(engineRef.current.equalsEpsilon3d, controlPoint, state.context.controlPoints)
-        ) {
-          return;
-        }
-        updateGeometryOptions(controlPoint);
-      } else if (state.matches("extruding")) {
-        invariant(state.context.lastControlPoint != null);
-        const extrudedHeight = engineRef.current?.getExtrudedHeight(
-          state.context.lastControlPoint,
-          [props.x, props.y],
+      setGeometryOptions({
+        type,
+        controlPoints: feature?.feature?.properties?.positions,
+      });
+      if (feature?.feature?.properties?.extrudedHeight) {
+        setExtrudedHeight(feature.feature.properties.extrudedHeight);
+        setExtrudedPoint(
+          engineRef.current?.getExtrudedPoint(
+            feature?.feature?.properties?.positions[
+              feature?.feature?.properties?.positions.length - 1
+            ],
+            feature.feature.properties.extrudedHeight,
+          ),
         );
-        if (extrudedHeight != null) {
-          setExtrudedHeight(extrudedHeight);
-        }
       }
     },
-    [disableInteraction, state, engineRef, updateGeometryOptions, setExtrudedHeight],
+    [engineRef, state, onSketchEditFeature, send],
   );
 
-  const handleLeftUp = useCallback(
-    (props: MouseEventProps) => {
-      if (
-        disableInteraction ||
-        props.lng === undefined ||
-        props.lat === undefined ||
-        props.height === undefined ||
-        props.x === undefined ||
-        props.y === undefined ||
-        !engineRef.current
-      ) {
-        return;
-      }
-      if (
-        state.context.controlPoints?.length === 1 &&
-        state.context.lastPointerPosition != null &&
-        state.context.type !== "marker" &&
-        engineRef.current?.equalsEpsilon2d(
-          [props.x, props.y],
-          state.context.lastPointerPosition,
-          0,
-          5,
-        )
-      ) {
-        return; // Too close to the first position user clicked.
-      }
-
-      if (state.matches("drawing")) {
-        const controlPoint = engineRef.current?.toXYZ(props.lng, props.lat, props.height);
-        if (controlPoint == null) return;
-
-        if (state.context.type === "marker") {
-          markerGeometryRef.current = {
-            type: state.context.type,
-            controlPoints: [controlPoint],
-          };
-          const feature = createFeature();
-          markerGeometryRef.current = null;
-          if (feature == null) {
-            return;
-          }
-          handleFeatureCreate(feature);
-          send({ type: "CREATE" });
-          setGeometryOptions(null);
-          return;
-        }
-        if (
-          hasDuplicate(
-            engineRef.current?.equalsEpsilon3d,
-            controlPoint,
-            state.context.controlPoints,
-          )
-        ) {
-          return;
-        }
-        if (
-          state.context.type === "circle" ||
-          (state.context.type === "rectangle" && state.context.controlPoints?.length === 2)
-        ) {
-          const feature = createFeature();
-          if (feature == null) {
-            return;
-          }
-          handleFeatureCreate(feature);
-          send({ type: "CREATE" });
-          setGeometryOptions(null);
-          return;
-        } else {
-          if (props.x === undefined || props.y === undefined) return;
-          send({
-            type: "NEXT",
-            pointerPosition: [props.x, props.y],
-            controlPoint,
-          });
-        }
-      } else if (state.matches("extruding")) {
-        const feature = createFeature();
-        if (feature == null) {
-          return;
-        }
-        handleFeatureCreate(feature);
-        send({ type: "CREATE" });
-        setGeometryOptions(null);
+  const cancelEdit = useCallback(
+    (ignoreAutoReSelect?: boolean) => {
+      send({ type: "EXIT_EDIT" });
+      updateGeometryOptions(undefined);
+      onSketchEditFeature?.(undefined);
+      if (ignoreAutoReSelect) {
+        ignoreAutoReSelectRef.current = true;
       }
     },
-    [
-      disableInteraction,
-      state,
-      engineRef,
-      send,
-      setGeometryOptions,
-      createFeature,
-      handleFeatureCreate,
-    ],
+    [onSketchEditFeature, send, updateGeometryOptions],
   );
 
-  const handleDoubleClick = useCallback(
-    (props: MouseEventProps) => {
-      if (
-        disableInteraction ||
-        props.lng === undefined ||
-        props.lat === undefined ||
-        props.height === undefined ||
-        props.x === undefined ||
-        props.y === undefined
-      ) {
-        return;
+  const applyEdit = useCallback(() => {
+    if (sketchEditingFeature) {
+      const feature = updateFeature();
+      if (feature) {
+        handleFeatureUpdate({ ...feature, id: feature.properties.id });
       }
-      if (state.matches("drawing.extrudedPolygon")) {
-        const controlPoint = engineRef.current?.toXYZ(props.lng, props.lat, props.height);
-        if (controlPoint == null) return;
-        send({
-          type: "EXTRUDE",
-          pointerPosition: [props.x, props.y],
-          controlPoint,
-        });
-      } else if (state.matches("drawing.polyline") || state.matches("drawing.polygon")) {
-        const feature = createFeature();
-        if (feature == null) {
-          return;
-        }
-        handleFeatureCreate(feature);
-        send({ type: "CREATE" });
-        setGeometryOptions(null);
-      }
-    },
-    [disableInteraction, state, engineRef, send, handleFeatureCreate, createFeature],
-  );
-
-  const handleRightClick = useCallback(() => {
-    if (!sketchOptions.rightClickToAbort) {
-      return;
     }
-    if (type !== undefined) {
-      updateType(undefined);
-    }
-    if (state.matches("idle")) return;
-    send({ type: "ABORT" });
+    send({ type: "EXIT_EDIT" });
     updateGeometryOptions(undefined);
-  }, [type, state, sketchOptions.rightClickToAbort, send, updateGeometryOptions]);
+    onSketchEditFeature?.(undefined);
+  }, [
+    sketchEditingFeature,
+    send,
+    updateGeometryOptions,
+    handleFeatureUpdate,
+    updateFeature,
+    onSketchEditFeature,
+  ]);
 
-  const mouseDownEventRef = useRef<MouseEventCallback>(handleLeftDown);
-  mouseDownEventRef.current = handleLeftDown;
-  const mouseMoveEventRef = useRef<MouseEventCallback>(handleMouseMove);
-  mouseMoveEventRef.current = handleMouseMove;
-  const mouseUpEventRef = useRef<MouseEventCallback>(handleLeftUp);
-  mouseUpEventRef.current = handleLeftUp;
-  const mouseDoubleClickEventRef = useRef<MouseEventCallback>(handleDoubleClick);
-  mouseDoubleClickEventRef.current = handleDoubleClick;
-  const mouseRightClickEventRef = useRef<() => void>(handleRightClick);
-  mouseRightClickEventRef.current = handleRightClick;
-
-  const onMouseDown = useCallback(
-    (props: MouseEventProps) => {
-      mouseDownEventRef.current?.(props);
+  const deleteFeature = useCallback(
+    (layerId: string, featureId: string) => {
+      handleFeatureDelete(layerId, featureId);
     },
-    [mouseDownEventRef],
+    [handleFeatureDelete],
   );
 
-  const onMouseMove = useCallback(
-    (props: MouseEventProps) => {
-      mouseMoveEventRef.current?.(props);
-    },
-    [mouseMoveEventRef],
-  );
-
-  const onMouseUp = useCallback(
-    (props: MouseEventProps) => {
-      mouseUpEventRef.current?.(props);
-    },
-    [mouseUpEventRef],
-  );
-
-  const onMouseDoubleClick = useCallback(
-    (props: MouseEventProps) => {
-      mouseDoubleClickEventRef.current?.(props);
-    },
-    [mouseDoubleClickEventRef],
-  );
-
-  const onMouseRightClick = useCallback(() => {
-    mouseRightClickEventRef.current?.();
-  }, [mouseRightClickEventRef]);
-
-  useEffect(() => {
-    engineRef.current?.onMouseDown(onMouseDown);
-    engineRef.current?.onMouseMove(onMouseMove);
-    engineRef.current?.onMouseUp(onMouseUp);
-    engineRef.current?.onDoubleClick(onMouseDoubleClick);
-    engineRef.current?.onRightClick(onMouseRightClick);
-  }, [engineRef, onMouseDown, onMouseMove, onMouseUp, onMouseDoubleClick, onMouseRightClick]);
+  useSketch({
+    state,
+    engineRef,
+    disableInteraction,
+    type,
+    updateType,
+    sketchEditingFeature,
+    setSelectedControlPointIndex,
+    send,
+    setGeometryOptions,
+    markerGeometryRef,
+    pointerLocationRef,
+    geometryOptions,
+    updateGeometryOptions,
+    extrudedHeight,
+    setExtrudedHeight,
+    setExtrudedPoint,
+    updateCentroidPoints,
+    createFeature,
+    handleFeatureCreate,
+    applyEdit,
+    cancelEdit,
+    isEditing,
+    sketchOptions,
+  });
 
   useWindowEvent("keydown", event => {
     if (type === undefined) return;
@@ -548,7 +348,7 @@ export default function useHooks({
         updateGeometryOptions(controlPoint);
       } else if (event.key === "Delete" && state.matches("idle") && selectedFeature?.id) {
         const selectedLayer = layersRef.current?.selectedLayer();
-        if (selectedLayer?.id?.length === PLUGIN_LAYER_ID_LENGTH) {
+        if (selectedLayer && layersRef.current?.isTempLayer(selectedLayer?.id)) {
           pluginSketchLayerFeatureRemove(selectedLayer, selectedFeature.id);
         }
       }
@@ -564,11 +364,11 @@ export default function useHooks({
   });
 
   useEffect(() => {
-    if (type === undefined) {
+    if (type === undefined && !sketchEditingFeature) {
       send({ type: "ABORT" });
-      updateGeometryOptions(undefined);
+      updateGeometryOptionsRef.current?.(undefined);
     }
-  }, [type, send, updateGeometryOptions]);
+  }, [type, sketchEditingFeature, send]);
 
   const fromRef = useRef(from);
   fromRef.current = from;
@@ -578,9 +378,107 @@ export default function useHooks({
   onSketchTypeChangeRef.current = onSketchTypeChange;
 
   useEffect(() => {
-    overrideInteractionModeRef.current?.(type ? "sketch" : "default");
+    overrideInteractionModeRef.current?.(type || sketchEditingFeature ? "sketch" : "default");
+  }, [type, sketchEditingFeature]);
+
+  const isEditingRef = useRef(isEditing);
+  isEditingRef.current = isEditing;
+  const cancelEditRef = useRef(cancelEdit);
+  cancelEditRef.current = cancelEdit;
+
+  useEffect(() => {
     onSketchTypeChangeRef.current?.(type, fromRef.current);
+    if (isEditingRef.current) {
+      cancelEditRef.current();
+    }
   }, [type]);
+
+  // Edit
+  const onEditFeatureChangeCbs = useRef<SketchEditFeatureChangeCb[]>([]);
+  const onEditFeatureChange = useCallback((cb: SketchEditFeatureChangeCb) => {
+    onEditFeatureChangeCbs.current.push(cb);
+  }, []);
+  const onEditFeatureChangeRef = useRef(onEditFeatureChange);
+  onEditFeatureChangeRef.current = onEditFeatureChange;
+
+  const lastSketchEditingFeature = useRef<SketchEditingFeature | undefined>(undefined);
+
+  const catchedControlPointIndex = useMemo(
+    () => state.context.catchedControlPointIndex,
+    [state.context.catchedControlPointIndex],
+  );
+
+  const catchedExtrudedPoint = useMemo(
+    () => !!state.context.catchedExtrudedPoint,
+    [state.context.catchedExtrudedPoint],
+  );
+
+  const ignoreAutoReSelectRef = useRef(false);
+
+  useEffect(() => {
+    onEditFeatureChangeCbs.current.forEach(cb => {
+      cb(sketchEditingFeature);
+    });
+    if (sketchEditingFeature) lastSketchEditingFeature.current = sketchEditingFeature;
+    else {
+      // Select the feature after editing
+      if (ignoreAutoReSelectRef.current) {
+        ignoreAutoReSelectRef.current = false;
+        return;
+      }
+      layersRef.current?.selectFeatures([
+        {
+          layerId: undefined,
+          featureId: [],
+        },
+      ]);
+      setTimeout(() => {
+        if (lastSketchEditingFeature.current) {
+          layersRef.current?.selectFeatures([
+            {
+              layerId: lastSketchEditingFeature.current?.layerId,
+              featureId: [lastSketchEditingFeature.current?.feature.id],
+            },
+          ]);
+        }
+        lastSketchEditingFeature.current = undefined;
+      }, 50);
+    }
+  }, [layersRef, sketchEditingFeature, onEditFeatureChangeCbs]);
+
+  const handleControlPointMouseEvent: ControlPointMouseEventHandler = useCallback(
+    (index, isExtrudedPoint, eventType) => {
+      if (!state.matches("editing") || !state.context.controlPoints) return;
+
+      if (eventType === "mousedown") {
+        if (isExtrudedPoint) {
+          send({
+            type: "CATCH",
+            catchedControlPointIndex: -1,
+            controlPoints: state.context.controlPoints,
+            catchedExtrudedPoint: true,
+          });
+        } else {
+          send({
+            type: "CATCH",
+            catchedControlPointIndex: index,
+            controlPoints: state.context.controlPoints,
+            catchedExtrudedPoint: false,
+          });
+        }
+      } else {
+        if (
+          !isExtrudedPoint &&
+          (((state.context.type === "polygon" || state.context.type === "extrudedPolygon") &&
+            state.context.controlPoints.length > 3) ||
+            (state.context.type === "polyline" && state.context.controlPoints.length > 2))
+        ) {
+          setSelectedControlPointIndex(index);
+        }
+      }
+    },
+    [state, send],
+  );
 
   // API
   const getType = useGet(type);
@@ -593,29 +491,137 @@ export default function useHooks({
       setType,
       getOptions,
       overrideOptions,
+      editFeature,
+      cancelEdit,
+      applyEdit,
+      deleteFeature,
+      onEditFeatureChange: onEditFeatureChangeRef.current,
     }),
-    [getType, setType, getOptions, overrideOptions],
+    [
+      getType,
+      setType,
+      getOptions,
+      overrideOptions,
+      editFeature,
+      deleteFeature,
+      cancelEdit,
+      applyEdit,
+    ],
   );
+
+  useEffect(() => {
+    onMount?.();
+  }, [onMount]);
+
+  const handleDeleteControlPoint = useCallback(() => {
+    if (selectedControlPointIndex !== undefined) {
+      const newControlPoints = state.context.controlPoints?.toSpliced(selectedControlPointIndex, 1);
+      if (!newControlPoints) return;
+      send({
+        type: "UPDATE",
+        controlPoints: newControlPoints,
+      });
+      setGeometryOptions(op =>
+        op
+          ? {
+              type: op.type,
+              controlPoints: newControlPoints,
+            }
+          : null,
+      );
+      setSelectedControlPointIndex(undefined);
+    }
+  }, [selectedControlPointIndex, state.context.controlPoints, send, setGeometryOptions]);
+
+  const handleDeleteControlPointRef = useRef(handleDeleteControlPoint);
+  handleDeleteControlPointRef.current = handleDeleteControlPoint;
+
+  const handleAddControlPoint = useCallback(
+    (controlPoint: Position3d, index: number) => {
+      if (state.context.controlPoints == null) return;
+      const insertPosition = index + 1;
+      const newControlPoints = state.context.controlPoints.toSpliced(
+        insertPosition,
+        0,
+        controlPoint,
+      );
+      send({
+        type: "UPDATE",
+        controlPoints: newControlPoints,
+      });
+      setGeometryOptions(op =>
+        op
+          ? {
+              type: op.type,
+              controlPoints: newControlPoints,
+            }
+          : null,
+      );
+    },
+    [state.context.controlPoints, send, setGeometryOptions],
+  );
+
+  //
+  const tempSwitchToMoveMode = useRef(false);
+  const stateRef = useRef(state);
+  stateRef.current = state;
+
+  useEffect(() => {
+    return window.addEventListener("keydown", event => {
+      if (event.code === "Space" && stateRef.current.matches("editing")) {
+        overrideInteractionMode?.("move");
+        tempSwitchToMoveMode.current = true;
+      } else if (event.code === "Delete" && stateRef.current.matches("editing")) {
+        handleDeleteControlPointRef.current();
+      }
+    });
+  }, [overrideInteractionMode]);
+
+  useEffect(() => {
+    return window.addEventListener("keyup", event => {
+      if (event.code === "Space" && tempSwitchToMoveMode.current) {
+        overrideInteractionMode?.("sketch");
+        tempSwitchToMoveMode.current = false;
+      }
+    });
+  }, [overrideInteractionMode]);
 
   return {
     state,
+    isEditing,
+    catchedControlPointIndex,
+    catchedExtrudedPoint,
     extrudedHeight,
+    extrudedPoint,
+    centroidBasePoint,
+    centroidExtrudedPoint,
     geometryOptions,
     color: sketchOptions.color,
     disableShadow: sketchOptions.disableShadow,
-    enableRelativeHeight: sketchOptions.enableRelativeHeight,
-  } as any;
+    selectedControlPointIndex,
+    handleControlPointMouseEvent,
+    handleAddControlPoint,
+  };
 }
 
-function hasDuplicate(
-  equalFunction: (
-    point1: Position3d,
-    point2: Position3d,
-    relativeEpsilon: number | undefined,
-    absoluteEpsilon: number | undefined,
-  ) => boolean,
-  controlPoint: Position3d,
-  controlPoints?: readonly Position3d[],
-): boolean {
-  return controlPoints?.some(another => equalFunction(controlPoint, another, 0, 1e-7)) === true;
+async function getCentroid(
+  controlPoints: readonly Position3d[],
+  engineRef: RefObject<EngineRef>,
+): Promise<Position3d | undefined> {
+  let totalLat = 0;
+  let totalLng = 0;
+
+  controlPoints.forEach(controlPoint => {
+    const p = engineRef.current?.toLngLatHeight(...controlPoint);
+    if (!p) return;
+    totalLng += p[0];
+    totalLat += p[1];
+  });
+
+  const centroidLat = totalLat / controlPoints.length;
+  const centroidLng = totalLng / controlPoints.length;
+  const centroidHeight =
+    (await engineRef.current?.sampleTerrainHeight(centroidLng, centroidLat)) ?? 0;
+
+  return engineRef.current?.toXYZ(centroidLng, centroidLat, centroidHeight);
 }

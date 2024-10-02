@@ -46,10 +46,20 @@ export type Props = Omit<ClusteredLayerProps, "atomMap" | "isHidden" | "selected
     reason: LayerSelectionReason | undefined,
     info: SelectedFeatureInfo | undefined,
   ) => void;
+  onMount?: () => void;
 };
 
 const Layers: ForwardRefRenderFunction<Ref, Props> = (
-  { layers, selectedLayer, hiddenLayers, requestingRenderMode, engineRef, onLayerSelect, ...props },
+  {
+    layers,
+    selectedLayer,
+    hiddenLayers,
+    requestingRenderMode,
+    engineRef,
+    onLayerSelect,
+    onMount,
+    ...props
+  },
   ref,
 ) => {
   const { atomMap, flattenedLayers, isHidden } = useHooks({
@@ -60,6 +70,7 @@ const Layers: ForwardRefRenderFunction<Ref, Props> = (
     requestingRenderMode,
     engineRef,
     onLayerSelect,
+    onMount,
   });
 
   return (

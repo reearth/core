@@ -96,6 +96,7 @@ const FEATURE_DELEGATE_THRESHOLD = 6000;
 export default function Feature({
   layer,
   isHidden,
+  sketchEditingFeature,
   ...props
 }: FeatureComponentProps): JSX.Element | null {
   const data = extractSimpleLayerData(layer);
@@ -131,7 +132,10 @@ export default function Feature({
     const useSceneSpecularEnvironmentMaps =
       !!props.viewerProperty?.scene?.imageBasedLighting?.specularEnvironmentMaps;
 
-    const isVisible = layer.layer.visible !== false && !isHidden;
+    const isVisible =
+      layer.layer.visible !== false &&
+      !isHidden &&
+      !(sketchEditingFeature?.layerId === layer.id && sketchEditingFeature?.feature?.id === f?.id);
 
     const componentId =
       urlMD5 +
@@ -140,7 +144,7 @@ export default function Feature({
           f?.id ?? ""
         }_${k}_${isVisible}_${useSceneSphericalHarmonicCoefficients}_${useSceneSpecularEnvironmentMaps}_${
           JSON.stringify(f?.[k]) ?? ""
-        }_${JSON.stringify(layer.transition) ?? ""}`,
+        }_${JSON.stringify(layer.transition) ?? ""}_${JSON.stringify(f?.geometry) ?? ""}`,
       );
 
     if (cacheable) {

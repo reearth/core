@@ -1,5 +1,4 @@
 // TODO: Refactor: move cesium related code to engine.
-// import { Cartesian2, Cartesian3 } from "cesium";
 import invariant from "tiny-invariant";
 import { createMachine, type StateFrom } from "xstate";
 
@@ -24,15 +23,38 @@ export type EventObject =
       pointerPosition: Position2d;
       controlPoint: Position3d;
     })
+  | ((
+      | { type: "EDIT_MARKER" }
+      | { type: "EDIT_POLYLINE" }
+      | { type: "EDIT_CIRCLE" }
+      | { type: "EDIT_RECTANGLE" }
+      | { type: "EDIT_POLYGON" }
+      | { type: "EDIT_EXTRUDED_CIRCLE" }
+      | { type: "EDIT_EXTRUDED_RECTANGLE" }
+      | { type: "EDIT_EXTRUDED_POLYGON" }
+      | { type: "CATCH" }
+      | { type: "UPDATE" }
+      | { type: "MOVE" }
+      | { type: "RELEASE" }
+    ) & {
+      extrudedHeight?: number;
+      controlPoints: Position3d[];
+      catchedControlPointIndex?: number;
+      catchedExtrudedPoint?: boolean;
+    })
   | { type: "CREATE" }
   | { type: "CANCEL" }
-  | { type: "ABORT" };
+  | { type: "ABORT" }
+  | { type: "EXIT_EDIT" };
 
-interface Context {
+export interface Context {
   lastPointerPosition?: Position2d;
   lastControlPoint?: Position3d;
   type?: SketchType;
   controlPoints?: Position3d[];
+  catchedControlPointIndex?: number;
+  catchedExtrudedPoint?: boolean;
+  originalControlPoint?: Position3d;
 }
 
 export function createSketchMachine() {
@@ -75,6 +97,38 @@ export function createSketchMachine() {
             EXTRUDED_POLYGON: {
               target: "drawing.extrudedPolygon",
               actions: ["createExtrudedPolygon"],
+            },
+            EDIT_MARKER: {
+              target: "editing.marker",
+              actions: ["editMarker"],
+            },
+            EDIT_POLYLINE: {
+              target: "editing.polyline",
+              actions: ["editPolyline"],
+            },
+            EDIT_CIRCLE: {
+              target: "editing.circle",
+              actions: ["editCircle"],
+            },
+            EDIT_RECTANGLE: {
+              target: "editing.rectangle",
+              actions: ["editRectangle"],
+            },
+            EDIT_POLYGON: {
+              target: "editing.polygon",
+              actions: ["editPolygon"],
+            },
+            EDIT_EXTRUDED_CIRCLE: {
+              target: "editing.circle",
+              actions: ["editExtrudedCircle"],
+            },
+            EDIT_EXTRUDED_RECTANGLE: {
+              target: "editing.extrudedRectangle",
+              actions: ["editExtrudedRectangle"],
+            },
+            EDIT_EXTRUDED_POLYGON: {
+              target: "editing.extrudedPolygon",
+              actions: ["editExtrudedPolygon"],
             },
           },
         },
@@ -138,7 +192,7 @@ export function createSketchMachine() {
                       {
                         target: "#sketch.extruding",
                         cond: "willRectangleComplete",
-                        actions: ["pushPosition"],
+                        actions: ["pushPosition", "recordOriginalControlPoint"],
                       },
                       {
                         target: "vertex",
@@ -224,6 +278,247 @@ export function createSketchMachine() {
             },
           },
         },
+        editing: {
+          states: {
+            marker: {
+              initial: "waiting",
+              states: {
+                waiting: {
+                  on: {
+                    CATCH: {
+                      target: "moving",
+                      internal: true,
+                      actions: ["catchControlPoint"],
+                    },
+                  },
+                },
+                moving: {
+                  on: {
+                    MOVE: {
+                      target: "moving",
+                      internal: true,
+                      actions: ["moveControlPoint"],
+                    },
+                    RELEASE: {
+                      target: "waiting",
+                      actions: ["releaseControlPoint"],
+                    },
+                  },
+                },
+              },
+            },
+            polyline: {
+              initial: "waiting",
+              states: {
+                waiting: {
+                  on: {
+                    CATCH: {
+                      target: "moving",
+                      internal: true,
+                      actions: ["catchControlPoint"],
+                    },
+                    UPDATE: {
+                      target: "waiting",
+                      internal: true,
+                      actions: ["updateControlPoints"],
+                    },
+                  },
+                },
+                moving: {
+                  on: {
+                    MOVE: {
+                      target: "moving",
+                      internal: true,
+                      actions: ["moveControlPoint"],
+                    },
+                    RELEASE: {
+                      target: "waiting",
+                      actions: ["releaseControlPoint"],
+                    },
+                  },
+                },
+              },
+            },
+            circle: {
+              initial: "waiting",
+              states: {
+                waiting: {
+                  on: {
+                    CATCH: {
+                      target: "moving",
+                      internal: true,
+                      actions: ["catchControlPoint"],
+                    },
+                  },
+                },
+                moving: {
+                  on: {
+                    MOVE: {
+                      target: "moving",
+                      internal: true,
+                      actions: ["moveControlPoint"],
+                    },
+                    RELEASE: {
+                      target: "waiting",
+                      actions: ["releaseControlPoint"],
+                    },
+                  },
+                },
+              },
+            },
+            rectangle: {
+              initial: "waiting",
+              states: {
+                waiting: {
+                  on: {
+                    CATCH: {
+                      target: "moving",
+                      internal: true,
+                      actions: ["catchControlPoint"],
+                    },
+                  },
+                },
+                moving: {
+                  on: {
+                    MOVE: {
+                      target: "moving",
+                      internal: true,
+                      actions: ["moveControlPoint"],
+                    },
+                    RELEASE: {
+                      target: "waiting",
+                      actions: ["releaseControlPoint"],
+                    },
+                  },
+                },
+              },
+            },
+            polygon: {
+              initial: "waiting",
+              states: {
+                waiting: {
+                  on: {
+                    CATCH: {
+                      target: "moving",
+                      internal: true,
+                      actions: ["catchControlPoint"],
+                    },
+                    UPDATE: {
+                      target: "waiting",
+                      internal: true,
+                      actions: ["updateControlPoints"],
+                    },
+                  },
+                },
+                moving: {
+                  on: {
+                    MOVE: {
+                      target: "moving",
+                      internal: true,
+                      actions: ["moveControlPoint"],
+                    },
+                    RELEASE: {
+                      target: "waiting",
+                      actions: ["releaseControlPoint"],
+                    },
+                  },
+                },
+              },
+            },
+            extrudedCircle: {
+              initial: "waiting",
+              states: {
+                waiting: {
+                  on: {
+                    CATCH: {
+                      target: "moving",
+                      internal: true,
+                      actions: ["catchControlPoint"],
+                    },
+                  },
+                },
+                moving: {
+                  on: {
+                    MOVE: {
+                      target: "moving",
+                      internal: true,
+                      actions: ["moveControlPoint"],
+                    },
+                    RELEASE: {
+                      target: "waiting",
+                      actions: ["releaseControlPoint"],
+                    },
+                  },
+                },
+              },
+            },
+            extrudedRectangle: {
+              initial: "waiting",
+              states: {
+                waiting: {
+                  on: {
+                    CATCH: {
+                      target: "moving",
+                      internal: true,
+                      actions: ["catchControlPoint"],
+                    },
+                  },
+                },
+                moving: {
+                  on: {
+                    MOVE: {
+                      target: "moving",
+                      internal: true,
+                      actions: ["moveControlPoint"],
+                    },
+                    RELEASE: {
+                      target: "waiting",
+                      actions: ["releaseControlPoint"],
+                    },
+                  },
+                },
+              },
+            },
+            extrudedPolygon: {
+              initial: "waiting",
+              states: {
+                waiting: {
+                  on: {
+                    CATCH: {
+                      target: "moving",
+                      internal: true,
+                      actions: ["catchControlPoint"],
+                    },
+                    UPDATE: {
+                      target: "waiting",
+                      internal: true,
+                      actions: ["updateControlPoints"],
+                    },
+                  },
+                },
+                moving: {
+                  on: {
+                    MOVE: {
+                      target: "moving",
+                      internal: true,
+                      actions: ["moveControlPoint"],
+                    },
+                    RELEASE: {
+                      target: "waiting",
+                      actions: ["releaseControlPoint"],
+                    },
+                  },
+                },
+              },
+            },
+          },
+          on: {
+            EXIT_EDIT: {
+              target: "idle",
+              actions: ["clearDrawing"],
+            },
+          },
+        },
       },
       schema: {
         events: {} as unknown as EventObject,
@@ -249,12 +544,22 @@ export function createSketchMachine() {
           context.type = "marker";
           context.controlPoints = [controlPoint];
         },
+        editMarker: (context, event) => {
+          context.lastControlPoint = undefined;
+          context.type = "marker";
+          context.controlPoints = event.controlPoints;
+        },
         createPolyline: (context, event) => {
           context.lastPointerPosition = [...event.pointerPosition];
           const controlPoint = [...event.controlPoint] as Position3d;
           context.lastControlPoint = controlPoint;
           context.type = "polyline";
           context.controlPoints = [controlPoint];
+        },
+        editPolyline: (context, event) => {
+          context.lastControlPoint = undefined;
+          context.type = "polyline";
+          context.controlPoints = event.controlPoints;
         },
         createCircle: (context, event) => {
           context.lastPointerPosition = [...event.pointerPosition];
@@ -263,12 +568,22 @@ export function createSketchMachine() {
           context.type = "circle";
           context.controlPoints = [controlPoint];
         },
+        editCircle: (context, event) => {
+          context.lastControlPoint = undefined;
+          context.type = "circle";
+          context.controlPoints = event.controlPoints;
+        },
         createRectangle: (context, event) => {
           context.lastPointerPosition = [...event.pointerPosition];
           const controlPoint = [...event.controlPoint] as Position3d;
           context.lastControlPoint = controlPoint;
           context.type = "rectangle";
           context.controlPoints = [controlPoint];
+        },
+        editRectangle: (context, event) => {
+          context.lastControlPoint = undefined;
+          context.type = "rectangle";
+          context.controlPoints = event.controlPoints;
         },
         createPolygon: (context, event) => {
           context.lastPointerPosition = [...event.pointerPosition];
@@ -277,12 +592,22 @@ export function createSketchMachine() {
           context.type = "polygon";
           context.controlPoints = [controlPoint];
         },
+        editPolygon: (context, event) => {
+          context.lastControlPoint = undefined;
+          context.type = "polygon";
+          context.controlPoints = event.controlPoints;
+        },
         createExtrudedCircle: (context, event) => {
           context.lastPointerPosition = [...event.pointerPosition];
           const controlPoint = [...event.controlPoint] as Position3d;
           context.lastControlPoint = controlPoint;
           context.type = "extrudedCircle";
           context.controlPoints = [controlPoint];
+        },
+        editExtrudedCircle: (context, event) => {
+          context.lastControlPoint = undefined;
+          context.type = "extrudedCircle";
+          context.controlPoints = event.controlPoints;
         },
         createExtrudedRectangle: (context, event) => {
           context.lastPointerPosition = [...event.pointerPosition];
@@ -291,12 +616,22 @@ export function createSketchMachine() {
           context.type = "extrudedRectangle";
           context.controlPoints = [controlPoint];
         },
+        editExtrudedRectangle: (context, event) => {
+          context.lastControlPoint = undefined;
+          context.type = "extrudedRectangle";
+          context.controlPoints = event.controlPoints;
+        },
         createExtrudedPolygon: (context, event) => {
           context.lastPointerPosition = [...event.pointerPosition];
           const controlPoint = [...event.controlPoint] as Position3d;
           context.lastControlPoint = controlPoint;
           context.type = "extrudedPolygon";
           context.controlPoints = [controlPoint];
+        },
+        editExtrudedPolygon: (context, event) => {
+          context.lastControlPoint = undefined;
+          context.type = "extrudedPolygon";
+          context.controlPoints = event.controlPoints;
         },
         pushPosition: (context, event) => {
           context.lastPointerPosition = [...event.pointerPosition];
@@ -313,6 +648,26 @@ export function createSketchMachine() {
           delete context.lastControlPoint;
           delete context.type;
           delete context.controlPoints;
+          delete context.catchedControlPointIndex;
+          delete context.catchedExtrudedPoint;
+          delete context.originalControlPoint;
+        },
+        catchControlPoint: (context, event) => {
+          context.catchedControlPointIndex = event.catchedControlPointIndex;
+          context.catchedExtrudedPoint = event.catchedExtrudedPoint;
+        },
+        moveControlPoint: (context, event) => {
+          context.controlPoints = event.controlPoints;
+        },
+        releaseControlPoint: context => {
+          delete context.catchedControlPointIndex;
+          delete context.catchedExtrudedPoint;
+        },
+        updateControlPoints: (context, event) => {
+          context.controlPoints = event.controlPoints;
+        },
+        recordOriginalControlPoint: (context, event) => {
+          context.originalControlPoint = [...event.controlPoint] as Position3d;
         },
       },
     },

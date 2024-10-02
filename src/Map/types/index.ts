@@ -38,7 +38,13 @@ import type {
   LayerSelectionReason,
   Ref as LayersRef,
 } from "../Layers";
-import { SketchType, SketchOptions, SketchComponentType } from "../Sketch/types";
+import {
+  SketchType,
+  SketchOptions,
+  SketchComponentType,
+  SketchEditFeatureChangeCb,
+  SketchEditingFeature,
+} from "../Sketch/types";
 import type { TimelineManagerRef } from "../useTimelineManager";
 
 import type { SceneMode, ViewerProperty } from "./viewerProperty";
@@ -114,6 +120,10 @@ export type EngineRef = {
     position: [x: number, y: number, z: number],
     windowPosition: [x: number, y: number],
   ) => number | undefined;
+  getExtrudedPoint: (
+    position: [x: number, y: number, z: number],
+    extrutedHeight: number,
+  ) => Position3d | undefined;
   getSurfaceDistance: (point1: Cartesian3, point2: Cartesian3) => number | undefined;
   equalsEpsilon2d: (
     point1: Position2d,
@@ -196,6 +206,11 @@ export type EngineRef = {
     // TODO: Get condition as expression for plugin
     condition?: (f: PickedFeature) => boolean,
   ) => PickedFeature[] | undefined;
+  calcRectangleControlPoint: (
+    p1: Position3d,
+    p2: Position3d,
+    p3: Position3d,
+  ) => [p1: Position3d, p2: Position3d, p3: Position3d];
 } & MouseEventHandles;
 
 export type EngineProps = {
@@ -360,4 +375,9 @@ export type SketchRef = {
   setType: (type: SketchType | undefined, from?: "editor" | "plugin") => void;
   getOptions: () => SketchOptions;
   overrideOptions: (options: SketchOptions) => void;
+  editFeature: (feature: SketchEditingFeature | undefined) => void;
+  cancelEdit: (ignoreAutoReSelect?: boolean) => void;
+  applyEdit: () => void;
+  deleteFeature: (layerId: string, featureId: string) => void;
+  onEditFeatureChange: (cb: SketchEditFeatureChangeCb) => void;
 };

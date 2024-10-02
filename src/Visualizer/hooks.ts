@@ -206,6 +206,25 @@ export default function useHooks(
     onSketchPluginFeatureCreateCallbacksRef.current.forEach(fn => fn(props));
   }, []);
 
+  const onSketchPluginFeatureUpdateCallbacksRef = useRef<SketchEventCallback[]>([]);
+  const onSketchPluginFeatureUpdate = useCallback((cb: SketchEventCallback) => {
+    onSketchPluginFeatureUpdateCallbacksRef.current.push(cb);
+  }, []);
+  const handleSketchPluginFeatureUpdate = useCallback((props: SketchEventProps) => {
+    onSketchPluginFeatureUpdateCallbacksRef.current.forEach(fn => fn(props));
+  }, []);
+
+  const onSketchPluginFeatureDeleteCallbacksRef = useRef<SketchEventCallback[]>([]);
+  const onSketchPluginFeatureDelete = useCallback((cb: SketchEventCallback) => {
+    onSketchPluginFeatureDeleteCallbacksRef.current.push(cb);
+  }, []);
+  const handleSketchPluginFeatureDelete = useCallback(
+    (props: { layerId: string; featureId: string }) => {
+      onSketchPluginFeatureDeleteCallbacksRef.current.forEach(fn => fn(props));
+    },
+    [],
+  );
+
   const onSketchTypeChangeCallbacksRef = useRef<((type: SketchType | undefined) => void)[]>([]);
   const onSketchTypeChange = useCallback((cb: (type: SketchType | undefined) => void) => {
     onSketchTypeChangeCallbacksRef.current.push(cb);
@@ -256,6 +275,8 @@ export default function useHooks(
       handleCameraForceHorizontalRollChange,
       handleInteractionModeChange: changeInteractionMode,
       onSketchPluginFeatureCreate,
+      onSketchPluginFeatureUpdate,
+      onSketchPluginFeatureDelete,
       onSketchTypeChange,
       onLayerVisibility,
       onLayerLoad,
@@ -273,6 +294,8 @@ export default function useHooks(
       handleCameraForceHorizontalRollChange,
       onLayerEdit,
       onSketchPluginFeatureCreate,
+      onSketchPluginFeatureUpdate,
+      onSketchPluginFeatureDelete,
       onSketchTypeChange,
       onLayerVisibility,
       onLayerLoad,
@@ -313,6 +336,8 @@ export default function useHooks(
     handleCameraChange: changeCamera,
     handleInteractionModeChange: changeInteractionMode,
     handleSketchPluginFeatureCreate,
+    handleSketchPluginFeatureUpdate,
+    handleSketchPluginFeatureDelete,
     handleSketchTypeChange,
     handleLayerVisibility,
     handleLayerLoad,

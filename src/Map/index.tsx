@@ -34,6 +34,7 @@ export type CursorType = "auto" | "grab" | "crosshair";
 export type Props = {
   engines?: Record<string, Engine>;
   engine?: string;
+  onAPIReady?: () => void;
 } & Omit<
   LayersProps,
   | "Feature"
@@ -67,7 +68,13 @@ function MapFn(
     onSketchTypeChange,
     onSketchFeatureCreate,
     onSketchPluginFeatureCreate,
+    onSketchFeatureUpdate,
+    onSketchPluginFeatureUpdate,
+    onSketchFeatureDelete,
+    onSketchPluginFeatureDelete,
     featureFlags = INTERACTION_MODES.default,
+    onMount,
+    onAPIReady,
     ...props
   }: Props,
   ref: Ref<MapRef>,
@@ -82,11 +89,18 @@ function MapFn(
     requestingRenderMode,
     handleLayerSelect,
     handleEngineLayerSelect,
+    sketchEditingFeature,
+    setSketchEditingFeature,
+    handleEngineMount,
+    handleLayersMount,
+    handleSketchMount,
   } = useHooks({
     ref,
     timelineManagerRef,
     cursor,
     onLayerSelect,
+    onMount,
+    onAPIReady,
   });
 
   const selectedLayerIds = useMemo(
@@ -111,6 +125,7 @@ function MapFn(
       timelineManagerRef={timelineManagerRef}
       onLayerSelect={handleEngineLayerSelect}
       featureFlags={featureFlags}
+      onMount={handleEngineMount}
       {...props}>
       <Layers
         ref={layersRef}
@@ -128,7 +143,9 @@ function MapFn(
         meta={props.meta}
         viewerProperty={props.property}
         requestingRenderMode={requestingRenderMode}
+        sketchEditingFeature={sketchEditingFeature}
         onLayerSelect={handleLayerSelect}
+        onMount={handleLayersMount}
       />
       <Sketch
         ref={sketchRef}
@@ -142,6 +159,13 @@ function MapFn(
         onSketchTypeChange={onSketchTypeChange}
         onSketchFeatureCreate={onSketchFeatureCreate}
         onSketchPluginFeatureCreate={onSketchPluginFeatureCreate}
+        onSketchFeatureUpdate={onSketchFeatureUpdate}
+        onSketchPluginFeatureUpdate={onSketchPluginFeatureUpdate}
+        onSketchFeatureDelete={onSketchFeatureDelete}
+        onSketchPluginFeatureDelete={onSketchPluginFeatureDelete}
+        sketchEditingFeature={sketchEditingFeature}
+        onSketchEditFeature={setSketchEditingFeature}
+        onMount={handleSketchMount}
       />
     </Engine>
   ) : null;
