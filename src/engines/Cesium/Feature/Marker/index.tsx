@@ -239,7 +239,7 @@ export default function Marker({ property, id, isVisible, geometry, layer, featu
         hideIndicator={hideIndicator}>
         {style === "point" ? (
           <PointGraphics
-            pixelSize={pointSize}
+            pixelSize={100} // for debug only
             color={pointColorCesium}
             outlineColor={pointOutlineColorCesium}
             outlineWidth={pointOutlineWidth}
