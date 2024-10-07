@@ -1,11 +1,12 @@
 import {
   Color,
+  Event,
   ImageryProvider,
   TextureMagnificationFilter,
   TextureMinificationFilter,
 } from "cesium";
 import { isEqual } from "lodash-es";
-import { useCallback, useMemo, useRef, useLayoutEffect, useState } from "react";
+import { useCallback, useMemo, useRef, useLayoutEffect, useState, useEffect } from "react";
 import { ImageryLayer } from "resium";
 
 import { tiles as tilePresets } from "./presets";
@@ -31,9 +32,10 @@ export type Tile = {
 export type Props = {
   tiles?: Tile[];
   cesiumIonAccessToken?: string;
+  onTilesChange?: () => void;
 };
 
-export default function ImageryLayers({ tiles, cesiumIonAccessToken }: Props) {
+export default function ImageryLayers({ tiles, cesiumIonAccessToken, onTilesChange }: Props) {
   const { providers, updated } = useImageryProviders({
     tiles,
     cesiumIonAccessToken,
@@ -46,6 +48,16 @@ export default function ImageryLayers({ tiles, cesiumIonAccessToken }: Props) {
   useLayoutEffect(() => {
     if (updated) setCounter(c => c + 1);
   }, [providers, updated]);
+
+  useEffect(() => {
+    onTilesChange?.();
+  }, [tiles, counter, onTilesChange]);
+
+  function onLayerReady(layer: typeof ImageryLayer) {
+    console.log("Imagery layer is ready:", layer);
+  }
+  const layerReadyEvent = new Event();
+  layerReadyEvent.addEventListener(onLayerReady);
 
   return (
     <>

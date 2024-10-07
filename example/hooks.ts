@@ -12,7 +12,6 @@ import {
 import { DEFAULT_CAMERA, DEFAULT_LAYERS, DEFAULT_TILE } from "./constants";
 import { DEFAULT_VIEWER_PROPERTY } from "./scene";
 import { TEST_LAYERS } from "./testLayers";
-import { CESIUM_ION_ACCESS_TOKEN } from "./token";
 
 export default () => {
   const ref = useRef<MapRef>(null);
@@ -40,7 +39,7 @@ export default () => {
 
   const meta = useMemo(
     () => ({
-      cesiumIonAccessToken: CESIUM_ION_ACCESS_TOKEN || undefined,
+      cesiumIonAccessToken: import.meta.env.EXAMPLE_CESIUM_ION_ACCESS_TOKEN || undefined,
     }),
     [],
   );

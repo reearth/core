@@ -235,6 +235,7 @@ export type EngineProps = {
   isLayerDragging?: boolean;
   shouldRender?: boolean;
   meta?: Record<string, unknown>;
+  displayCredits?: boolean;
   layersRef?: RefObject<LayersRef>;
   requestingRenderMode?: MutableRefObject<RequestingRenderMode>;
   timelineManagerRef?: TimelineManagerRef;
@@ -258,6 +259,7 @@ export type EngineProps = {
   onLayerSelectWithRectStart?: (e: LayerSelectWithRectStart) => void;
   onLayerSelectWithRectMove?: (e: LayerSelectWithRectMove) => void;
   onLayerSelectWithRectEnd?: (e: LayerSelectWithRectEnd) => void;
+  onCreditsUpdate?: (credits: Credit[]) => void;
 };
 
 export type LayerEditEvent = {
@@ -380,4 +382,8 @@ export type SketchRef = {
   applyEdit: () => void;
   deleteFeature: (layerId: string, featureId: string) => void;
   onEditFeatureChange: (cb: SketchEditFeatureChangeCb) => void;
+};
+
+export type Credit = {
+  html?: string;
 };

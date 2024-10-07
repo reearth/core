@@ -12,6 +12,7 @@ import {
   type LatLng,
   type Cluster,
   type ComputedLayer,
+  type Credit,
 } from "../Map";
 import { SketchFeature, SketchType } from "../Map/Sketch/types";
 
@@ -46,6 +47,7 @@ export type CoreVisualizerProps = {
   ready?: boolean;
   hiddenLayers?: string[];
   zoomedLayerId?: string;
+  displayCredits?: boolean;
   onCameraChange?: (camera: Camera) => void;
   onLayerDrop?: (layerId: string, propertyKey: string, position: LatLng | undefined) => void;
   onLayerSelect?: (
@@ -62,6 +64,7 @@ export type CoreVisualizerProps = {
   onSketchFeatureDelete?: (layerId: string, featureId: string) => void;
   onInteractionModeChange?: (mode: InteractionModeType) => void;
   onAPIReady?: () => void;
+  onCreditsUpdate?: (credits: Credit[]) => void;
 };
 
 export const CoreVisualizer = memo(
@@ -82,6 +85,7 @@ export const CoreVisualizer = memo(
         interactionMode,
         shouldRender,
         meta,
+        displayCredits,
         style,
         zoomedLayerId,
         children,
@@ -96,6 +100,7 @@ export const CoreVisualizer = memo(
         onSketchFeatureUpdate,
         onSketchFeatureDelete,
         onAPIReady,
+        onCreditsUpdate,
       },
       ref: Ref<MapRef | null>,
     ) => {
@@ -160,6 +165,7 @@ export const CoreVisualizer = memo(
                 isLayerDragging={isLayerDragging}
                 isLayerDraggable={isEditable}
                 meta={meta}
+                displayCredits={displayCredits}
                 style={style}
                 featureFlags={featureFlags}
                 shouldRender={shouldRender}
@@ -191,6 +197,7 @@ export const CoreVisualizer = memo(
                 onLayerSelectWithRectMove={handleLayerSelectWithRectMove}
                 onLayerSelectWithRectEnd={handleLayerSelectWithRectEnd}
                 onAPIReady={onAPIReady}
+                onCreditsUpdate={onCreditsUpdate}
               />
               <coreContext.Provider value={coreContextValue}>{children}</coreContext.Provider>
             </div>
