@@ -1,6 +1,5 @@
 import {
   Color,
-  Event,
   ImageryProvider,
   TextureMagnificationFilter,
   TextureMinificationFilter,
@@ -52,12 +51,6 @@ export default function ImageryLayers({ tiles, cesiumIonAccessToken, onTilesChan
   useEffect(() => {
     onTilesChange?.();
   }, [tiles, counter, onTilesChange]);
-
-  function onLayerReady(layer: typeof ImageryLayer) {
-    console.log("Imagery layer is ready:", layer);
-  }
-  const layerReadyEvent = new Event();
-  layerReadyEvent.addEventListener(onLayerReady);
 
   return (
     <>
