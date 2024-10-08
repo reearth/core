@@ -6,6 +6,7 @@ export const PRESET_APPEARANCE: SketchAppearance = {
     heightReference: "clamp",
     hideIndicator: true,
     selectedFeatureColor: "#00bebe",
+    style: "point", // for debug only
   },
   polygon: {
     classificationType: "terrain",
