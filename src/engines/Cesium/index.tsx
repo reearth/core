@@ -47,6 +47,7 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
     shouldRender,
     layerSelectionReason,
     meta,
+    displayCredits,
     layersRef,
     featureFlags,
     requestingRenderMode,
@@ -63,6 +64,7 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
     onMount,
     onLayerVisibility,
     onLayerLoad,
+    onCreditsUpdate,
   },
   ref,
 ) => {
@@ -85,6 +87,8 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
     handleClick,
     handleMount,
     handleUnmount,
+    handleTilesChange,
+    handleTerrainProviderChange,
   } = useHooks({
     ref,
     property,
@@ -112,6 +116,7 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
     onLayerLoad,
     onCameraChange,
     onMount,
+    onCreditsUpdate,
   });
 
   return (
@@ -133,7 +138,7 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
       navigationHelpButton={false}
       projectionPicker={false}
       sceneModePicker={false}
-      creditContainer={creditContainer}
+      creditContainer={displayCredits ? undefined : creditContainer}
       style={{
         width: small ? "300px" : "auto",
         height: small ? "300px" : "100%",
@@ -158,7 +163,11 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
       onWheel={mouseEventHandles.wheel}>
       <Event onMount={handleMount} onUnmount={handleUnmount} />
       <Clock timelineManagerRef={timelineManagerRef} />
-      <ImageryLayers tiles={property?.tiles} cesiumIonAccessToken={cesiumIonAccessToken} />
+      <ImageryLayers
+        tiles={property?.tiles}
+        cesiumIonAccessToken={cesiumIonAccessToken}
+        onTilesChange={handleTilesChange}
+      />
       <LabelImageryLayers tileLabels={property?.tileLabels} />
       <Indicator property={property} timelineManagerRef={timelineManagerRef} />
       <ScreenSpaceEventHandler useDefault>
@@ -252,7 +261,11 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
         saturationShift={property?.sky?.skyAtmosphere?.saturationShift}
         brightnessShift={property?.sky?.skyAtmosphere?.brightnessShift}
       />
-      <Globe property={property} cesiumIonAccessToken={cesiumIonAccessToken} />
+      <Globe
+        property={property}
+        cesiumIonAccessToken={cesiumIonAccessToken}
+        onTerrainProviderChange={handleTerrainProviderChange}
+      />
       <featureContext.Provider value={context}>{ready ? children : null}</featureContext.Provider>
       <AmbientOcclusion
         {...AMBIENT_OCCLUSION_QUALITY[property?.render?.ambientOcclusion?.quality || "low"]}

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import {
   ComputedFeature,
+  Credit,
   LazyLayer,
   MapRef,
   SketchEditingFeature,
@@ -12,7 +13,6 @@ import {
 import { DEFAULT_CAMERA, DEFAULT_LAYERS, DEFAULT_TILE } from "./constants";
 import { DEFAULT_VIEWER_PROPERTY } from "./scene";
 import { TEST_LAYERS } from "./testLayers";
-import { CESIUM_ION_ACCESS_TOKEN } from "./token";
 
 export default () => {
   const ref = useRef<MapRef>(null);
@@ -40,7 +40,7 @@ export default () => {
 
   const meta = useMemo(
     () => ({
-      cesiumIonAccessToken: CESIUM_ION_ACCESS_TOKEN || undefined,
+      cesiumIonAccessToken: import.meta.env.EXAMPLE_CESIUM_ION_ACCESS_TOKEN || undefined,
     }),
     [],
   );
@@ -125,6 +125,14 @@ export default () => {
     ref.current?.sketch.deleteFeature(selectedLayer.id, selectedFeature.id);
   }, [selectedLayer, selectedFeature]);
 
+  const [credits, setCredits] = useState<Credit[]>([]);
+  const handleCreditsUpdate = useCallback((credits: Credit[]) => {
+    setCredits(credits);
+  }, []);
+  useEffect(() => {
+    console.log("Credits:", credits);
+  }, [credits]);
+
   return {
     isReady,
     ref,
@@ -154,5 +162,6 @@ export default () => {
     handleCancelEditSketchFeature,
     handleApplyEditSketchFeature,
     handleDeleteSketchFeature,
+    handleCreditsUpdate,
   };
 };

@@ -12,6 +12,8 @@ import {
   GroundPrimitive,
   ShadowMap,
   ImageryLayer,
+  CreditDisplay,
+  Credit as CesiumCredit,
 } from "cesium";
 import { MutableRefObject, RefObject, useCallback, useEffect, useMemo, useRef } from "react";
 import type { CesiumComponentRef, CesiumMovementEvent, RootEventTarget } from "resium";
@@ -27,6 +29,7 @@ import type {
 import { e2eAccessToken, setE2ECesiumViewer } from "../../e2eConfig";
 import { ComputedFeature, DataType, SelectedFeatureInfo, LatLng, Camera } from "../../mantle";
 import {
+  Credit,
   LayerLoadEvent,
   LayerSelectWithRectEnd,
   LayerSelectWithRectMove,
@@ -89,6 +92,7 @@ export default ({
   onLayerLoad,
   onCameraChange,
   onMount,
+  onCreditsUpdate,
 }: {
   ref: React.ForwardedRef<EngineRef>;
   property?: ViewerProperty;
@@ -128,6 +132,7 @@ export default ({
   onLayerLoad?: (e: LayerLoadEvent) => void;
   onCameraChange?: (camera: Camera) => void;
   onMount?: () => void;
+  onCreditsUpdate?: (credits: Credit[]) => void;
 }) => {
   const cesium = useRef<CesiumComponentRef<CesiumViewer>>(null);
 
@@ -728,6 +733,49 @@ export default ({
     unmountCamera?.();
   }, [unmountCamera]);
 
+  const updateCredits = useCallback(() => {
+    if (!onCreditsUpdate) return;
+    // currently we don't have a proper way to get the credits update event
+    // wait for 3 seconds to get latest credits
+    // some internal property is been used here.
+    setTimeout(() => {
+      const creditDisplay = cesium.current?.cesiumElement?.creditDisplay as
+        | (CreditDisplay & {
+            _currentFrameCredits: {
+              lightboxCredits: { _array: { credit?: CesiumCredit }[] };
+              screenCredits: { _array: { credit?: CesiumCredit }[] };
+            };
+            _currentCesiumCredit: CesiumCredit;
+          })
+        | undefined;
+
+      if (!creditDisplay) return;
+
+      const { lightboxCredits, screenCredits } = creditDisplay?._currentFrameCredits || {};
+      const cesiumCredits = creditDisplay._currentCesiumCredit;
+
+      const credits: Credit[] = [
+        ...(cesiumCredits?.html ? [{ html: cesiumCredits.html }] : []),
+        ...Array.from(lightboxCredits?._array ?? []).map(c => ({
+          html: c?.credit?.html,
+        })),
+        ...Array.from(screenCredits?._array ?? []).map(c => ({
+          html: c?.credit?.html,
+        })),
+      ];
+
+      onCreditsUpdate(credits);
+    }, 3000);
+  }, [onCreditsUpdate]);
+
+  const handleTilesChange = useCallback(() => {
+    updateCredits();
+  }, [updateCredits]);
+
+  const handleTerrainProviderChange = useCallback(() => {
+    updateCredits();
+  }, [updateCredits]);
+
   return {
     cesium,
     cesiumIonAccessToken,
@@ -747,6 +795,8 @@ export default ({
     handleClick,
     handleMount,
     handleUnmount,
+    handleTilesChange,
+    handleTerrainProviderChange,
   };
 };
 

@@ -5,7 +5,7 @@ import {
   IonResource,
   TerrainProvider,
 } from "cesium";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { Globe as CesiumGlobe } from "resium";
 
 import type { ViewerProperty, TerrainProperty } from "../..";
@@ -15,9 +15,14 @@ import { toColor } from "../common";
 export type Props = {
   property?: ViewerProperty;
   cesiumIonAccessToken?: string;
+  onTerrainProviderChange?: () => void;
 };
 
-export default function Globe({ property, cesiumIonAccessToken }: Props): JSX.Element | null {
+export default function Globe({
+  property,
+  cesiumIonAccessToken,
+  onTerrainProviderChange,
+}: Props): JSX.Element | null {
   const terrainProperty = useMemo(
     (): TerrainProperty => ({
       ...property?.terrain,
@@ -50,6 +55,10 @@ export default function Globe({ property, cesiumIonAccessToken }: Props): JSX.El
     () => toColor(property?.globe?.baseColor),
     [property?.globe?.baseColor],
   );
+
+  useEffect(() => {
+    onTerrainProviderChange?.();
+  }, [terrainProvider, onTerrainProviderChange]);
 
   return (
     <CesiumGlobe
