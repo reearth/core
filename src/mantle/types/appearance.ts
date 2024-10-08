@@ -200,7 +200,6 @@ export type Cesium3DTilesAppearance = {
   selectedFeatureColor?: string; // This doesn't support expression
   disableIndexingFeature?: boolean;
   tileset?: string;
-  apiKey?: string;
   experimental_clipping?: EXPERIMENTAL_clipping;
   pointSize?: number;
   meta?: unknown;
