@@ -47,7 +47,7 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
     shouldRender,
     layerSelectionReason,
     meta,
-    displayCredits = true,
+    displayCredits,
     layersRef,
     featureFlags,
     requestingRenderMode,

@@ -85,7 +85,7 @@ export const CoreVisualizer = memo(
         interactionMode,
         shouldRender,
         meta,
-        displayCredits,
+        displayCredits = true,
         style,
         zoomedLayerId,
         children,
