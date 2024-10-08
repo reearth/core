@@ -35,6 +35,7 @@ function App() {
     handleCancelEditSketchFeature,
     handleApplyEditSketchFeature,
     handleDeleteSketchFeature,
+    handleCreditsUpdate,
   } = useHooks();
 
   return (
@@ -73,6 +74,7 @@ function App() {
         onCameraChange={setCurrentCamera}
         onSketchTypeChangeProp={setSketchTool}
         layers={layers}
+        onCreditsUpdate={handleCreditsUpdate}
       />
     </div>
   );
