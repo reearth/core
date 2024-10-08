@@ -757,10 +757,10 @@ export default ({
       const credits: Credit[] = [
         ...(cesiumCredits?.html ? [{ html: cesiumCredits.html }] : []),
         ...Array.from(lightboxCredits?._array ?? []).map(c => ({
-          html: (c as { credit?: { html?: string } })?.credit?.html,
+          html: c?.credit?.html,
         })),
         ...Array.from(screenCredits?._array ?? []).map(c => ({
-          html: (c as { credit?: { html?: string } })?.credit?.html,
+          html: c?.credit?.html,
         })),
       ];
 
