@@ -19,8 +19,7 @@ import {
   Cesium3DTileContent,
   Color,
   Viewer,
-  Resource,
-  GoogleMaps,
+  createGooglePhotorealistic3DTileset,
 } from "cesium";
 import { pick } from "lodash-es";
 import { MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -707,12 +706,19 @@ export const useHooks = ({
   }, [styleUrl]);
 
   const googleMapPhotorealisticResource = useMemo(() => {
-    if (type !== "google-photorealistic" || !isVisible) return;
-    const tileset = {
-      url: `${GoogleMaps.mapTilesApiEndpoint}3dtiles/root.json?key=${googleMapApiKey}`,
-      showCreditsOnScreen: true,
+    if (type !== "google-photorealistic" || !isVisible) return null;
+
+    const loadTileset = async () => {
+      try {
+        const tileset = await createGooglePhotorealistic3DTileset(googleMapApiKey);
+        return tileset.resource;
+      } catch (error) {
+        console.error(`Error loading Photorealistic 3D Tiles tileset: ${error}`);
+        throw error;
+      }
     };
-    return new Resource(tileset as Resource.ConstructorOptions);
+
+    return loadTileset();
   }, [type, isVisible, googleMapApiKey]);
 
   const tilesetUrl = useMemo(() => {
