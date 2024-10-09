@@ -6,7 +6,7 @@ export const GOOGLE_PHOTOREALISTIC_3DTILES: Layer = {
   data: {
     type: "google-photorealistic",
     serviceTokens: {
-      googleMapApiKey: import.meta.env.VITE_GOOGLE_MAP_API_KEY || "",
+      googleMapApiKey: import.meta.env.EXAMPLE_GOOGLE_MAP_API_KEY || "",
     },
   },
   "3dtiles": {},
