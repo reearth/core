@@ -1,9 +1,5 @@
-// TODO: remove MockedProvider after double-checking the test here is not necessary
-// import { MockedProvider as MockedGqlProvider, MockedResponse } from "@apollo/client/testing";
 import { render as rtlRender } from "@testing-library/react";
 import { vitest } from "vitest";
-
-// import { Provider as I18nProvider } from "../services/i18n";
 
 // react-inlinesvg is not displayed in test.
 // see detail: https://github.com/gilbarbara/react-inlinesvg/issues/145
@@ -22,11 +18,7 @@ vitest.mock("react-inlinesvg", () => {
   };
 });
 
-const render = (
-  ui: React.ReactElement,
-  // queryMocks?: readonly MockedResponse<Record<string, any>>[],
-  { ...renderOptions } = {},
-) => {
+const render = (ui: React.ReactElement, { ...renderOptions } = {}) => {
   const Wrapper: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
     return <>{children}</>;
   };
