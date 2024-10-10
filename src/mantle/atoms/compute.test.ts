@@ -85,16 +85,17 @@ test("computeAtom", async () => {
     status: "ready",
     features: [],
     originalFeatures: [],
-  }),
-    await waitFor(() =>
-      expect(result.current.result).toEqual({
-        id: "xxx",
-        layer,
-        status: "ready",
-        features: [],
-        originalFeatures: [],
-      }),
-    );
+  });
+
+  await waitFor(() =>
+    expect(result.current.result).toEqual({
+      id: "xxx",
+      layer,
+      status: "ready",
+      features: [],
+      originalFeatures: [],
+    }),
+  );
 
   // delete delegatedDataTypes
   act(() => {
@@ -187,7 +188,7 @@ test("computeAtom", async () => {
     layer,
     status: "fetching",
     features: [...toComputedFeature(features), ...toComputedFeature(features2)],
-    originalFeatures: [...features, ...features3],
+    originalFeatures: [...features, ...features2],
   });
 
   await waitFor(() =>
