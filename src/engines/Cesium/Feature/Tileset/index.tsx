@@ -84,7 +84,7 @@ function Tileset({
         cacheBytes={cacheBytes}
         style={style}
         shadows={shadowMode(shadows)}
-        clippingPlanes={clippingPlanes.length > 0 ? clippingPlanes : undefined}
+        clippingPlanes={clippingPlanes}
         colorBlendMode={colorBlendModeFor3DTile(colorBlendMode)}
         imageBasedLighting={imageBasedLighting}
         onReady={handleReady}
