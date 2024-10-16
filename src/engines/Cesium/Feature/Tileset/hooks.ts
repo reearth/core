@@ -500,8 +500,9 @@ export const useHooks = ({
     return prevPlanes.current;
   }, [_planes]);
   const clipDirection = direction === "inside" ? -1 : 1;
+
   // Create immutable object
-  const [clippingPlanes] = useState(
+  const [clippingPlanes, setClippingPlanes] = useState<CesiumClippingPlaneCollection>(
     () =>
       new CesiumClippingPlaneCollection({
         planes: planes?.map(
@@ -515,6 +516,27 @@ export const useHooks = ({
         edgeWidth: edgeWidth,
         edgeColor: toColor(edgeColor),
       }),
+  );
+  // Initialize clipping planes
+  // This is workaround to reinitialize ClippingPlanes in strict mode.
+  useEffect(
+    () => () => {
+      setClippingPlanes(
+        new CesiumClippingPlaneCollection({
+          planes: planes?.map(
+            plane =>
+              new ClippingPlane(
+                new Cartesian3(plane.normal?.x, plane.normal?.y, plane.normal?.z),
+                (plane.distance || 0) * clipDirection,
+              ),
+          ),
+          unionClippingRegions: direction === "outside",
+          edgeWidth: edgeWidth,
+          edgeColor: toColor(edgeColor),
+        }),
+      );
+    },
+    [], // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   const { drawClippingEnabled, drawClippingEdgeProps } = useDrawClipping({
