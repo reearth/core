@@ -448,7 +448,7 @@ export const useHooks = ({
 }) => {
   const { viewer } = useCesium();
   const tilesetRef = useRef<Cesium3DTilesetType>();
-  const { onLayerLoad } = useContext();
+  const { onLayerLoad, updateCredits } = useContext();
   const layerIdRef = useRef(layer?.id);
   layerIdRef.current = layer?.id;
 
@@ -800,6 +800,13 @@ export const useHooks = ({
     },
     [onLayerFetch, onLayerLoad],
   );
+
+  useEffect(() => {
+    updateCredits?.();
+    return () => {
+      updateCredits?.();
+    };
+  }, [type, updateCredits]);
 
   return {
     tilesetUrl,

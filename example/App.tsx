@@ -36,6 +36,7 @@ function App() {
     handleApplyEditSketchFeature,
     handleDeleteSketchFeature,
     handleCreditsUpdate,
+    handleGetCredits,
   } = useHooks();
 
   return (
@@ -59,6 +60,7 @@ function App() {
         handleCancelEditSketchFeature={handleCancelEditSketchFeature}
         handleApplyEditSketchFeature={handleApplyEditSketchFeature}
         handleDeleteSketchFeature={handleDeleteSketchFeature}
+        handleGetCredits={handleGetCredits}
       />
       <SelectionPanel selectedLayer={selectedLayer} selectedFeature={selectedFeature} />
       <CoreVisualizer

@@ -91,6 +91,7 @@ const engineRefKeys: FunctionKeys<EngineRef> = {
   bringToFront: 1,
   sendToBack: 1,
   calcRectangleControlPoint: 1,
+  getCredits: 1,
 };
 
 const layersRefKeys: FunctionKeys<LayersRef> = {
