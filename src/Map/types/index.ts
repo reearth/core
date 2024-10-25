@@ -211,6 +211,7 @@ export type EngineRef = {
     p2: Position3d,
     p3: Position3d,
   ) => [p1: Position3d, p2: Position3d, p3: Position3d];
+  getCredits: () => Credit[] | undefined;
 } & MouseEventHandles;
 
 export type EngineProps = {

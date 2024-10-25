@@ -32,6 +32,7 @@ import {
   cartesianToLatLngHeight,
   getExtrudedHeight,
   getOverriddenScreenSpaceCameraOptions,
+  getCredits,
 } from "../common";
 import { attachTag, getTag } from "../Feature";
 import { PickedFeature, pickManyFromViewportAsFeature } from "../pickMany";
@@ -973,6 +974,11 @@ export default function useEngineRef(
         const pp5 = Cesium.Cartesian3.add(pp4, offset, cartesianScratch2);
         const p5 = [pp5.x, pp5.y, pp5.z] as Position3d;
         return [p1, p2, p5];
+      },
+      getCredits: () => {
+        const viewer = cesium.current?.cesiumElement;
+        if (!viewer || viewer.isDestroyed()) return;
+        return getCredits(viewer);
       },
     };
   }, [cesium]);

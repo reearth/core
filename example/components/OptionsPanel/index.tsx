@@ -38,6 +38,7 @@ type OptionsPanelProps = {
   handleCancelEditSketchFeature: () => void;
   handleApplyEditSketchFeature: () => void;
   handleDeleteSketchFeature: () => void;
+  handleGetCredits: () => void;
 };
 
 const OptionsPanel: FC<OptionsPanelProps> = ({
@@ -57,6 +58,7 @@ const OptionsPanel: FC<OptionsPanelProps> = ({
   handleCancelEditSketchFeature,
   handleApplyEditSketchFeature,
   handleDeleteSketchFeature,
+  handleGetCredits,
 }) => {
   const [open, setOpen] = useState(false);
 
@@ -171,6 +173,14 @@ const OptionsPanel: FC<OptionsPanelProps> = ({
                   </Button>
                 </>
               )}
+            </div>
+          </OptionSection>
+
+          <OptionSection title="Map Ref">
+            <div className="flex flex-wrap items-center gap-1">
+              <Button size="sm" variant="outline" onClick={handleGetCredits}>
+                getCredits
+              </Button>
             </div>
           </OptionSection>
         </div>

@@ -26,6 +26,7 @@ export type Context = {
     position: [x: number, y: number, z: number],
   ) => [x: number, y: number] | undefined;
   isPositionVisible?: (position: [x: number, y: number, z: number]) => boolean;
+  updateCredits?: () => void;
 };
 
 export const context = createContext<Context>({});
