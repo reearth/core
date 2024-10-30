@@ -133,6 +133,10 @@ export default () => {
     console.log("Credits:", credits);
   }, [credits]);
 
+  const handleGetCredits = useCallback(() => {
+    alert(JSON.stringify(ref.current?.engine?.getCredits()));
+  }, []);
+
   return {
     isReady,
     ref,
@@ -163,5 +167,6 @@ export default () => {
     handleApplyEditSketchFeature,
     handleDeleteSketchFeature,
     handleCreditsUpdate,
+    handleGetCredits,
   };
 };

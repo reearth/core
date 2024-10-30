@@ -35,6 +35,8 @@ import {
   Plane,
   CameraEventType,
   KeyboardEventModifier,
+  CreditDisplay,
+  Credit as CesiumCredit,
 } from "cesium";
 import { MutableRefObject, useMemo } from "react";
 
@@ -897,4 +899,36 @@ export function getExtrudedHeight(
     console.error(error);
   }
   return;
+}
+
+export function getCredits(viewer: Viewer) {
+  if (!viewer) return;
+  const creditDisplay = viewer.creditDisplay as
+    | (CreditDisplay & {
+        _currentFrameCredits: {
+          lightboxCredits: { _array: { credit?: CesiumCredit }[] };
+          screenCredits: { _array: { credit?: CesiumCredit }[] };
+        };
+        _currentCesiumCredit: CesiumCredit;
+      })
+    | undefined;
+
+  if (!creditDisplay) return;
+
+  const { lightboxCredits, screenCredits } = creditDisplay?._currentFrameCredits || {};
+  const cesiumCredits = creditDisplay._currentCesiumCredit;
+
+  const credits: {
+    html?: string;
+  }[] = [
+    ...(cesiumCredits?.html ? [{ html: cesiumCredits.html }] : []),
+    ...Array.from(lightboxCredits?._array ?? []).map(c => ({
+      html: c?.credit?.html,
+    })),
+    ...Array.from(screenCredits?._array ?? []).map(c => ({
+      html: c?.credit?.html,
+    })),
+  ];
+
+  return credits;
 }
