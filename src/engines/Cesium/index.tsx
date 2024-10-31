@@ -138,8 +138,6 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
       navigationHelpButton={false}
       projectionPicker={false}
       sceneModePicker={false}
-      useBrowserRecommendedResolution={false}
-      resolutionScale={3}
       creditContainer={displayCredits ? undefined : creditContainer}
       style={{
         width: small ? "300px" : "auto",
