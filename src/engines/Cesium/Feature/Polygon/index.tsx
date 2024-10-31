@@ -24,6 +24,7 @@ export type Props = FeatureProps<Property> & {
 
 export type Property = PolygonAppearance & {
   polygon?: PolygonValue;
+  height?: number;
 };
 
 export default function Polygon({
@@ -59,6 +60,7 @@ export default function Polygon({
     extrudedHeight,
     classificationType: ct,
     hideIndicator,
+    height,
   } = property ?? {};
 
   const hierarchy = useCustomCompareMemo(
@@ -156,6 +158,7 @@ export default function Polygon({
           shadows={shadowMode(shadows)}
           distanceDisplayCondition={distanceDisplayCondition}
           classificationType={classificationType(ct)}
+          height={height}
           {...extrudedHeightProperty}
         />
       </EntityExt>
