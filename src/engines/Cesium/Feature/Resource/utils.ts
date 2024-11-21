@@ -318,7 +318,7 @@ export const attachStyle = (
   if (entity.polygon) {
     const entityPosition = entity.position?.getValue(currentTime);
     const hierarchy = entity.polygon?.hierarchy?.getValue(currentTime) as PolygonHierarchy;
-    const coordinates: any = hierarchy?.positions?.map(position => [
+    const coordinates = hierarchy?.positions?.map(position => [
       position?.x ?? 0,
       position?.y ?? 0,
       position?.z ?? 0,
@@ -329,7 +329,7 @@ export const attachStyle = (
       id: makeFeatureId(entity),
       geometry: {
         type: "Polygon",
-        coordinates,
+        coordinates: [coordinates],
       },
       properties: convertEntityProperties(currentTime, entity),
       metaData: {

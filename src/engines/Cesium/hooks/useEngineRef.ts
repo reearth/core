@@ -46,6 +46,7 @@ import {
   findEntity,
   findFeaturesFromLayer,
 } from "../utils/utils";
+import { getGeometryFromEntity } from "../helpers/getGeometryFromEntity";
 
 export default function useEngineRef(
   ref: Ref<EngineRef>,
@@ -847,6 +848,7 @@ export default function useEngineRef(
             tag.computedFeature ?? {
               type: "computedFeature",
               id: tag.featureId,
+              geometry: getGeometryFromEntity(viewer.clock.currentTime, entity),
               properties: convertEntityProperties(viewer.clock.currentTime, entity),
               metaData: {
                 description: convertEntityDescription(viewer.clock.currentTime, entity),
