@@ -1,15 +1,9 @@
-import {
-  Entity,
-  Cartesian3,
-  PolygonHierarchy,
-  PointGraphics,
-  BillboardGraphics,
-  JulianDate,
-} from "cesium";
+import { Entity, PointGraphics, BillboardGraphics, JulianDate } from "cesium";
 
 import { EvalFeature } from "../../..";
 import { AppearanceTypes, ComputedFeature, ComputedLayer, Feature } from "../../../../mantle";
 import { heightReference, shadowMode, toColor } from "../../common";
+import { getMarkerCoordinates, getGeometryFromEntity } from "../../helpers/getGeometryFromEntity";
 import { convertEntityDescription, convertEntityProperties } from "../../utils/utils";
 import { attachTag, extractSimpleLayer, getTag, Tag } from "../utils";
 
@@ -133,15 +127,13 @@ export const attachStyle = (
   const billboard = hasAppearance(layer, entity, ["marker", "billboard"]);
   const label = hasAppearance(layer, entity, ["marker", "label"]);
   if (entity.point || entity.billboard || entity.label) {
-    const position = entity.position?.getValue(currentTime);
-    const coordinates = [position?.x ?? 0, position?.y ?? 0, position?.z ?? 0];
+    const coordinates = getMarkerCoordinates(entity, currentTime);
+    const geometry = getGeometryFromEntity(currentTime, entity);
+
     const feature: Feature = {
       type: "feature",
       id: makeFeatureId(entity),
-      geometry: {
-        type: "Point",
-        coordinates,
-      },
+      geometry,
       properties: convertEntityProperties(currentTime, entity),
       metaData: {
         description: convertEntityDescription(currentTime, entity),
@@ -263,19 +255,12 @@ export const attachStyle = (
 
   if (entity.polyline) {
     const entityPosition = entity.position?.getValue(currentTime);
-    const positions = entity.polyline?.positions?.getValue(currentTime) as Cartesian3[];
-    const coordinates = positions?.map(position => [
-      position?.x ?? 0,
-      position?.y ?? 0,
-      position?.z ?? 0,
-    ]);
+    const geometry = getGeometryFromEntity(currentTime, entity);
+
     const feature: Feature = {
       type: "feature",
       id: makeFeatureId(entity),
-      geometry: {
-        type: "LineString",
-        coordinates,
-      },
+      geometry,
       properties: convertEntityProperties(currentTime, entity),
       metaData: {
         description: convertEntityDescription(currentTime, entity),
@@ -317,20 +302,12 @@ export const attachStyle = (
 
   if (entity.polygon) {
     const entityPosition = entity.position?.getValue(currentTime);
-    const hierarchy = entity.polygon?.hierarchy?.getValue(currentTime) as PolygonHierarchy;
-    const coordinates = hierarchy?.positions?.map(position => [
-      position?.x ?? 0,
-      position?.y ?? 0,
-      position?.z ?? 0,
-    ]);
+    const geometry = getGeometryFromEntity(currentTime, entity);
 
     const feature: Feature = {
       type: "feature",
       id: makeFeatureId(entity),
-      geometry: {
-        type: "Polygon",
-        coordinates: [coordinates],
-      },
+      geometry,
       properties: convertEntityProperties(currentTime, entity),
       metaData: {
         description: convertEntityDescription(currentTime, entity),
