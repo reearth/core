@@ -13,7 +13,6 @@ type SelectionPanelProps = {
 };
 
 const SelectionPanel: FC<SelectionPanelProps> = ({ selectedLayer, selectedFeature }) => {
-
   const [open, setOpen] = useState(false);
 
   return (
