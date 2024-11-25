@@ -1,5 +1,6 @@
 import { Layer } from "@reearth/core";
 
+import { CZML_SIMPLE } from "./czml_simple";
 import { GEOJSON_MARKER } from "./geojson_marker";
 import { GEOJSON_SIMPLE } from "./geojson_simple";
 import { GOOGLE_PHOTOREALISTIC_3DTILES } from "./google_photorealistic_3dtiles";
@@ -14,4 +15,5 @@ export const TEST_LAYERS: Layer[] = [
   GOOGLE_PHOTOREALISTIC_3DTILES,
   OSM_BUILDINGS,
   THREEDTILES_SIMPLE,
+  CZML_SIMPLE,
 ];
