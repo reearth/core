@@ -135,6 +135,5 @@
   },
   "resolutions": {
     "jackspeak": "2.1.1"
-  },
-  "packageManager": "yarn@4.5.3"
+  }
 }
