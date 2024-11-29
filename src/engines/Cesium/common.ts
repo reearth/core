@@ -553,8 +553,9 @@ export const colorBlendModeFor3DTile = (
       highlight: Cesium3DTileColorBlendMode.HIGHLIGHT,
       replace: Cesium3DTileColorBlendMode.REPLACE,
       mix: Cesium3DTileColorBlendMode.MIX,
+      default: Cesium3DTileColorBlendMode.HIGHLIGHT,
     }) as { [key in string]?: Cesium3DTileColorBlendMode }
-  )[colorBlendMode] || Cesium3DTileColorBlendMode.HIGHLIGHT;
+  )[colorBlendMode]
 
 export const heightReference = (
   heightReference?: "none" | "clamp" | "relative",
