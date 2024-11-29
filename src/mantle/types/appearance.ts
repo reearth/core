@@ -194,7 +194,7 @@ export type Cesium3DTilesAppearance = {
   color?: string;
   styleUrl?: string;
   shadows?: "disabled" | "enabled" | "cast_only" | "receive_only";
-  colorBlendMode?: "highlight" | "replace" | "mix" | "default";
+  colorBlendMode?: "highlight" | "replace" | "mix";
   edgeWidth?: number;
   edgeColor?: string;
   selectedFeatureColor?: string; // This doesn't support expression
