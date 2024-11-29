@@ -546,14 +546,13 @@ export const colorBlendMode = (colorBlendMode?: "highlight" | "replace" | "mix" 
   )[colorBlendMode || ""];
 
 export const colorBlendModeFor3DTile = (
-  colorBlendMode: "highlight" | "replace" | "mix" | "default" = "default",
+  colorBlendMode: "highlight" | "replace" | "mix" | "default" = "highlight",
 ) =>
   (
     ({
       highlight: Cesium3DTileColorBlendMode.HIGHLIGHT,
       replace: Cesium3DTileColorBlendMode.REPLACE,
       mix: Cesium3DTileColorBlendMode.MIX,
-      default: Cesium3DTileColorBlendMode.HIGHLIGHT,
     }) as { [key in string]?: Cesium3DTileColorBlendMode }
   )[colorBlendMode]
 
