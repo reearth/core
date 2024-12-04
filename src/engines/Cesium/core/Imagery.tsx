@@ -188,7 +188,7 @@ export function useImageryProviders({
     prevCesiumIonAccessToken.current = cesiumIonAccessToken;
 
     return { providers, updated };
-  }, [cesiumIonAccessToken, tiles, tileKeys, newTile]);
+  }, [cesiumIonAccessToken, tiles, tileKeys, newTile, zoomLevels]);
 
   prevProviders.current = providers;
   return { providers, updated };
