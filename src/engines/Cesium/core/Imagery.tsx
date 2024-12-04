@@ -113,6 +113,12 @@ export function useImageryProviders({
   const tileKeys = tiles.map(t => t.id).join(",");
   const prevTileKeys = useRef(tileKeys);
   const prevProviders = useRef<Providers>({});
+  
+  const zoomLevels = tiles.map(t => {
+    if(t.id && t.zoomLevel) return {[t.id]: t.zoomLevel}
+    return
+  })
+  const prevZoomLevels = useRef(zoomLevels)
 
   // Manage TileProviders so that TileProvider does not need to be recreated each time tiles are updated.
   const { providers, updated } = useMemo(() => {
@@ -174,9 +180,11 @@ export function useImageryProviders({
       !!added.length ||
       !!isCesiumAccessTokenUpdated ||
       !isEqual(prevTileKeys.current, tileKeys) ||
+      !isEqual(prevZoomLevels.current, zoomLevels) ||
       rawProviders.some(p => p.tile && (p.prevType !== p.tile.type || p.prevUrl !== p.tile.url));
 
     prevTileKeys.current = tileKeys;
+    prevZoomLevels.current = zoomLevels;
     prevCesiumIonAccessToken.current = cesiumIonAccessToken;
 
     return { providers, updated };
