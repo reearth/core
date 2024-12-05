@@ -115,7 +115,7 @@ export function useImageryProviders({
   const prevProviders = useRef<Providers>({});
   const zoomLevels = useMemo(() => tiles.map(t => {
       if (t.id && t.zoomLevel) return { [t.id]: t.zoomLevel };
-    return
+      return
   }),
   [tiles]);
   const prevZoomLevels = useRef(zoomLevels);
