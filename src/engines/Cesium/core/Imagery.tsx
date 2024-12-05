@@ -113,12 +113,12 @@ export function useImageryProviders({
   const tileKeys = tiles.map(t => t.id).join(",");
   const prevTileKeys = useRef(tileKeys);
   const prevProviders = useRef<Providers>({});
-  
-  const zoomLevels = tiles.map(t => {
-    if(t.id && t.zoomLevel) return {[t.id]: t.zoomLevel}
+  const zoomLevels = useMemo(() => tiles.map(t => {
+      if (t.id && t.zoomLevel) return { [t.id]: t.zoomLevel };
     return
-  })
-  const prevZoomLevels = useRef(zoomLevels)
+  }),
+  [tiles]);
+  const prevZoomLevels = useRef(zoomLevels);
 
   // Manage TileProviders so that TileProvider does not need to be recreated each time tiles are updated.
   const { providers, updated } = useMemo(() => {
