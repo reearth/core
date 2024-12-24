@@ -2,7 +2,7 @@ import { Entity, PointGraphics, BillboardGraphics, JulianDate } from "cesium";
 
 import { EvalFeature } from "../../..";
 import { AppearanceTypes, ComputedFeature, ComputedLayer, Feature } from "../../../../mantle";
-import { heightReference, shadowMode, toColor } from "../../common";
+import { heightReference, shadowMode, toColor, classificationType } from "../../common";
 import { getMarkerCoordinates, getGeometryFromEntity } from "../../helpers/getGeometryFromEntity";
 import { convertEntityDescription, convertEntityProperties } from "../../utils/utils";
 import { attachTag, extractSimpleLayer, getTag, Tag } from "../utils";
@@ -33,7 +33,7 @@ type EntityAppearanceKey<AName extends SupportedAppearanceKey> = AName extends "
   ? keyof Pick<Entity, "point" | "billboard" | "label">
   : keyof Pick<Entity, CesiumEntityAppearanceKey>;
 
-type AppearancePropertyKeyType = "color" | "heightReference" | "shadows";
+type AppearancePropertyKeyType = "color" | "heightReference" | "shadows" | "classificationType";
 
 export function attachProperties<
   AName extends SupportedAppearanceKey,
@@ -87,6 +87,9 @@ export function attachProperties<
         break;
       case "heightReference":
         value = heightReference(value);
+        break;
+      case "classificationType":
+        value = classificationType(value);
     }
 
     if (value === (entity[propertyName] as any)[entityPropertyKey]) {
@@ -160,10 +163,10 @@ export const attachStyle = (
           name: "show",
           ...(computedFeature?.marker?.style
             ? {
-              override:
-                computedFeature?.marker?.style === "point" &&
-                (computedFeature?.marker.show ?? true),
-            }
+                override:
+                  computedFeature?.marker?.style === "point" &&
+                  (computedFeature?.marker.show ?? true),
+              }
             : {}),
         },
         pixelSize: {
@@ -199,10 +202,10 @@ export const attachStyle = (
           name: "show",
           ...(computedFeature?.marker?.style
             ? {
-              override:
-                computedFeature?.marker?.style === "image" &&
-                (computedFeature?.marker.show ?? true),
-            }
+                override:
+                  computedFeature?.marker?.style === "image" &&
+                  (computedFeature?.marker.show ?? true),
+              }
             : {}),
         },
         image: {
@@ -295,6 +298,10 @@ export const attachStyle = (
         clampToGround: {
           name: "clampToGround",
         },
+        classificationType: {
+          name: "classificationType",
+          type: "classificationType",
+        },
       });
     }
     return [feature, computedFeature];
@@ -355,6 +362,10 @@ export const attachStyle = (
         },
         extrudedHeight: {
           name: "extrudedHeight",
+        },
+        classificationType: {
+          name: "classificationType",
+          type: "classificationType",
         },
       });
     }
