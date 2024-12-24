@@ -125,17 +125,24 @@ export default () => {
     ref.current?.sketch.deleteFeature(selectedLayer.id, selectedFeature.id);
   }, [selectedLayer, selectedFeature]);
 
-  const [credits, setCredits] = useState<Credit[]>([]);
+  const [_credits, setCredits] = useState<Credit[]>([]);
   const handleCreditsUpdate = useCallback((credits: Credit[]) => {
     setCredits(credits);
   }, []);
-  useEffect(() => {
-    console.log("Credits:", credits);
-  }, [credits]);
 
   const handleGetCredits = useCallback(() => {
     alert(JSON.stringify(ref.current?.engine?.getCredits()));
   }, []);
+
+  // Spatial ID
+  const [spatialIdZoom, setSpatialIdZoom] = useState<number>(20);
+  const handleSpatialIdZoomChange = useCallback((value: number[]) => {
+    setSpatialIdZoom(value[0]);
+  }, []);
+
+  const handleSpatialIdPick = useCallback(() => {
+    ref.current?.spatialId?.pickSpace({ zoom: spatialIdZoom });
+  }, [spatialIdZoom]);
 
   return {
     isReady,
@@ -168,5 +175,8 @@ export default () => {
     handleDeleteSketchFeature,
     handleCreditsUpdate,
     handleGetCredits,
+    handleSpatialIdPick,
+    spatialIdZoom,
+    handleSpatialIdZoomChange,
   };
 };

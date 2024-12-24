@@ -119,6 +119,7 @@ export type EngineRef = {
   getExtrudedHeight: (
     position: [x: number, y: number, z: number],
     windowPosition: [x: number, y: number],
+    allowNegative?: boolean,
   ) => number | undefined;
   getExtrudedPoint: (
     position: [x: number, y: number, z: number],
