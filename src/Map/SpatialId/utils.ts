@@ -73,7 +73,7 @@ export const getSpaceData = (space: Space): SpatialIdSpaceData => {
     zfxyStr: space.zfxyStr,
     tilehash: space.tilehash,
     hilbertTilehash: space.hilbertTilehash,
-    hilbertIndex: space.hilbertIndex,
+    hilbertIndex: space.hilbertIndex.toString(),
     vertices: space.vertices3d(),
   };
 };

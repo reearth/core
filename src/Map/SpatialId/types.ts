@@ -40,6 +40,6 @@ export type SpatialIdSpaceData = {
   zfxyStr: string;
   tilehash: string;
   hilbertTilehash: string;
-  hilbertIndex: bigint;
+  hilbertIndex: string;
   vertices: [number, number, number][];
 };

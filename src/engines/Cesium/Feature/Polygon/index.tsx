@@ -54,6 +54,7 @@ export default function Polygon({
     fillColor,
     strokeColor,
     strokeWidth = 1,
+    height,
     heightReference: hr,
     shadows,
     extrudedHeight,
@@ -83,7 +84,7 @@ export default function Polygon({
       coordiantes && stroke && !disableWorkaround
         ? coordiantes.flatMap(hole => [
             // bottom
-            hole.map(c => Cartesian3.fromDegrees(c[0], c[1], c[2] ?? 0)),
+            hole.map(c => Cartesian3.fromDegrees(c[0], c[1], c[2] ?? height)),
             ...(extrudedHeight
               ? [
                   // top
@@ -92,14 +93,14 @@ export default function Polygon({
                   ...hole
                     .slice(0, -1)
                     .map(c => [
-                      Cartesian3.fromDegrees(c[0], c[1], 0),
+                      Cartesian3.fromDegrees(c[0], c[1], height ?? 0),
                       Cartesian3.fromDegrees(c[0], c[1], extrudedHeight),
                     ]),
                 ]
               : []),
           ])
         : [],
-    [coordiantes, stroke, disableWorkaround],
+    [coordiantes, stroke, disableWorkaround, height, extrudedHeight],
   );
 
   const memoStrokeColor = useMemo(
@@ -152,6 +153,7 @@ export default function Polygon({
           outline={!!memoStrokeColor}
           outlineColor={memoStrokeColor}
           outlineWidth={strokeWidth}
+          height={height}
           heightReference={heightReference(hr)}
           shadows={shadowMode(shadows)}
           distanceDisplayCondition={distanceDisplayCondition}
