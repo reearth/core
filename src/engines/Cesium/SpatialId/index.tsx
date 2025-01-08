@@ -26,7 +26,7 @@ const SpatialIdSpace: FC<SpatialIdComponentProps> = memo(({ space }) => {
           space.type === "floor" ? 0.5 : 1,
         ),
         material: Color.fromCssColorString(space.color ?? DEFAULT_COLOR).withAlpha(
-          space.type === "floor" ? 0.05 : space.type === "coordinate" ? 0.2 : 0.2,
+          space.type === "floor" ? 0.05 : 0.2,
         ),
         classificationType:
           space.type === "coordinate" ? ClassificationType.BOTH : ClassificationType.TERRAIN,
