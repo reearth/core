@@ -262,12 +262,16 @@ export default ({
   // press space to move
   const tempSwitchToMoveMode = useRef(false);
   useEffect(() => {
-    return window.addEventListener("keydown", e => {
+    const handleKeydown = (e: KeyboardEvent) => {
       if (e.code === "Space" && stateRef.current !== "idle") {
         tempSwitchToMoveMode.current = true;
         overrideInteractionMode?.("move");
       }
-    });
+    };
+    window.addEventListener("keydown", handleKeydown);
+    return () => {
+      window.removeEventListener("keydown", handleKeydown);
+    };
   }, [overrideInteractionMode]);
 
   useEffect(() => {
