@@ -8,7 +8,6 @@ const DEFAULT_COLOR = "#00bebe";
 
 type SpatialIdComponentProps = {
   space: SpatialIdSpaceType;
-  color?: string;
 };
 
 const SpatialIdSpace: FC<SpatialIdComponentProps> = memo(({ space }) => {
