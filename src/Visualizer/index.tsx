@@ -116,6 +116,7 @@ export const CoreVisualizer = memo(
         cameraForceHorizontalRoll,
         coreContextValue,
         containerStyle,
+        overriddenInteractionMode,
         handleLayerSelect,
         handleLayerDrag,
         handleLayerDrop,
@@ -174,7 +175,7 @@ export const CoreVisualizer = memo(
                 small={small}
                 ready={ready}
                 timelineManagerRef={timelineManagerRef}
-                interactionMode={interactionMode}
+                interactionMode={overriddenInteractionMode}
                 selectedFeature={selectedFeature}
                 cursor={cursor}
                 onCameraChange={handleCameraChange}

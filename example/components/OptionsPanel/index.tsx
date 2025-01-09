@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { SKETCH_TOOLS, TILES } from "@/constants";
 import { TEST_LAYERS } from "@/testLayers";
@@ -39,6 +40,9 @@ type OptionsPanelProps = {
   handleApplyEditSketchFeature: () => void;
   handleDeleteSketchFeature: () => void;
   handleGetCredits: () => void;
+  handleSpatialIdPick: () => void;
+  spatialIdZoom: number;
+  handleSpatialIdZoomChange: (v: number[]) => void;
 };
 
 const OptionsPanel: FC<OptionsPanelProps> = ({
@@ -59,6 +63,9 @@ const OptionsPanel: FC<OptionsPanelProps> = ({
   handleApplyEditSketchFeature,
   handleDeleteSketchFeature,
   handleGetCredits,
+  handleSpatialIdPick,
+  spatialIdZoom,
+  handleSpatialIdZoomChange,
 }) => {
   const [open, setOpen] = useState(false);
 
@@ -174,6 +181,20 @@ const OptionsPanel: FC<OptionsPanelProps> = ({
                 </>
               )}
             </div>
+          </OptionSection>
+
+          <OptionSection title="Spatial ID">
+            <Slider
+              defaultValue={[20]}
+              min={0}
+              max={25}
+              step={1}
+              value={[spatialIdZoom]}
+              onValueChange={handleSpatialIdZoomChange}
+            />
+            <Button size="sm" variant={"default"} onClick={handleSpatialIdPick}>
+              PickSpace
+            </Button>
           </OptionSection>
 
           <OptionSection title="Map Ref">

@@ -329,6 +329,7 @@ export default function useHooks(
     cameraForceHorizontalRoll,
     coreContextValue,
     containerStyle,
+    overriddenInteractionMode: interactionMode,
     handleLayerSelect,
     handleLayerDrag,
     handleLayerDrop,
