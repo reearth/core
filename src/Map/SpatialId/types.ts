@@ -1,4 +1,4 @@
-import { Space } from "@spatial-id/javascript-sdk";
+import { Space } from "@reearth/spatial-id-sdk";
 
 export type SpatialIdSpaceType = {
   id: string;
