@@ -2114,10 +2114,10 @@
   resolved "https://registry.yarnpkg.com/@react-dnd/shallowequal/-/shallowequal-4.0.2.tgz#d1b4befa423f692fa4abf1c79209702e7d8ae4b4"
   integrity sha512-/RVXdLvJxLg4QKvMoM5WlwNR9ViO9z8B/qPcc+C0Sa/teJY7QG7kJ441DwzOjMYEY7GmU4dj5EcGHIkKZiQZCA==
 
-"@reearth/cesium-mvt-imagery-provider@1.5.4":
-  version "1.5.4"
-  resolved "https://registry.yarnpkg.com/@reearth/cesium-mvt-imagery-provider/-/cesium-mvt-imagery-provider-1.5.4.tgz#33b4433a3414bf869a667ff82ea20ae5ff7280a9"
-  integrity sha512-5FwyOOwDmE+KwWmHkYt/NosJ3A3FFSWyhTqEGVPyy/HzsyvT3lYwilA+k40sXc9jOjwntClfqQNvQMMsmPF9Hw==
+"@reearth/cesium-mvt-imagery-provider@1.6.0":
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/@reearth/cesium-mvt-imagery-provider/-/cesium-mvt-imagery-provider-1.6.0.tgz#faff69807215e30cdd86ae9670f3d81617c7b223"
+  integrity sha512-udtSpXOhPIfEgXimIy3ywGP72Jpd0bxdq2Lrsv+09Ds8zX8mT/oXapSoD6FZ4UKjjWvlRuP1wZcRyTCDlQ8b1Q==
   dependencies:
     "@mapbox/vector-tile" "1.3.1"
     "@turf/turf" "6.5.0"
