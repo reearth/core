@@ -1,4 +1,4 @@
-import { Space } from "@spatial-id/javascript-sdk";
+import { Space } from "@reearth/spatial-id-sdk";
 import { v4 as uuid } from "uuid";
 
 import { SPATIALID_DEFAULT_COLOR, SPATIALID_DEFAULT_MAX_HEIGHT } from "./hooks";
