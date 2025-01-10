@@ -3,6 +3,7 @@ import { useImperativeHandle, useRef, type Ref, useState, useCallback, useEffect
 import { SelectedFeatureInfo } from "../mantle";
 
 import { type MapRef, mapRef } from "./ref";
+import { SpatialIdRef } from "./SpatialId/types";
 import type {
   EngineRef,
   LayersRef,
@@ -42,10 +43,16 @@ export default function ({
   onMount?: () => void;
   onAPIReady?: () => void;
 }) {
-  const [mapAPIReady, setMapAPIReady] = useState({ engine: false, layers: false, sketch: false });
+  const [mapAPIReady, setMapAPIReady] = useState({
+    engine: false,
+    layers: false,
+    sketch: false,
+    spatialId: false,
+  });
   const engineRef = useRef<EngineRef>(null);
   const layersRef = useRef<LayersRef>(null);
   const sketchRef = useRef<SketchRef>(null);
+  const spatialIdRef = useRef<SpatialIdRef>(null);
   const requestingRenderMode = useRef<RequestingRenderMode>(NO_REQUEST_RENDER);
 
   useImperativeHandle(
@@ -55,13 +62,20 @@ export default function ({
         engineRef,
         layersRef,
         sketchRef,
+        spatialIdRef,
         timelineManagerRef,
       }),
     [timelineManagerRef],
   );
 
   useEffect(() => {
-    if (onAPIReady && mapAPIReady.engine && mapAPIReady.layers && mapAPIReady.sketch) {
+    if (
+      onAPIReady &&
+      mapAPIReady.engine &&
+      mapAPIReady.layers &&
+      mapAPIReady.sketch &&
+      mapAPIReady.spatialId
+    ) {
       onAPIReady?.();
     }
   }, [onAPIReady, mapAPIReady]);
@@ -136,11 +150,15 @@ export default function ({
   const handleSketchMount = useCallback(() => {
     setMapAPIReady(s => ({ ...s, sketch: true }));
   }, []);
+  const handleSpatialIdMount = useCallback(() => {
+    setMapAPIReady(s => ({ ...s, spatialId: true }));
+  }, []);
 
   return {
     engineRef,
     layersRef,
     sketchRef,
+    spatialIdRef,
     selectedLayer,
     requestingRenderMode,
     handleLayerSelect,
@@ -150,5 +168,6 @@ export default function ({
     handleEngineMount,
     handleLayersMount,
     handleSketchMount,
+    handleSpatialIdMount,
   };
 }

@@ -71,6 +71,7 @@ export default function ({
   ref,
   engineRef,
   layersRef,
+  interactionMode,
   selectedFeature,
   overrideInteractionMode,
   onSketchTypeChange,
@@ -333,6 +334,7 @@ export default function ({
   useWindowEvent("keydown", event => {
     if (type === undefined) return;
     if (event.code === "Space") {
+      tempSwitchToMoveMode.current = true;
       setDisableInteraction(true);
       overrideInteractionMode?.("move");
     } else {
@@ -360,6 +362,9 @@ export default function ({
     if (event.code === "Space") {
       overrideInteractionMode?.("sketch");
       setDisableInteraction(false);
+      if (tempSwitchToMoveMode.current) {
+        tempSwitchToMoveMode.current = false;
+      }
     }
   });
 
@@ -376,9 +381,17 @@ export default function ({
   overrideInteractionModeRef.current = overrideInteractionMode;
   const onSketchTypeChangeRef = useRef(onSketchTypeChange);
   onSketchTypeChangeRef.current = onSketchTypeChange;
+  const interactionModeRef = useRef(interactionMode);
+  interactionModeRef.current = interactionMode;
 
   useEffect(() => {
-    overrideInteractionModeRef.current?.(type || sketchEditingFeature ? "sketch" : "default");
+    overrideInteractionModeRef.current?.(
+      type || sketchEditingFeature
+        ? "sketch"
+        : interactionModeRef.current === "sketch"
+          ? "default"
+          : interactionModeRef.current,
+    );
   }, [type, sketchEditingFeature]);
 
   const isEditingRef = useRef(isEditing);
@@ -392,6 +405,19 @@ export default function ({
       cancelEditRef.current();
     }
   }, [type]);
+
+  const typeRef = useRef(type);
+  typeRef.current = type;
+  useEffect(() => {
+    if (tempSwitchToMoveMode.current) return;
+    if (interactionMode !== "sketch") {
+      if (isEditingRef.current) {
+        cancelEditRef.current();
+      } else if (typeRef.current !== undefined) {
+        updateType(undefined);
+      }
+    }
+  }, [interactionMode, updateType]);
 
   // Edit
   const onEditFeatureChangeCbs = useRef<SketchEditFeatureChangeCb[]>([]);
@@ -569,8 +595,8 @@ export default function ({
   useEffect(() => {
     return window.addEventListener("keydown", event => {
       if (event.code === "Space" && stateRef.current.matches("editing")) {
-        overrideInteractionMode?.("move");
         tempSwitchToMoveMode.current = true;
+        overrideInteractionMode?.("move");
       } else if (event.code === "Delete" && stateRef.current.matches("editing")) {
         handleDeleteControlPointRef.current();
       }

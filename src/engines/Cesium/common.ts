@@ -554,7 +554,7 @@ export const colorBlendModeFor3DTile = (
       replace: Cesium3DTileColorBlendMode.REPLACE,
       mix: Cesium3DTileColorBlendMode.MIX,
     }) as { [key in string]?: Cesium3DTileColorBlendMode }
-  )[colorBlendMode]
+  )[colorBlendMode];
 
 export const heightReference = (
   heightReference?: "none" | "clamp" | "relative",
@@ -853,6 +853,7 @@ export function getExtrudedHeight(
   scene: Scene,
   position: Cartesian3,
   windowPosition: Cartesian2,
+  allowNegative = false,
 ): number | undefined {
   const cartesianScratch = new Cartesian3();
   const normalScratch = new Cartesian3();
@@ -894,7 +895,7 @@ export function getExtrudedHeight(
       scene.globe.ellipsoid,
       cartographicScratch,
     ).height;
-    return Math.max(0, toHeight - fromHeight);
+    return allowNegative ? toHeight - fromHeight : Math.max(0, toHeight - fromHeight);
   } catch (error) {
     console.error(error);
   }

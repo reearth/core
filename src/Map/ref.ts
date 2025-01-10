@@ -1,5 +1,6 @@
 import type { RefObject } from "react";
 
+import { SpatialIdRef } from "./SpatialId/types";
 import type { EngineRef, LayersRef, SketchRef } from "./types";
 import { TimelineManagerRef } from "./useTimelineManager";
 import { FunctionKeys, WrappedRef, wrapRef } from "./utils";
@@ -8,6 +9,7 @@ export type MapRef = {
   engine: WrappedRef<EngineRef>;
   layers: WrappedRef<LayersRef>;
   sketch: WrappedRef<SketchRef>;
+  spatialId?: WrappedRef<SpatialIdRef>;
   timeline?: TimelineManagerRef;
 };
 
@@ -133,21 +135,30 @@ const sketchRefKeys: FunctionKeys<SketchRef> = {
   onEditFeatureChange: 1,
 };
 
+const spatialIdRefKeys: FunctionKeys<SpatialIdRef> = {
+  pickSpace: 1,
+  exitPickSpace: 1,
+  onSpacePick: 1,
+};
+
 export function mapRef({
   engineRef,
   layersRef,
   sketchRef,
+  spatialIdRef,
   timelineManagerRef,
 }: {
   engineRef: RefObject<EngineRef>;
   layersRef: RefObject<LayersRef>;
   sketchRef: RefObject<SketchRef>;
+  spatialIdRef: RefObject<SpatialIdRef>;
   timelineManagerRef?: TimelineManagerRef;
 }): MapRef {
   return {
     engine: wrapRef(engineRef, engineRefKeys),
     layers: wrapRef(layersRef, layersRefKeys),
     sketch: wrapRef(sketchRef, sketchRefKeys),
+    spatialId: wrapRef(spatialIdRef, spatialIdRefKeys),
     timeline: timelineManagerRef,
   };
 }
