@@ -1,6 +1,6 @@
 {
   "name": "@reearth/core",
-  "version": "0.0.7-alpha.24",
+  "version": "0.0.7-alpha.25",
   "author": "Re:Earth contributors <community@reearth.io>",
   "license": "Apache-2.0",
   "description": "A library that abstracts a map engine as one common API.",
@@ -42,7 +42,7 @@
     "@radix-ui/react-slot": "1.1.0",
     "@radix-ui/react-switch": "1.1.0",
     "@radix-ui/react-toggle": "1.1.0",
-    "@reearth/cesium-mvt-imagery-provider": "1.5.4",
+    "@reearth/cesium-mvt-imagery-provider": "1.6.0",
     "@reearth/spatial-id-sdk": "0.0.0",
     "@rot1024/use-transition": "1.0.0",
     "@seznam/compose-react-refs": "1.0.6",
