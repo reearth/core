@@ -1,6 +1,6 @@
 import { FEATURE_FLAGS } from "./featureFlags";
 
-export type InteractionModeType = "default" | "move" | "selection" | "sketch";
+export type InteractionModeType = "default" | "move" | "selection" | "sketch" | "spatialId";
 
 // If you would like enable a feature in a specific mode,
 // just set the feature's flag here to that mode.
@@ -22,4 +22,5 @@ export const INTERACTION_MODES: Record<InteractionModeType, number> = {
     FEATURE_FLAGS.CAMERA_ZOOM |
     FEATURE_FLAGS.CAMERA_TILT,
   sketch: FEATURE_FLAGS.SKETCH | FEATURE_FLAGS.CAMERA_ZOOM | FEATURE_FLAGS.CAMERA_TILT,
+  spatialId: FEATURE_FLAGS.CAMERA_ZOOM | FEATURE_FLAGS.CAMERA_TILT,
 };

@@ -1,15 +1,9 @@
-import {
-  Entity,
-  Cartesian3,
-  PolygonHierarchy,
-  PointGraphics,
-  BillboardGraphics,
-  JulianDate,
-} from "cesium";
+import { Entity, PointGraphics, BillboardGraphics, JulianDate } from "cesium";
 
 import { EvalFeature } from "../../..";
 import { AppearanceTypes, ComputedFeature, ComputedLayer, Feature } from "../../../../mantle";
-import { heightReference, shadowMode, toColor } from "../../common";
+import { heightReference, shadowMode, toColor, classificationType } from "../../common";
+import { getMarkerCoordinates, getGeometryFromEntity } from "../../helpers/getGeometryFromEntity";
 import { convertEntityDescription, convertEntityProperties } from "../../utils/utils";
 import { attachTag, extractSimpleLayer, getTag, Tag } from "../utils";
 
@@ -39,7 +33,7 @@ type EntityAppearanceKey<AName extends SupportedAppearanceKey> = AName extends "
   ? keyof Pick<Entity, "point" | "billboard" | "label">
   : keyof Pick<Entity, CesiumEntityAppearanceKey>;
 
-type AppearancePropertyKeyType = "color" | "heightReference" | "shadows";
+type AppearancePropertyKeyType = "color" | "heightReference" | "shadows" | "classificationType";
 
 export function attachProperties<
   AName extends SupportedAppearanceKey,
@@ -93,6 +87,9 @@ export function attachProperties<
         break;
       case "heightReference":
         value = heightReference(value);
+        break;
+      case "classificationType":
+        value = classificationType(value);
     }
 
     if (value === (entity[propertyName] as any)[entityPropertyKey]) {
@@ -132,16 +129,14 @@ export const attachStyle = (
   const point = hasAppearance(layer, entity, ["marker", "point"]);
   const billboard = hasAppearance(layer, entity, ["marker", "billboard"]);
   const label = hasAppearance(layer, entity, ["marker", "label"]);
-  if (point || billboard || label) {
-    const position = entity.position?.getValue(currentTime);
-    const coordinates = [position?.x ?? 0, position?.y ?? 0, position?.z ?? 0];
+  if (entity.point || entity.billboard || entity.label) {
+    const coordinates = getMarkerCoordinates(entity, currentTime);
+    const geometry = getGeometryFromEntity(currentTime, entity);
+
     const feature: Feature = {
       type: "feature",
       id: makeFeatureId(entity),
-      geometry: {
-        type: "Point",
-        coordinates,
-      },
+      geometry,
       properties: convertEntityProperties(currentTime, entity),
       metaData: {
         description: convertEntityDescription(currentTime, entity),
@@ -261,21 +256,14 @@ export const attachStyle = (
     return [feature, computedFeature];
   }
 
-  if (hasAppearance(layer, entity, ["polyline", "polyline"])) {
+  if (entity.polyline) {
     const entityPosition = entity.position?.getValue(currentTime);
-    const positions = entity.polyline?.positions?.getValue(currentTime) as Cartesian3[];
-    const coordinates = positions?.map(position => [
-      position?.x ?? 0,
-      position?.y ?? 0,
-      position?.z ?? 0,
-    ]);
+    const geometry = getGeometryFromEntity(currentTime, entity);
+
     const feature: Feature = {
       type: "feature",
       id: makeFeatureId(entity),
-      geometry: {
-        type: "LineString",
-        coordinates,
-      },
+      geometry,
       properties: convertEntityProperties(currentTime, entity),
       metaData: {
         description: convertEntityDescription(currentTime, entity),
@@ -290,42 +278,43 @@ export const attachStyle = (
     if (!computedFeature) {
       return;
     }
-    attachProperties(entity, computedFeature, ["polyline", "polyline"], {
-      show: {
-        name: "show",
-        default: true,
-      },
-      width: {
-        name: "strokeWidth",
-      },
-      material: {
-        name: "strokeColor",
-        type: "color",
-      },
-      shadows: {
-        name: "shadows",
-        type: "shadows",
-      },
-      clampToGround: {
-        name: "clampToGround",
-      },
-    });
+    if (hasAppearance(layer, entity, ["polyline", "polyline"])) {
+      attachProperties(entity, computedFeature, ["polyline", "polyline"], {
+        show: {
+          name: "show",
+          default: true,
+        },
+        width: {
+          name: "strokeWidth",
+        },
+        material: {
+          name: "strokeColor",
+          type: "color",
+        },
+        shadows: {
+          name: "shadows",
+          type: "shadows",
+        },
+        clampToGround: {
+          name: "clampToGround",
+        },
+        classificationType: {
+          name: "classificationType",
+          type: "classificationType",
+        },
+      });
+    }
     return [feature, computedFeature];
   }
 
-  if (hasAppearance(layer, entity, ["polygon", "polygon"])) {
+  if (entity.polygon) {
     const entityPosition = entity.position?.getValue(currentTime);
-    const hierarchy = entity.polygon?.hierarchy?.getValue(currentTime) as PolygonHierarchy;
-    const coordinates = hierarchy?.holes?.map(hole =>
-      hole.positions.map(position => [position?.x ?? 0, position?.y ?? 0, position?.z ?? 0]),
-    );
+    const geometry = getGeometryFromEntity(currentTime, entity);
+
     const feature: Feature = {
       type: "feature",
       id: makeFeatureId(entity),
-      geometry: {
-        type: "Polygon",
-        coordinates,
-      },
+      geometry,
       properties: convertEntityProperties(currentTime, entity),
       metaData: {
         description: convertEntityDescription(currentTime, entity),
@@ -340,40 +329,46 @@ export const attachStyle = (
     if (!computedFeature) {
       return;
     }
-    attachProperties(entity, computedFeature, ["polygon", "polygon"], {
-      show: {
-        name: "show",
-        default: true,
-      },
-      fill: {
-        name: "fill",
-      },
-      material: {
-        name: "fillColor",
-        type: "color",
-      },
-      outline: {
-        name: "stroke",
-      },
-      outlineColor: {
-        name: "strokeColor",
-        type: "color",
-      },
-      outlineWidth: {
-        name: "strokeWidth",
-      },
-      shadows: {
-        name: "shadows",
-        type: "shadows",
-      },
-      heightReference: {
-        name: "heightReference",
-        type: "heightReference",
-      },
-      extrudedHeight: {
-        name: "extrudedHeight",
-      },
-    });
+    if (hasAppearance(layer, entity, ["polygon", "polygon"])) {
+      attachProperties(entity, computedFeature, ["polygon", "polygon"], {
+        show: {
+          name: "show",
+          default: true,
+        },
+        fill: {
+          name: "fill",
+        },
+        material: {
+          name: "fillColor",
+          type: "color",
+        },
+        outline: {
+          name: "stroke",
+        },
+        outlineColor: {
+          name: "strokeColor",
+          type: "color",
+        },
+        outlineWidth: {
+          name: "strokeWidth",
+        },
+        shadows: {
+          name: "shadows",
+          type: "shadows",
+        },
+        heightReference: {
+          name: "heightReference",
+          type: "heightReference",
+        },
+        extrudedHeight: {
+          name: "extrudedHeight",
+        },
+        classificationType: {
+          name: "classificationType",
+          type: "classificationType",
+        },
+      });
+    }
     return [feature, computedFeature];
   }
 };

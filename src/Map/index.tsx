@@ -5,6 +5,7 @@ import { INTERACTION_MODES } from "../Visualizer/interactionMode";
 import useHooks, { MapRef } from "./hooks";
 import Layers, { type Props as LayersProps } from "./Layers";
 import Sketch, { SketchProps } from "./Sketch";
+import SpatialId from "./SpatialId";
 import type { Engine, EngineProps } from "./types";
 
 export * from "./types";
@@ -85,6 +86,7 @@ function MapFn(
     engineRef,
     layersRef,
     sketchRef,
+    spatialIdRef,
     selectedLayer,
     requestingRenderMode,
     handleLayerSelect,
@@ -94,6 +96,7 @@ function MapFn(
     handleEngineMount,
     handleLayersMount,
     handleSketchMount,
+    handleSpatialIdMount,
   } = useHooks({
     ref,
     timelineManagerRef,
@@ -166,6 +169,14 @@ function MapFn(
         sketchEditingFeature={sketchEditingFeature}
         onSketchEditFeature={setSketchEditingFeature}
         onMount={handleSketchMount}
+      />
+      <SpatialId
+        ref={spatialIdRef}
+        engineRef={engineRef}
+        interactionMode={interactionMode}
+        terrainEnabled={!!props.property?.terrain?.enabled}
+        overrideInteractionMode={overrideInteractionMode}
+        onMount={handleSpatialIdMount}
       />
     </Engine>
   ) : null;

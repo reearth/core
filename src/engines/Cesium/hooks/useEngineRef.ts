@@ -35,6 +35,7 @@ import {
   getCredits,
 } from "../common";
 import { attachTag, getTag } from "../Feature";
+import { getGeometryFromEntity } from "../helpers/getGeometryFromEntity";
 import { PickedFeature, pickManyFromViewportAsFeature } from "../pickMany";
 import { createGeometry } from "../Sketch/createGeometry";
 import { CursorType } from "../types";
@@ -260,13 +261,14 @@ export default function useEngineRef(
         }
         return;
       },
-      getExtrudedHeight: (position, windowPosition) => {
+      getExtrudedHeight: (position, windowPosition, allowNegative) => {
         const viewer = cesium.current?.cesiumElement;
         if (!viewer || viewer.isDestroyed()) return;
         return getExtrudedHeight(
           viewer.scene,
           new Cesium.Cartesian3(position[0], position[1], position[2]),
           new Cesium.Cartesian2(windowPosition[0], windowPosition[1]),
+          allowNegative,
         );
       },
       getExtrudedPoint: (position, extrudedHeight) => {
@@ -847,6 +849,7 @@ export default function useEngineRef(
             tag.computedFeature ?? {
               type: "computedFeature",
               id: tag.featureId,
+              geometry: getGeometryFromEntity(viewer.clock.currentTime, entity),
               properties: convertEntityProperties(viewer.clock.currentTime, entity),
               metaData: {
                 description: convertEntityDescription(viewer.clock.currentTime, entity),

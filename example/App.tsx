@@ -37,6 +37,9 @@ function App() {
     handleDeleteSketchFeature,
     handleCreditsUpdate,
     handleGetCredits,
+    handleSpatialIdPick,
+    spatialIdZoom,
+    handleSpatialIdZoomChange,
   } = useHooks();
 
   return (
@@ -61,6 +64,9 @@ function App() {
         handleApplyEditSketchFeature={handleApplyEditSketchFeature}
         handleDeleteSketchFeature={handleDeleteSketchFeature}
         handleGetCredits={handleGetCredits}
+        handleSpatialIdPick={handleSpatialIdPick}
+        spatialIdZoom={spatialIdZoom}
+        handleSpatialIdZoomChange={handleSpatialIdZoomChange}
       />
       <SelectionPanel selectedLayer={selectedLayer} selectedFeature={selectedFeature} />
       <CoreVisualizer
