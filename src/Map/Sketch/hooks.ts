@@ -385,13 +385,9 @@ export default function ({
   interactionModeRef.current = interactionMode;
 
   useEffect(() => {
-    overrideInteractionModeRef.current?.(
-      type || sketchEditingFeature
-        ? "sketch"
-        : interactionModeRef.current === "sketch"
-          ? "default"
-          : interactionModeRef.current,
-    );
+    if ((sketchEditingFeature || type) && interactionModeRef.current !== "sketch") {
+      overrideInteractionModeRef.current?.("sketch");
+    }
   }, [type, sketchEditingFeature]);
 
   const isEditingRef = useRef(isEditing);
@@ -404,6 +400,9 @@ export default function ({
     if (isEditingRef.current) {
       cancelEditRef.current();
     }
+    if (type === undefined) {
+      overrideInteractionModeRef.current?.("default");
+    }
   }, [type]);
 
   const typeRef = useRef(type);
@@ -413,8 +412,6 @@ export default function ({
     if (interactionMode !== "sketch") {
       if (isEditingRef.current) {
         cancelEditRef.current();
-      } else if (typeRef.current !== undefined) {
-        updateType(undefined);
       }
     }
   }, [interactionMode, updateType]);
