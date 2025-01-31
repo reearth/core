@@ -401,7 +401,9 @@ export default function ({
       cancelEditRef.current();
     }
     if (type === undefined) {
-      overrideInteractionModeRef.current?.("default");
+      overrideInteractionModeRef.current?.(
+        interactionModeRef.current === "sketch" ? "default" : interactionModeRef.current,
+      );
     }
   }, [type]);
 
