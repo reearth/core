@@ -70,3 +70,35 @@ export const LAND_USE: Layer = {
     stroke: true,
   },
 };
+
+export const LSLD: Layer = {
+  id: "lsld_use_mvt",
+  type: "simple",
+  data: {
+    type: "mvt",
+    url: "https://assets.cms.plateau.reearth.io/assets/ce/5a6bea-6816-4783-ada5-b193f2888737/01100_sapporo-shi_city_2020_citygml_6_op_lsld_mvt/{z}/{x}/{y}.mvt",
+    layers: "lsld",
+  },
+  polygon: {
+    show: true,
+    fillColor: {
+      expression: {
+        conditions: [
+          [
+            '(!(${attributes["urf:areaType_code"]} === "" || ${attributes["urf:areaType_code"]} === null || isNaN(Number(${attributes["urf:areaType_code"]}))) ? Number(${attributes["urf:areaType_code"]}) : null) === 1',
+            'color("#FFED4C", 1)',
+          ],
+          [
+            '(!(${attributes["urf:areaType_code"]} === "" || ${attributes["urf:areaType_code"]} === null || isNaN(Number(${attributes["urf:areaType_code"]}))) ? Number(${attributes["urf:areaType_code"]}) : null) === 2',
+            'color("#FB684C", 1)',
+          ],
+          ["true", 'color("#ffffff", 1)'],
+        ],
+      },
+    },
+  },
+  raster: {
+    minimumLevel: 8,
+    maximumLevel: 16,
+  },
+};

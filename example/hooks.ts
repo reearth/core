@@ -2,7 +2,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import {
   ComputedFeature,
+  ComputedLayer,
   Credit,
+  LayerSelectionReason,
   LazyLayer,
   MapRef,
   SketchEditingFeature,
@@ -33,9 +35,15 @@ export default () => {
   // TODO: use onLayerSelect props (core should export a type for selection).
   const [selectedLayer, setSelectedLayer] = useState<LazyLayer | undefined>();
   const [selectedFeature, setSelectedFeature] = useState<ComputedFeature | undefined>();
-  const handleSelect = useCallback(() => {
+  const handleSelect: (
+    layerId: string | undefined,
+    layer: (() => Promise<ComputedLayer | undefined>) | undefined,
+    feature: ComputedFeature | undefined,
+    reason: LayerSelectionReason | undefined,
+  ) => void = useCallback((_layerId, _layer, feature) => {
     setSelectedLayer(ref.current?.layers.selectedLayer());
-    setSelectedFeature(ref.current?.layers.selectedFeature());
+    // console.log("SELECTED: ", feature?.properties["urf_areaType"]);
+    setSelectedFeature(ref.current?.layers.selectedFeature() ?? feature);
   }, []);
 
   const meta = useMemo(
