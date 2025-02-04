@@ -560,8 +560,8 @@ export default ({
         if (pickRay) {
           const l = await scene.imageryLayers.pickImageryLayerFeatures(pickRay, scene);
 
-          // NOTE: For now we only send the first selected feature to onLayerSelect instead of sending all of them: @pyshx
-          const f = l?.[0];
+          // Find the topmost overlaid feature.
+          const f = l?.findLast(f => !!f.data);
 
           const appearanceType = f?.data?.appearanceType;
 
