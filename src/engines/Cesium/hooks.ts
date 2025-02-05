@@ -561,7 +561,10 @@ export default ({
           const l = await scene.imageryLayers.pickImageryLayerFeatures(pickRay, scene);
 
           // Find the topmost overlaid feature.
-          const f = l?.findLast(f => !!f.data);
+          const f = l?.findLast(f => {
+            const appearanceType = f?.data?.appearanceType;
+            return appearanceType && f?.data?.feature?.[appearanceType]?.show !== false;
+          });
 
           const appearanceType = f?.data?.appearanceType;
 
