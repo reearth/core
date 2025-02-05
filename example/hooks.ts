@@ -42,7 +42,7 @@ export default () => {
     reason: LayerSelectionReason | undefined,
   ) => void = useCallback((_layerId, _layer, feature) => {
     setSelectedLayer(ref.current?.layers.selectedLayer());
-    // console.log("SELECTED: ", feature?.properties["urf_areaType"]);
+    // console.log("SELECTED: ", feature?.properties);
     setSelectedFeature(ref.current?.layers.selectedFeature() ?? feature);
   }, []);
 
