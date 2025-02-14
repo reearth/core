@@ -138,10 +138,11 @@ export default function useHooks(
   const interactionMode = _interactionMode || "default";
 
   const [cursor, setCursor] = useState<CursorType>("auto");
+  // Note TODO: manage cursor state by functions instead of interactionMode
   useEffect(() => {
-    setCursor(
-      interactionMode === "sketch" ? "crosshair" : interactionMode === "move" ? "grab" : "auto",
-    );
+    if (interactionMode === "sketch") {
+      setCursor("crosshair");
+    }
   }, [interactionMode]);
 
   // feature flags

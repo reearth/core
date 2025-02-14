@@ -1,5 +1,6 @@
 import {
   ForwardedRef,
+  RefObject,
   useCallback,
   useEffect,
   useImperativeHandle,
@@ -7,19 +8,22 @@ import {
   useRef,
   useState,
 } from "react";
-import { RefObject } from "use-callback-ref/dist/es5/types";
+import { v4 as uuid } from "uuid";
 
 import { InteractionModeType } from "../../Visualizer";
 import { EngineRef, MouseEventProps } from "../types";
 
+import { SPATIALID_DEFAULT_OPTIONS } from "./constants";
 import {
   SpatialIdRef,
   SpatialIdSpacePickingState,
   SpatialIdSpaceType,
   SpatialIdSpaceData,
   SpatialIdPickSpaceOptions,
+  VerticalSpaceIndicatorType,
+  CoordinateSelectorType,
 } from "./types";
-import { createSpatialIdFloorSpaces, createSpatialIdSpace, getSpaceData } from "./utils";
+import { createSpatialIdSpace, getSpaceData, getVerticalLimits } from "./utils";
 
 type Props = {
   ref: ForwardedRef<SpatialIdRef>;
@@ -29,12 +33,6 @@ type Props = {
   overrideInteractionMode?: (mode: InteractionModeType) => void;
   onMount?: () => void;
 };
-
-export const SPATIALID_DEFAULT_ZOOM = 20;
-export const SPATIALID_DEFAULT_MAX_HEIGHT = 1000;
-export const SPATIALID_DEFAULT_COLOR = "#00bebe";
-export const SPATIALID_DEFAULT_DATA_ONLY = false;
-export const SPATIALID_DEFAULT_RIGHT_CLICK_TO_EXIT = true;
 
 export default ({
   ref,
@@ -46,32 +44,65 @@ export default ({
 }: Props) => {
   const [state, setState] = useState<SpatialIdSpacePickingState>("idle");
 
-  const [spatialIdSpaces, setSpatialIdSpaces] = useState<SpatialIdSpaceType[]>([]);
-  const [floorSpaces, setFloorSpaces] = useState<SpatialIdSpaceType[]>([]);
-  const [selectorSpace, setSelectorSpace] = useState<SpatialIdSpaceType | null>(null);
-
-  const spaces = useMemo(() => {
-    return [...spatialIdSpaces, ...floorSpaces, ...(selectorSpace ? [selectorSpace] : [])];
-  }, [spatialIdSpaces, floorSpaces, selectorSpace]);
+  const [spatialIdSpaces, setSpatialIdSpaces] = useState<SpatialIdSpaceType[] | null>(null);
+  const [verticalSpaceIndicator, setVerticalSpaceIndicator] =
+    useState<VerticalSpaceIndicatorType | null>(null);
+  const [coordinateSelector, setCoordinateSelector] = useState<CoordinateSelectorType | null>(null);
+  const [spaceSelector, setSpaceSelector] = useState<SpatialIdSpaceType | null>(null);
 
   const [basePosition, setBasePosition] = useState<[number, number, number] | null>(null);
   const [baseCoordinate, setBaseCoordinate] = useState<[number, number, number] | null>(null);
 
-  const [pickOptions, setPickOptions] = useState<Required<SpatialIdPickSpaceOptions>>({
-    zoom: SPATIALID_DEFAULT_ZOOM,
-    maxHeight: SPATIALID_DEFAULT_MAX_HEIGHT,
-    color: SPATIALID_DEFAULT_COLOR,
-    dataOnly: SPATIALID_DEFAULT_DATA_ONLY,
-    rightClickToExit: SPATIALID_DEFAULT_RIGHT_CLICK_TO_EXIT,
-  });
+  const [pickOptions, setPickOptions] =
+    useState<Required<SpatialIdPickSpaceOptions>>(SPATIALID_DEFAULT_OPTIONS);
+
+  const verticalLimits = useMemo(
+    () => getVerticalLimits(pickOptions.maxHeight, pickOptions.minHeight, pickOptions.zoom),
+    [pickOptions.maxHeight, pickOptions.minHeight, pickOptions.zoom],
+  );
+
+  const groundIndicators = useMemo(() => {
+    const allSpaces = [...(spatialIdSpaces ?? []), ...(spaceSelector ? [spaceSelector] : [])];
+
+    if (!allSpaces) return null;
+    // find unique spaces by space.space.zfxy.z, space.space.zfxy.x, space.space.zfxy.y
+    const uniqueSpaces = allSpaces.reduce((acc, space) => {
+      if (
+        !acc.find(
+          s =>
+            s.space.zfxy.z === space.space.zfxy.z &&
+            s.space.zfxy.x === space.space.zfxy.x &&
+            s.space.zfxy.y === space.space.zfxy.y,
+        )
+      ) {
+        acc.push(space);
+      }
+      return acc;
+    }, [] as SpatialIdSpaceType[]);
+
+    if (uniqueSpaces.length === 0) return null;
+
+    return uniqueSpaces.map(space => {
+      const { wsen } = space;
+      return {
+        id: uuid(),
+        spaceId: space.space.id,
+        wsen,
+        color: pickOptions.groundIndicatorColor,
+      };
+    });
+  }, [spatialIdSpaces, spaceSelector, pickOptions.groundIndicatorColor]);
 
   const pickSpace = useCallback(
     (options?: SpatialIdPickSpaceOptions) => {
       setState("coordinate");
       setPickOptions(prev => ({ ...prev, ...options }));
       overrideInteractionMode?.("spatialId");
+      setTimeout(() => {
+        engineRef.current?.setCursor("crosshair");
+      }, 100);
     },
-    [overrideInteractionMode],
+    [engineRef, overrideInteractionMode],
   );
 
   const interactionModeRef = useRef(interactionMode);
@@ -79,26 +110,29 @@ export default ({
 
   const finishPicking = useCallback(() => {
     setState("idle");
-    setSelectorSpace(null);
     setBasePosition(null);
     setBaseCoordinate(null);
-    setFloorSpaces([]);
+    setSpaceSelector(null);
+    setCoordinateSelector(null);
+    setVerticalSpaceIndicator(null);
     overrideInteractionMode?.(
       interactionModeRef.current === "spatialId"
         ? "default"
         : interactionModeRef.current ?? "default",
     );
+    engineRef.current?.setCursor("default");
     engineRef.current?.requestRender();
   }, [overrideInteractionMode, engineRef]);
 
-  // handle events
   const handleMouseUp = useCallback(
     (props: MouseEventProps) => {
       if (state === "idle") return;
       if (tempSwitchToMoveMode.current) return;
 
+      // handle coordinate picking
       if (state === "coordinate") {
-        if (!selectorSpace || props.lat === undefined || props.lng === undefined) return;
+        if (!coordinateSelector || props.lat === undefined || props.lng === undefined) return;
+
         setState("floor");
         setBaseCoordinate([props.lng, props.lat, terrainEnabled ? props.height ?? 0 : 0]);
         setBasePosition(
@@ -107,27 +141,47 @@ export default ({
           }) ?? null,
         );
 
-        setSelectorSpace(prev =>
-          prev ? { ...prev, type: "selector", color: pickOptions.color } : null,
-        );
+        setCoordinateSelector(null);
 
-        const floorSpaces = createSpatialIdFloorSpaces(
-          selectorSpace.space,
-          pickOptions.maxHeight,
-          pickOptions.color,
+        const initialSpaceSelectorSpace = createSpatialIdSpace(
+          props.lng,
+          props.lat,
+          terrainEnabled ? props.height ?? 0 : 0,
+          pickOptions.zoom,
         );
-        setFloorSpaces(floorSpaces);
+        setSpaceSelector({
+          ...initialSpaceSelectorSpace,
+          color: pickOptions.color,
+          outlineColor: pickOptions.outlineColor,
+        });
+
+        const { id, wsen } = createSpatialIdSpace(
+          props.lng,
+          props.lat,
+          terrainEnabled ? props.height ?? 0 : 0,
+          pickOptions.zoom,
+        );
+        setVerticalSpaceIndicator({
+          id,
+          wsen,
+          height: verticalLimits.top,
+          extrudedHeight: verticalLimits.bottom,
+          color: pickOptions.verticalSpaceIndicatorColor,
+          outlineColor: pickOptions.verticalSpaceIndicatorOutlineColor,
+        });
+        engineRef.current?.requestRender();
       } else if (state === "floor") {
-        if (!selectorSpace) return;
+        if (!spaceSelector) return;
 
         const confirmedSpace: SpatialIdSpaceType = {
-          ...selectorSpace,
-          type: "confirmed",
+          ...spaceSelector,
+          id: uuid(),
           color: pickOptions.color,
+          outlineColor: pickOptions.outlineColor,
         };
 
         if (!pickOptions.dataOnly) {
-          setSpatialIdSpaces(prev => [...prev, confirmedSpace]);
+          setSpatialIdSpaces(prev => (prev ? [...prev, confirmedSpace] : [confirmedSpace]));
         }
 
         finishPicking();
@@ -136,7 +190,16 @@ export default ({
         onSpacePickEvents.current.forEach(cb => cb(spaceData));
       }
     },
-    [state, terrainEnabled, engineRef, selectorSpace, pickOptions, finishPicking],
+    [
+      state,
+      terrainEnabled,
+      engineRef,
+      spaceSelector,
+      pickOptions,
+      verticalLimits,
+      coordinateSelector,
+      finishPicking,
+    ],
   );
 
   const handleMouseMove = useCallback(
@@ -154,9 +217,13 @@ export default ({
           pickOptions.zoom,
         );
 
-        if (newSpace.space.id === selectorSpace?.space.id) return;
-
-        setSelectorSpace({ ...newSpace, type: "coordinate", color: pickOptions.color });
+        if (newSpace.space.id === coordinateSelector?.spaceId) return;
+        setCoordinateSelector({
+          id: uuid(),
+          spaceId: newSpace.space.id,
+          wsen: newSpace.wsen,
+          color: pickOptions.selectorColor,
+        });
       } else if (state === "floor") {
         if (
           props.x === undefined ||
@@ -166,24 +233,42 @@ export default ({
         )
           return;
 
-        const height =
+        const offset =
           engineRef.current?.getExtrudedHeight(basePosition, [props.x, props.y], true) ?? 0;
 
-        if (baseCoordinate[2] + height > pickOptions.maxHeight) return;
+        if (
+          baseCoordinate[2] + offset > verticalLimits.top ||
+          baseCoordinate[2] + offset < verticalLimits.bottom
+        )
+          return;
 
         const newSpace = createSpatialIdSpace(
           baseCoordinate[0],
           baseCoordinate[1],
-          baseCoordinate[2] + height,
+          baseCoordinate[2] + offset,
           pickOptions.zoom,
         );
 
-        if (newSpace.space.id === selectorSpace?.space.id || newSpace.space.zfxy.f < 0) return;
+        if (newSpace.space.id === spaceSelector?.space.id) return;
 
-        setSelectorSpace({ ...newSpace, type: "selector", color: pickOptions.color });
+        setSpaceSelector({
+          ...newSpace,
+          color: pickOptions.selectorColor,
+          outlineColor: pickOptions.selectorOutlineColor,
+        });
       }
     },
-    [state, selectorSpace, basePosition, baseCoordinate, engineRef, terrainEnabled, pickOptions],
+    [
+      state,
+      spaceSelector,
+      basePosition,
+      baseCoordinate,
+      engineRef,
+      terrainEnabled,
+      pickOptions,
+      verticalLimits,
+      coordinateSelector?.spaceId,
+    ],
   );
 
   const handleMouseRightClick = useCallback(() => {
@@ -191,10 +276,10 @@ export default ({
     if (state === "coordinate" && pickOptions.rightClickToExit) {
       finishPicking();
     } else if (state === "floor") {
-      setSelectorSpace(null);
+      setSpaceSelector(null);
       setBasePosition(null);
       setBaseCoordinate(null);
-      setFloorSpaces([]);
+      setVerticalSpaceIndicator(null);
       setState("coordinate");
     }
     engineRef.current?.requestRender();
@@ -288,6 +373,10 @@ export default ({
   }, [onMount]);
 
   return {
-    spaces,
+    spatialIdSpaces,
+    verticalSpaceIndicator,
+    coordinateSelector,
+    spaceSelector,
+    groundIndicators,
   };
 };
