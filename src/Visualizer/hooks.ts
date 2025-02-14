@@ -7,7 +7,6 @@ import type {
   Camera,
   ComputedLayer,
   LayerEditEvent,
-  CursorType,
   LayerVisibilityEvent,
   LayerLoadEvent,
   LayerSelectWithRectStart,
@@ -131,22 +130,19 @@ export default function useHooks(
   }, []);
 
   // interaction mode
-  const [_interactionMode, changeInteractionMode] = useValue(
-    initialInteractionMode,
+  const [interactionMode, changeInteractionMode] = useValue(
+    initialInteractionMode || "default",
     onInteractionModeChange,
   );
-  const interactionMode = _interactionMode || "default";
 
-  const [cursor, setCursor] = useState<CursorType>("auto");
-  // Note TODO: manage cursor state by functions instead of interactionMode
   useEffect(() => {
-    if (interactionMode === "sketch") {
-      setCursor("crosshair");
+    if (interactionMode === "default") {
+      mapRef?.current?.engine?.setCursor("auto");
     }
   }, [interactionMode]);
 
   // feature flags
-  const featureFlags = INTERACTION_MODES[interactionMode];
+  const featureFlags = INTERACTION_MODES[interactionMode ?? "default"];
 
   // layer edit
   const onLayerEditRef = useRef<(e: LayerEditEvent) => void>();
@@ -326,7 +322,6 @@ export default function useHooks(
     featureFlags,
     isLayerDragging,
     timelineManagerRef,
-    cursor,
     cameraForceHorizontalRoll,
     coreContextValue,
     containerStyle,

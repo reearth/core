@@ -90,10 +90,16 @@ export default function ({
   const [type, updateType] = useState<SketchType | undefined>();
   const [from, updateFrom] = useState<"editor" | "plugin">("editor");
 
-  const setType = useCallback((type: SketchType | undefined, from?: "editor" | "plugin") => {
-    updateType(type);
-    updateFrom(from ?? "editor");
-  }, []);
+  const setType = useCallback(
+    (type: SketchType | undefined, from?: "editor" | "plugin") => {
+      updateType(type);
+      updateFrom(from ?? "editor");
+      if (type) {
+        engineRef.current?.setCursor("crosshair");
+      }
+    },
+    [engineRef],
+  );
 
   const [disableInteraction, setDisableInteraction] = useState(false);
 
@@ -610,6 +616,12 @@ export default function ({
       }
     });
   }, [overrideInteractionMode]);
+
+  useEffect(() => {
+    if (!isEditing) {
+      overrideInteractionModeRef.current?.("default");
+    }
+  }, [isEditing]);
 
   return {
     state,

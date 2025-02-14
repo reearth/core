@@ -14,7 +14,7 @@ import type {
 } from "./types";
 import useTimelineManager, { TimelineManagerRef } from "./useTimelineManager";
 
-import { CursorType, SketchEditingFeature } from ".";
+import { SketchEditingFeature } from ".";
 
 export type { MapRef } from "./ref";
 
@@ -25,14 +25,12 @@ export const REQUEST_RENDER_ONCE = 1;
 export default function ({
   ref,
   timelineManagerRef,
-  cursor,
   onLayerSelect,
   onMount,
   onAPIReady,
 }: {
   ref: Ref<MapRef>;
   timelineManagerRef?: TimelineManagerRef;
-  cursor?: CursorType;
   onLayerSelect?: (
     layerId: string | undefined,
     featureId: string | undefined,
@@ -129,12 +127,6 @@ export default function ({
     engineRef,
     timelineManagerRef,
   });
-
-  useEffect(() => {
-    if (cursor) {
-      engineRef.current?.setCursor(cursor);
-    }
-  }, [cursor]);
 
   const [sketchEditingFeature, setSketchEditingFeature] = useState<
     SketchEditingFeature | undefined
