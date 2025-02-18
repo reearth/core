@@ -281,8 +281,8 @@ export default ({
       finishPicking();
     } else if (state === "floor") {
       setSpaceSelector(null);
-      // setBasePosition(null);
-      // setBaseCoordinate(null);
+      setBasePosition(null);
+      setBaseCoordinate(null);
       setVerticalSpaceIndicator(null);
       setCoordinateSelector(lastCoordinateSelector.current);
       setState("coordinate");
