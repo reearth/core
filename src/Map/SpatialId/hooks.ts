@@ -10,6 +10,7 @@ import {
 } from "react";
 import { v4 as uuid } from "uuid";
 
+import { useWindowEvent } from "../../utils/use-window-event";
 import { InteractionModeType } from "../../Visualizer";
 import { EngineRef, MouseEventProps } from "../types";
 
@@ -48,6 +49,7 @@ export default ({
   const [verticalSpaceIndicator, setVerticalSpaceIndicator] =
     useState<VerticalSpaceIndicatorType | null>(null);
   const [coordinateSelector, setCoordinateSelector] = useState<CoordinateSelectorType | null>(null);
+  const lastCoordinateSelector = useRef<CoordinateSelectorType | null>(null);
   const [spaceSelector, setSpaceSelector] = useState<SpatialIdSpaceType | null>(null);
 
   const [basePosition, setBasePosition] = useState<[number, number, number] | null>(null);
@@ -114,6 +116,7 @@ export default ({
     setBaseCoordinate(null);
     setSpaceSelector(null);
     setCoordinateSelector(null);
+    lastCoordinateSelector.current = null;
     setVerticalSpaceIndicator(null);
     overrideInteractionMode?.(
       interactionModeRef.current === "spatialId"
@@ -141,6 +144,7 @@ export default ({
           }) ?? null,
         );
 
+        lastCoordinateSelector.current = coordinateSelector;
         setCoordinateSelector(null);
 
         const initialSpaceSelectorSpace = createSpatialIdSpace(
@@ -271,7 +275,7 @@ export default ({
     ],
   );
 
-  const handleMouseRightClick = useCallback(() => {
+  const cancel = useCallback(() => {
     if (state === "idle") return;
     if (state === "coordinate" && pickOptions.rightClickToExit) {
       finishPicking();
@@ -280,10 +284,21 @@ export default ({
       setBasePosition(null);
       setBaseCoordinate(null);
       setVerticalSpaceIndicator(null);
+      setCoordinateSelector(lastCoordinateSelector.current);
       setState("coordinate");
     }
     engineRef.current?.requestRender();
   }, [state, pickOptions, engineRef, finishPicking]);
+
+  const handleMouseRightClick = useCallback(() => {
+    cancel();
+  }, [cancel]);
+
+  useWindowEvent("keydown", event => {
+    if (event.code === "Escape") {
+      cancel();
+    }
+  });
 
   // bind mouse events
   const eventsBinded = useRef(false);

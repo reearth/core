@@ -16,6 +16,7 @@ import { v4 as uuidv4 } from "uuid";
 import { InterpreterFrom, StateFrom } from "xstate";
 
 import { ControlPointMouseEventHandler } from "../../engines/Cesium/Sketch";
+import { useWindowEvent } from "../../utils/use-window-event";
 import { InteractionModeType } from "../../Visualizer/interactionMode";
 import { Feature, EngineRef, LayersRef, SketchRef } from "../types";
 import { useGet } from "../utils";
@@ -34,7 +35,6 @@ import {
 import usePluginSketchLayer from "./usePluginSketchLayer";
 import useSketch from "./useSketch";
 import useSketchFeature from "./useSketchFeature";
-import { useWindowEvent } from "./utils";
 
 import { OnLayerSelectType } from ".";
 
