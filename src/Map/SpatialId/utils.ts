@@ -56,8 +56,8 @@ export const getVerticalLimits = (
   zoom: number,
 ): { top: number; bottom: number } => {
   // lat/lng doesn't matter
-  const topSpace = new Space({ lat: 35, lng: 139, alt: maxHeigth }, zoom);
-  const bottomSpace = new Space({ lat: 35, lng: 139, alt: minHeight }, zoom);
+  const topSpace = new Space({ lat: 0, lng: 0, alt: maxHeigth }, zoom);
+  const bottomSpace = new Space({ lat: 0, lng: 0, alt: minHeight }, zoom);
   const { height } = getRectangeParamsFromSpace(topSpace);
   const { extrudedHeight } = getRectangeParamsFromSpace(bottomSpace);
   return { top: height, bottom: extrudedHeight };
