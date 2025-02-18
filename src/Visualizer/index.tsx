@@ -112,7 +112,6 @@ export const CoreVisualizer = memo(
         featureFlags,
         isLayerDragging,
         timelineManagerRef,
-        cursor,
         cameraForceHorizontalRoll,
         coreContextValue,
         containerStyle,
@@ -177,7 +176,6 @@ export const CoreVisualizer = memo(
                 timelineManagerRef={timelineManagerRef}
                 interactionMode={overriddenInteractionMode}
                 selectedFeature={selectedFeature}
-                cursor={cursor}
                 onCameraChange={handleCameraChange}
                 onLayerDrag={handleLayerDrag}
                 onLayerDrop={handleLayerDrop}

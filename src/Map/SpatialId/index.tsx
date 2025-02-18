@@ -1,7 +1,10 @@
-import { forwardRef, ForwardRefRenderFunction } from "react";
-import { RefObject } from "use-callback-ref/dist/es5/types";
+import { forwardRef, ForwardRefRenderFunction, RefObject } from "react";
 
-import SpatialIdSpace from "../../engines/Cesium/SpatialId";
+import {
+  CoordinateIndicator,
+  SpatialIdSpace,
+  VerticalSpaceIndicator,
+} from "../../engines/Cesium/SpatialId";
 import { InteractionModeType } from "../../Visualizer";
 import { EngineRef } from "../types";
 
@@ -20,7 +23,13 @@ const SpatialId: ForwardRefRenderFunction<SpatialIdRef, SpatialIdProps> = (
   { engineRef, terrainEnabled, interactionMode, overrideInteractionMode, onMount },
   ref,
 ) => {
-  const { spaces } = useHooks({
+  const {
+    spatialIdSpaces,
+    verticalSpaceIndicator,
+    coordinateSelector,
+    spaceSelector,
+    groundIndicators,
+  } = useHooks({
     ref,
     engineRef,
     terrainEnabled,
@@ -28,9 +37,24 @@ const SpatialId: ForwardRefRenderFunction<SpatialIdRef, SpatialIdProps> = (
     overrideInteractionMode,
     onMount,
   });
-  return spaces.length > 0
-    ? spaces.map(space => <SpatialIdSpace key={space.id} space={space} />)
-    : null;
+
+  return (
+    <>
+      {spatialIdSpaces &&
+        spatialIdSpaces.length > 0 &&
+        spatialIdSpaces.map(space => <SpatialIdSpace key={space.id} space={space} />)}
+      {groundIndicators &&
+        groundIndicators.length > 0 &&
+        groundIndicators.map(indicator => (
+          <CoordinateIndicator key={indicator.id} wsen={indicator.wsen} color={indicator.color} />
+        ))}
+      {verticalSpaceIndicator && <VerticalSpaceIndicator indicator={verticalSpaceIndicator} />}
+      {coordinateSelector && (
+        <CoordinateIndicator wsen={coordinateSelector.wsen} color={coordinateSelector.color} />
+      )}
+      {spaceSelector && <SpatialIdSpace space={spaceSelector} />}
+    </>
+  );
 };
 
 export default forwardRef(SpatialId);

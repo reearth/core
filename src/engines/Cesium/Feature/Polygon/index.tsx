@@ -128,7 +128,7 @@ export default function Polygon({
   );
 
   const extrudedHeightProperty: { extrudedHeight: number } | undefined = useMemo(
-    () => (extrudedHeight ? { extrudedHeight } : undefined),
+    () => (extrudedHeight !== undefined ? { extrudedHeight } : undefined),
     [extrudedHeight],
   );
 

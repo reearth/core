@@ -30,8 +30,6 @@ export type { TimelineCommitter, TimelineManagerRef } from "./useTimelineManager
 
 export type { MapRef } from "./hooks";
 
-export type CursorType = "auto" | "grab" | "crosshair";
-
 export type Props = {
   engines?: Record<string, Engine>;
   engine?: string;
@@ -46,9 +44,7 @@ export type Props = {
   | "viewerProperty"
 > &
   Omit<EngineProps, "onLayerSelect" | "layerSelectionReason" | "selectedLayerId"> &
-  Omit<SketchProps, "layersRef" | "engineRef" | "SketchComponent"> & {
-    cursor?: CursorType;
-  };
+  Omit<SketchProps, "layersRef" | "engineRef" | "SketchComponent">;
 
 function MapFn(
   {
@@ -63,7 +59,6 @@ function MapFn(
     timelineManagerRef,
     interactionMode,
     selectedFeature,
-    cursor,
     onLayerSelect,
     overrideInteractionMode,
     onSketchTypeChange,
@@ -100,7 +95,6 @@ function MapFn(
   } = useHooks({
     ref,
     timelineManagerRef,
-    cursor,
     onLayerSelect,
     onMount,
     onAPIReady,

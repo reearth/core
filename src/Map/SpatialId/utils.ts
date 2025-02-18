@@ -1,7 +1,7 @@
-import { Space } from "@reearth/spatial-id-sdk";
 import { v4 as uuid } from "uuid";
 
-import { SPATIALID_DEFAULT_COLOR, SPATIALID_DEFAULT_MAX_HEIGHT } from "./hooks";
+import { Space } from "@reearth/spatial-id-sdk";
+
 import { SpatialIdSpaceType, SpatialIdSpaceData } from "./types";
 
 const getRectangeParamsFromSpace = (space: Space) => {
@@ -35,34 +35,6 @@ export const createSpatialIdSpace = (
   };
 };
 
-export const createSpatialIdFloorSpaces = (
-  space: Space,
-  maxHeight = SPATIALID_DEFAULT_MAX_HEIGHT,
-  color = SPATIALID_DEFAULT_COLOR,
-) => {
-  const floorSpaces: SpatialIdSpaceType[] = [];
-  const { height, extrudedHeight } = getRectangeParamsFromSpace(space);
-  const heightStep = extrudedHeight - height;
-  for (let h = 0; h < maxHeight; h += heightStep) {
-    const fSpace = new Space({ lat: space.center.lat, lng: space.center.lng, alt: h }, space.zoom);
-    const {
-      wsen: fWsen,
-      height: fHeight,
-      extrudedHeight: fExtrudedHeight,
-    } = getRectangeParamsFromSpace(fSpace);
-    floorSpaces.push({
-      id: uuid(),
-      space: fSpace,
-      wsen: fWsen,
-      height: fHeight,
-      extrudedHeight: fExtrudedHeight,
-      type: "floor",
-      color,
-    });
-  }
-  return floorSpaces;
-};
-
 export const getSpaceData = (space: Space): SpatialIdSpaceData => {
   return {
     id: space.id,
@@ -76,4 +48,17 @@ export const getSpaceData = (space: Space): SpatialIdSpaceData => {
     hilbertIndex: space.hilbertIndex.toString(),
     vertices: space.vertices3d(),
   };
+};
+
+export const getVerticalLimits = (
+  maxHeigth: number,
+  minHeight: number,
+  zoom: number,
+): { top: number; bottom: number } => {
+  // lat/lng doesn't matter
+  const topSpace = new Space({ lat: 0, lng: 0, alt: maxHeigth }, zoom);
+  const bottomSpace = new Space({ lat: 0, lng: 0, alt: minHeight }, zoom);
+  const { height } = getRectangeParamsFromSpace(topSpace);
+  const { extrudedHeight } = getRectangeParamsFromSpace(bottomSpace);
+  return { top: height, bottom: extrudedHeight };
 };

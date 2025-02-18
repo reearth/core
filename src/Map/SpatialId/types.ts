@@ -6,16 +6,39 @@ export type SpatialIdSpaceType = {
   wsen: [number, number, number, number];
   height: number;
   extrudedHeight: number;
-  type?: "selector" | "floor" | "coordinate" | "confirmed";
   color?: string;
+  outlineColor?: string;
+};
+
+export type VerticalSpaceIndicatorType = {
+  id: string;
+  wsen: [number, number, number, number];
+  height: number;
+  extrudedHeight: number;
+  color: string;
+  outlineColor: string;
+};
+
+export type CoordinateSelectorType = {
+  id: string;
+  spaceId: string;
+  wsen: [number, number, number, number];
+  color: string;
 };
 
 export type SpatialIdPickSpaceOptions = {
   zoom?: number;
   maxHeight?: number;
-  color?: string;
+  minHeight?: number;
   dataOnly?: boolean;
   rightClickToExit?: boolean;
+  color?: string;
+  outlineColor?: string;
+  groundIndicatorColor?: string;
+  selectorColor?: string;
+  selectorOutlineColor?: string;
+  verticalSpaceIndicatorColor?: string;
+  verticalSpaceIndicatorOutlineColor?: string;
 };
 
 export type SpatialIdRef = {
