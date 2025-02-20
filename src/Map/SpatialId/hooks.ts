@@ -187,7 +187,7 @@ export default ({
           id,
           wsen,
           height: verticalLimits.top + appliedCenterGeoidHeight,
-          extrudedHeight: verticalLimits.bottom,
+          extrudedHeight: verticalLimits.bottom + appliedCenterGeoidHeight,
           color: pickOptions.verticalSpaceIndicatorColor,
           outlineColor: pickOptions.verticalSpaceIndicatorOutlineColor,
         });
