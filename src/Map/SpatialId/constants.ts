@@ -14,3 +14,8 @@ export const SPATIALID_DEFAULT_OPTIONS: Required<SpatialIdPickSpaceOptions> = {
   verticalSpaceIndicatorColor: "#ffffff33",
   verticalSpaceIndicatorOutlineColor: "#ffffff55",
 };
+
+export const SPATIALID_LATITUDE_RANGE = {
+  min: -85.0511,
+  max: 85.0511,
+};
