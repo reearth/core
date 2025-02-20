@@ -71,7 +71,7 @@ export default ({
     const allSpaces = [...(spatialIdSpaces ?? []), ...(spaceSelector ? [spaceSelector] : [])];
 
     if (!allSpaces) return null;
-    // find unique spaces by space.space.zfxy.z, space.space.zfxy.x, space.space.zfxy.y
+
     const uniqueSpaces = allSpaces.reduce((acc, space) => {
       if (
         !acc.find(
@@ -148,7 +148,7 @@ export default ({
         )
           return;
 
-        setState("waitingGeoid");
+        setState("fetchingGeoid");
 
         const { id, wsen, space } = createSpatialIdSpace(
           props.lng,

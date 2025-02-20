@@ -47,7 +47,7 @@ export type SpatialIdRef = {
   onSpacePick: (cb: (space: SpatialIdSpaceData) => void) => void;
 };
 
-export type SpatialIdSpacePickingState = "idle" | "coordinate" | "waitingGeoid" | "floor";
+export type SpatialIdSpacePickingState = "idle" | "coordinate" | "fetchingGeoid" | "floor";
 
 export type SpatialIdSpaceData = {
   id: string;
