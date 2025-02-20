@@ -18,7 +18,7 @@ export function getGeoidHeight(lng: number, lat: number): Promise<number | undef
       });
     })
     .catch(e => {
-      console.warn("Failed to fetch geoid height", e);
+      console.error("Failed to fetch geoid height", e);
       return undefined;
     });
 }
