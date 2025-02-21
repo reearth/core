@@ -11,7 +11,7 @@ import type {
 } from "react";
 
 import { PickedFeature } from "../../engines/Cesium/pickMany";
-import { CursorType } from "../../engines/Cesium/types";
+import { CursorType, GeoidServer } from "../../engines/Cesium/types";
 import type {
   LatLngHeight,
   Camera,
@@ -213,6 +213,8 @@ export type EngineRef = {
     p3: Position3d,
   ) => [p1: Position3d, p2: Position3d, p3: Position3d];
   getCredits: () => Credit[] | undefined;
+  setGeoidServer: (params: GeoidServer) => void;
+  getGeoidHeight: (lng?: number, lat?: number) => Promise<number | undefined>;
 } & MouseEventHandles;
 
 export type EngineProps = {

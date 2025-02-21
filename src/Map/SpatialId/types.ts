@@ -65,5 +65,4 @@ export type SpatialIdSpaceData = {
   hilbertTilehash: string;
   hilbertIndex: string;
   vertices: [number, number, number][];
-  geoidHeight: number;
 };

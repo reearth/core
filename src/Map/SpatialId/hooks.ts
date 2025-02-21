@@ -14,7 +14,6 @@ import { useWindowEvent } from "../../utils/use-window-event";
 import { InteractionModeType } from "../../Visualizer";
 import { EngineRef, MouseEventProps } from "../types";
 
-import { getGeoidHeight } from "./api";
 import { SPATIALID_DEFAULT_OPTIONS, SPATIALID_LATITUDE_RANGE } from "./constants";
 import {
   SpatialIdRef,
@@ -163,8 +162,8 @@ export default ({
         });
 
         const [geoidHeight, centerGeoidHeight] = await Promise.all([
-          getGeoidHeight(props.lng, props.lat),
-          getGeoidHeight(space.center.lng, space.center.lat),
+          engineRef.current?.getGeoidHeight(props.lng, props.lat),
+          engineRef.current?.getGeoidHeight(space.center.lng, space.center.lat),
         ]);
 
         setTimeout(() => {
@@ -232,10 +231,9 @@ export default ({
           setSpatialIdSpaces(prev => (prev ? [...prev, confirmedSpace] : [confirmedSpace]));
         }
 
-        const geoidHeight = centerGeoidHeightRef.current ?? 0;
         finishPicking();
 
-        const spaceData = getSpaceData(confirmedSpace.space, geoidHeight);
+        const spaceData = getSpaceData(confirmedSpace.space);
         onSpacePickEvents.current.forEach(cb => cb(spaceData));
       }
     },

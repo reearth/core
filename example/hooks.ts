@@ -30,6 +30,10 @@ export default () => {
       dataOnly: false,
     });
     ref.current?.sketch.onEditFeatureChange(setSketchEditingFeatrue);
+    ref.current?.engine?.setGeoidServer({
+      url: "https://api-vt.geolonia.com/api/altitude?lat=${lat}&lng=${lng}",
+      geoidProperty: "geoid",
+    });
   }, []);
 
   // TODO: use onLayerSelect props (core should export a type for selection).

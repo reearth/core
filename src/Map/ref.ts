@@ -94,6 +94,8 @@ const engineRefKeys: FunctionKeys<EngineRef> = {
   sendToBack: 1,
   calcRectangleControlPoint: 1,
   getCredits: 1,
+  setGeoidServer: 1,
+  getGeoidHeight: 1,
 };
 
 const layersRefKeys: FunctionKeys<LayersRef> = {

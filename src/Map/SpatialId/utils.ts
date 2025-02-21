@@ -36,7 +36,7 @@ export const createSpatialIdSpace = (
   };
 };
 
-export const getSpaceData = (space: Space, geoidHeight: number): SpatialIdSpaceData => {
+export const getSpaceData = (space: Space): SpatialIdSpaceData => {
   return {
     id: space.id,
     center: space.center,
@@ -48,7 +48,6 @@ export const getSpaceData = (space: Space, geoidHeight: number): SpatialIdSpaceD
     hilbertTilehash: space.hilbertTilehash,
     hilbertIndex: space.hilbertIndex.toString(),
     vertices: space.vertices3d(),
-    geoidHeight,
   };
 };
 
