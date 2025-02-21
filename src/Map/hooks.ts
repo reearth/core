@@ -2,6 +2,7 @@ import { useImperativeHandle, useRef, type Ref, useState, useCallback, useEffect
 
 import { SelectedFeatureInfo } from "../mantle";
 
+import { GeoidRef } from "./Geoid/types";
 import { type MapRef, mapRef } from "./ref";
 import { SpatialIdRef } from "./SpatialId/types";
 import type {
@@ -51,6 +52,7 @@ export default function ({
   const layersRef = useRef<LayersRef>(null);
   const sketchRef = useRef<SketchRef>(null);
   const spatialIdRef = useRef<SpatialIdRef>(null);
+  const geoidRef = useRef<GeoidRef>(null);
   const requestingRenderMode = useRef<RequestingRenderMode>(NO_REQUEST_RENDER);
 
   useImperativeHandle(
@@ -61,6 +63,7 @@ export default function ({
         layersRef,
         sketchRef,
         spatialIdRef,
+        geoidRef,
         timelineManagerRef,
       }),
     [timelineManagerRef],
@@ -151,6 +154,7 @@ export default function ({
     layersRef,
     sketchRef,
     spatialIdRef,
+    geoidRef,
     selectedLayer,
     requestingRenderMode,
     handleLayerSelect,

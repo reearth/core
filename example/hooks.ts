@@ -16,6 +16,11 @@ import { DEFAULT_CAMERA, DEFAULT_LAYERS, DEFAULT_TILE } from "./constants";
 import { DEFAULT_VIEWER_PROPERTY } from "./scene";
 import { TEST_LAYERS } from "./testLayers";
 
+const geoidServer = {
+  url: "https://api-vt.geolonia.com/api/altitude?lat=${lat}&lng=${lng}",
+  geoidProperty: "geoid",
+};
+
 export default () => {
   const ref = useRef<MapRef>(null);
   const [isReady, setIsReady] = useState(false);
@@ -30,10 +35,6 @@ export default () => {
       dataOnly: false,
     });
     ref.current?.sketch.onEditFeatureChange(setSketchEditingFeatrue);
-    ref.current?.engine?.setGeoidServer({
-      url: "https://api-vt.geolonia.com/api/altitude?lat=${lat}&lng=${lng}",
-      geoidProperty: "geoid",
-    });
   }, []);
 
   // TODO: use onLayerSelect props (core should export a type for selection).
@@ -190,5 +191,6 @@ export default () => {
     handleSpatialIdPick,
     spatialIdZoom,
     handleSpatialIdZoomChange,
+    geoidServer,
   };
 };

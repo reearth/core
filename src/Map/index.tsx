@@ -2,6 +2,7 @@ import { forwardRef, useMemo, type Ref } from "react";
 
 import { INTERACTION_MODES } from "../Visualizer/interactionMode";
 
+import Geoid from "./Geoid";
 import useHooks, { MapRef } from "./hooks";
 import Layers, { type Props as LayersProps } from "./Layers";
 import Sketch, { SketchProps } from "./Sketch";
@@ -82,6 +83,7 @@ function MapFn(
     layersRef,
     sketchRef,
     spatialIdRef,
+    geoidRef,
     selectedLayer,
     requestingRenderMode,
     handleLayerSelect,
@@ -167,11 +169,13 @@ function MapFn(
       <SpatialId
         ref={spatialIdRef}
         engineRef={engineRef}
+        geoidRef={geoidRef}
         interactionMode={interactionMode}
         terrainEnabled={!!props.property?.terrain?.enabled}
         overrideInteractionMode={overrideInteractionMode}
         onMount={handleSpatialIdMount}
       />
+      <Geoid ref={geoidRef} geoidServer={props.property?.geoid?.server} />
     </Engine>
   ) : null;
 }

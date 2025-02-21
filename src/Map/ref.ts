@@ -1,5 +1,6 @@
 import type { RefObject } from "react";
 
+import { GeoidRef } from "./Geoid/types";
 import { SpatialIdRef } from "./SpatialId/types";
 import type { EngineRef, LayersRef, SketchRef } from "./types";
 import { TimelineManagerRef } from "./useTimelineManager";
@@ -10,6 +11,7 @@ export type MapRef = {
   layers: WrappedRef<LayersRef>;
   sketch: WrappedRef<SketchRef>;
   spatialId?: WrappedRef<SpatialIdRef>;
+  geoid: WrappedRef<GeoidRef>;
   timeline?: TimelineManagerRef;
 };
 
@@ -94,8 +96,6 @@ const engineRefKeys: FunctionKeys<EngineRef> = {
   sendToBack: 1,
   calcRectangleControlPoint: 1,
   getCredits: 1,
-  setGeoidServer: 1,
-  getGeoidHeight: 1,
 };
 
 const layersRefKeys: FunctionKeys<LayersRef> = {
@@ -143,17 +143,23 @@ const spatialIdRefKeys: FunctionKeys<SpatialIdRef> = {
   onSpacePick: 1,
 };
 
+const geoidRefKeys: FunctionKeys<GeoidRef> = {
+  getGeoidHeight: 1,
+};
+
 export function mapRef({
   engineRef,
   layersRef,
   sketchRef,
   spatialIdRef,
+  geoidRef,
   timelineManagerRef,
 }: {
   engineRef: RefObject<EngineRef>;
   layersRef: RefObject<LayersRef>;
   sketchRef: RefObject<SketchRef>;
   spatialIdRef: RefObject<SpatialIdRef>;
+  geoidRef: RefObject<GeoidRef>;
   timelineManagerRef?: TimelineManagerRef;
 }): MapRef {
   return {
@@ -161,6 +167,7 @@ export function mapRef({
     layers: wrapRef(layersRef, layersRefKeys),
     sketch: wrapRef(sketchRef, sketchRefKeys),
     spatialId: wrapRef(spatialIdRef, spatialIdRefKeys),
+    geoid: wrapRef(geoidRef, geoidRefKeys),
     timeline: timelineManagerRef,
   };
 }

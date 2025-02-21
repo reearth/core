@@ -63,4 +63,10 @@ export const DEFAULT_VIEWER_PROPERTY: ViewerProperty = {
     enabled: true,
     normal: true,
   },
+  geoid: {
+    server: {
+      url: "https://api-vt.geolonia.com/api/altitude?lat=${lat}&lng=${lng}",
+      geoidProperty: "geoid",
+    },
+  },
 };

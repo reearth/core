@@ -6,6 +6,7 @@ import {
   VerticalSpaceIndicator,
 } from "../../engines/Cesium/SpatialId";
 import { InteractionModeType } from "../../Visualizer";
+import { GeoidRef } from "../Geoid/types";
 import { EngineRef } from "../types";
 
 import useHooks from "./hooks";
@@ -13,6 +14,7 @@ import { SpatialIdRef } from "./types";
 
 type SpatialIdProps = {
   engineRef: RefObject<EngineRef>;
+  geoidRef: RefObject<GeoidRef>;
   terrainEnabled?: boolean;
   interactionMode?: InteractionModeType;
   overrideInteractionMode?: (mode: InteractionModeType) => void;
@@ -20,7 +22,7 @@ type SpatialIdProps = {
 };
 
 const SpatialId: ForwardRefRenderFunction<SpatialIdRef, SpatialIdProps> = (
-  { engineRef, terrainEnabled, interactionMode, overrideInteractionMode, onMount },
+  { engineRef, geoidRef, terrainEnabled, interactionMode, overrideInteractionMode, onMount },
   ref,
 ) => {
   const {
@@ -32,6 +34,7 @@ const SpatialId: ForwardRefRenderFunction<SpatialIdRef, SpatialIdProps> = (
   } = useHooks({
     ref,
     engineRef,
+    geoidRef,
     terrainEnabled,
     interactionMode,
     overrideInteractionMode,

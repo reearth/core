@@ -12,6 +12,7 @@ import { v4 as uuid } from "uuid";
 
 import { useWindowEvent } from "../../utils/use-window-event";
 import { InteractionModeType } from "../../Visualizer";
+import { GeoidRef } from "../Geoid/types";
 import { EngineRef, MouseEventProps } from "../types";
 
 import { SPATIALID_DEFAULT_OPTIONS, SPATIALID_LATITUDE_RANGE } from "./constants";
@@ -29,6 +30,7 @@ import { createSpatialIdSpace, getSpaceData, getVerticalLimits } from "./utils";
 type Props = {
   ref: ForwardedRef<SpatialIdRef>;
   engineRef: RefObject<EngineRef>;
+  geoidRef: RefObject<GeoidRef>;
   terrainEnabled?: boolean;
   interactionMode?: InteractionModeType;
   overrideInteractionMode?: (mode: InteractionModeType) => void;
@@ -38,6 +40,7 @@ type Props = {
 export default ({
   ref,
   engineRef,
+  geoidRef,
   terrainEnabled,
   interactionMode,
   overrideInteractionMode,
@@ -162,8 +165,8 @@ export default ({
         });
 
         const [geoidHeight, centerGeoidHeight] = await Promise.all([
-          engineRef.current?.getGeoidHeight(props.lng, props.lat),
-          engineRef.current?.getGeoidHeight(space.center.lng, space.center.lat),
+          geoidRef.current?.getGeoidHeight(props.lng, props.lat),
+          geoidRef.current?.getGeoidHeight(space.center.lng, space.center.lat),
         ]);
 
         setTimeout(() => {
@@ -241,6 +244,7 @@ export default ({
       state,
       terrainEnabled,
       engineRef,
+      geoidRef,
       spaceSelector,
       pickOptions,
       verticalLimits,
