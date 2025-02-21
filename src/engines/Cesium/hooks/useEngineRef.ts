@@ -70,7 +70,6 @@ export default function useEngineRef(
     wheel: [],
   });
   const tickEventCallback = useRef<TickEventCallback[]>([]);
-
   const e = useMemo((): EngineRef => {
     return {
       name: "cesium",
