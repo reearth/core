@@ -12,9 +12,10 @@ import { v4 as uuid } from "uuid";
 
 import { useWindowEvent } from "../../utils/use-window-event";
 import { InteractionModeType } from "../../Visualizer";
+import { GeoidRef } from "../Geoid/types";
 import { EngineRef, MouseEventProps } from "../types";
 
-import { SPATIALID_DEFAULT_OPTIONS } from "./constants";
+import { SPATIALID_DEFAULT_OPTIONS, SPATIALID_LATITUDE_RANGE } from "./constants";
 import {
   SpatialIdRef,
   SpatialIdSpacePickingState,
@@ -29,6 +30,7 @@ import { createSpatialIdSpace, getSpaceData, getVerticalLimits } from "./utils";
 type Props = {
   ref: ForwardedRef<SpatialIdRef>;
   engineRef: RefObject<EngineRef>;
+  geoidRef: RefObject<GeoidRef>;
   terrainEnabled?: boolean;
   interactionMode?: InteractionModeType;
   overrideInteractionMode?: (mode: InteractionModeType) => void;
@@ -38,6 +40,7 @@ type Props = {
 export default ({
   ref,
   engineRef,
+  geoidRef,
   terrainEnabled,
   interactionMode,
   overrideInteractionMode,
@@ -51,9 +54,12 @@ export default ({
   const [coordinateSelector, setCoordinateSelector] = useState<CoordinateSelectorType | null>(null);
   const lastCoordinateSelector = useRef<CoordinateSelectorType | null>(null);
   const [spaceSelector, setSpaceSelector] = useState<SpatialIdSpaceType | null>(null);
+  const centerGeoidHeightRef = useRef<number | null>(null);
 
   const [basePosition, setBasePosition] = useState<[number, number, number] | null>(null);
-  const [baseCoordinate, setBaseCoordinate] = useState<[number, number, number] | null>(null);
+  const [baseCoordinateGeoid, setBaseCoordinateGeoid] = useState<[number, number, number] | null>(
+    null,
+  );
 
   const [pickOptions, setPickOptions] =
     useState<Required<SpatialIdPickSpaceOptions>>(SPATIALID_DEFAULT_OPTIONS);
@@ -67,7 +73,7 @@ export default ({
     const allSpaces = [...(spatialIdSpaces ?? []), ...(spaceSelector ? [spaceSelector] : [])];
 
     if (!allSpaces) return null;
-    // find unique spaces by space.space.zfxy.z, space.space.zfxy.x, space.space.zfxy.y
+
     const uniqueSpaces = allSpaces.reduce((acc, space) => {
       if (
         !acc.find(
@@ -113,10 +119,11 @@ export default ({
   const finishPicking = useCallback(() => {
     setState("idle");
     setBasePosition(null);
-    setBaseCoordinate(null);
+    setBaseCoordinateGeoid(null);
     setSpaceSelector(null);
     setCoordinateSelector(null);
     lastCoordinateSelector.current = null;
+    centerGeoidHeightRef.current = null;
     setVerticalSpaceIndicator(null);
     overrideInteractionMode?.(
       interactionModeRef.current === "spatialId"
@@ -128,30 +135,79 @@ export default ({
   }, [overrideInteractionMode, engineRef]);
 
   const handleMouseUp = useCallback(
-    (props: MouseEventProps) => {
+    async (props: MouseEventProps) => {
       if (state === "idle") return;
       if (tempSwitchToMoveMode.current) return;
 
       // handle coordinate picking
       if (state === "coordinate") {
-        if (!coordinateSelector || props.lat === undefined || props.lng === undefined) return;
+        if (
+          !coordinateSelector ||
+          props.lat === undefined ||
+          props.lng === undefined ||
+          props.lat > SPATIALID_LATITUDE_RANGE.max ||
+          props.lat < SPATIALID_LATITUDE_RANGE.min
+        )
+          return;
 
-        setState("floor");
-        setBaseCoordinate([props.lng, props.lat, terrainEnabled ? props.height ?? 0 : 0]);
-        setBasePosition(
-          engineRef.current?.toXYZ(props.lng, props.lat, props.height ?? 0, {
-            useGlobeEllipsoid: !terrainEnabled,
-          }) ?? null,
+        setState("fetchingGeoid");
+
+        const { id, wsen, space } = createSpatialIdSpace(
+          props.lng,
+          props.lat,
+          0,
+          pickOptions.zoom,
+          0,
         );
 
-        lastCoordinateSelector.current = coordinateSelector;
-        setCoordinateSelector(null);
+        requestAnimationFrame(() => {
+          engineRef.current?.setCursor("wait");
+        });
+
+        const [geoidHeight, centerGeoidHeight] = await Promise.all([
+          geoidRef.current?.getGeoidHeight(props.lng, props.lat),
+          geoidRef.current?.getGeoidHeight(space.center.lng, space.center.lat),
+        ]);
+
+        setTimeout(() => {
+          engineRef.current?.setCursor("crosshair");
+        }, 100);
+
+        if (geoidHeight === undefined && centerGeoidHeight === undefined) {
+          setState("coordinate");
+          return;
+        }
+
+        // In most case the geoidHeight difference between click point and center is small
+        // The API is not that stable, it has NaN for some points for unknown reason
+        // Therefore we try use one another if one is NaN
+        const appliedGeoidHeight = geoidHeight ?? centerGeoidHeight ?? 0;
+        const appliedCenterGeoidHeight = centerGeoidHeight ?? geoidHeight ?? 0;
+        centerGeoidHeightRef.current = appliedCenterGeoidHeight;
+
+        setVerticalSpaceIndicator({
+          id,
+          wsen,
+          height: verticalLimits.top + appliedCenterGeoidHeight,
+          extrudedHeight: verticalLimits.bottom + appliedCenterGeoidHeight,
+          color: pickOptions.verticalSpaceIndicatorColor,
+          outlineColor: pickOptions.verticalSpaceIndicatorOutlineColor,
+        });
+
+        setBaseCoordinateGeoid([
+          props.lng,
+          props.lat,
+          (terrainEnabled ? props.height ?? 0 : 0) - appliedGeoidHeight,
+        ]);
+
+        setBasePosition(engineRef.current?.toXYZ(props.lng, props.lat, props.height ?? 0) ?? null);
 
         const initialSpaceSelectorSpace = createSpatialIdSpace(
           props.lng,
           props.lat,
-          terrainEnabled ? props.height ?? 0 : 0,
+          (terrainEnabled ? props.height ?? 0 : 0) - appliedGeoidHeight,
           pickOptions.zoom,
+          appliedCenterGeoidHeight,
         );
         setSpaceSelector({
           ...initialSpaceSelectorSpace,
@@ -159,21 +215,11 @@ export default ({
           outlineColor: pickOptions.outlineColor,
         });
 
-        const { id, wsen } = createSpatialIdSpace(
-          props.lng,
-          props.lat,
-          terrainEnabled ? props.height ?? 0 : 0,
-          pickOptions.zoom,
-        );
-        setVerticalSpaceIndicator({
-          id,
-          wsen,
-          height: verticalLimits.top,
-          extrudedHeight: verticalLimits.bottom,
-          color: pickOptions.verticalSpaceIndicatorColor,
-          outlineColor: pickOptions.verticalSpaceIndicatorOutlineColor,
-        });
+        lastCoordinateSelector.current = coordinateSelector;
+        setCoordinateSelector(null);
+
         engineRef.current?.requestRender();
+        setState("floor");
       } else if (state === "floor") {
         if (!spaceSelector) return;
 
@@ -198,6 +244,7 @@ export default ({
       state,
       terrainEnabled,
       engineRef,
+      geoidRef,
       spaceSelector,
       pickOptions,
       verticalLimits,
@@ -212,19 +259,22 @@ export default ({
       if (tempSwitchToMoveMode.current) return;
 
       if (state === "coordinate") {
-        if (props.lat === undefined || props.lng === undefined) return;
+        if (
+          props.lat === undefined ||
+          props.lng === undefined ||
+          props.lat > SPATIALID_LATITUDE_RANGE.max ||
+          props.lat < SPATIALID_LATITUDE_RANGE.min
+        )
+          return;
 
-        const newSpace = createSpatialIdSpace(
-          props.lng,
-          props.lat,
-          terrainEnabled ? props.height ?? 0 : 0,
-          pickOptions.zoom,
-        );
+        // Coordinate Selector is clamp to ground, we can ignore height
+        // The space id is used to identify the selector only
+        const newSpace = createSpatialIdSpace(props.lng, props.lat, 0, pickOptions.zoom, 0);
 
-        if (newSpace.space.id === coordinateSelector?.spaceId) return;
+        if (newSpace.space.id === coordinateSelector?.uid) return;
         setCoordinateSelector({
           id: uuid(),
-          spaceId: newSpace.space.id,
+          uid: newSpace.space.id,
           wsen: newSpace.wsen,
           color: pickOptions.selectorColor,
         });
@@ -233,7 +283,7 @@ export default ({
           props.x === undefined ||
           props.y === undefined ||
           basePosition === null ||
-          baseCoordinate === null
+          baseCoordinateGeoid === null
         )
           return;
 
@@ -241,16 +291,17 @@ export default ({
           engineRef.current?.getExtrudedHeight(basePosition, [props.x, props.y], true) ?? 0;
 
         if (
-          baseCoordinate[2] + offset > verticalLimits.top ||
-          baseCoordinate[2] + offset < verticalLimits.bottom
+          baseCoordinateGeoid[2] + offset > verticalLimits.top ||
+          baseCoordinateGeoid[2] + offset < verticalLimits.bottom
         )
           return;
 
         const newSpace = createSpatialIdSpace(
-          baseCoordinate[0],
-          baseCoordinate[1],
-          baseCoordinate[2] + offset,
+          baseCoordinateGeoid[0],
+          baseCoordinateGeoid[1],
+          baseCoordinateGeoid[2] + offset,
           pickOptions.zoom,
+          centerGeoidHeightRef.current ?? 0,
         );
 
         if (newSpace.space.id === spaceSelector?.space.id) return;
@@ -266,12 +317,11 @@ export default ({
       state,
       spaceSelector,
       basePosition,
-      baseCoordinate,
+      baseCoordinateGeoid,
       engineRef,
-      terrainEnabled,
       pickOptions,
       verticalLimits,
-      coordinateSelector?.spaceId,
+      coordinateSelector?.uid,
     ],
   );
 
@@ -282,10 +332,11 @@ export default ({
     } else if (state === "floor") {
       setSpaceSelector(null);
       setBasePosition(null);
-      setBaseCoordinate(null);
+      setBaseCoordinateGeoid(null);
       setVerticalSpaceIndicator(null);
       setCoordinateSelector(lastCoordinateSelector.current);
       setState("coordinate");
+      centerGeoidHeightRef.current = null;
     }
     engineRef.current?.requestRender();
   }, [state, pickOptions, engineRef, finishPicking]);

@@ -22,6 +22,7 @@ export const createSpatialIdSpace = (
   lat: number,
   alt: number,
   zoom: number,
+  geoidHeight: number,
 ): SpatialIdSpaceType => {
   const space = new Space({ lat, lng, alt }, zoom);
   const { wsen, height, extrudedHeight } = getRectangeParamsFromSpace(space);
@@ -30,8 +31,8 @@ export const createSpatialIdSpace = (
     id: uuid(),
     space,
     wsen,
-    height,
-    extrudedHeight,
+    height: height + geoidHeight,
+    extrudedHeight: extrudedHeight + geoidHeight,
   };
 };
 

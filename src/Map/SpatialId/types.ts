@@ -21,7 +21,7 @@ export type VerticalSpaceIndicatorType = {
 
 export type CoordinateSelectorType = {
   id: string;
-  spaceId: string;
+  uid: string;
   wsen: [number, number, number, number];
   color: string;
 };
@@ -47,7 +47,7 @@ export type SpatialIdRef = {
   onSpacePick: (cb: (space: SpatialIdSpaceData) => void) => void;
 };
 
-export type SpatialIdSpacePickingState = "idle" | "coordinate" | "floor";
+export type SpatialIdSpacePickingState = "idle" | "coordinate" | "fetchingGeoid" | "floor";
 
 export type SpatialIdSpaceData = {
   id: string;

@@ -37,6 +37,7 @@ export type SceneMode = "3d" | "2d" | "columbus";
 
 export type ViewerProperty = {
   globe?: GlobeProperty;
+  geoid?: GeoidProperty;
   terrain?: TerrainProperty;
   scene?: SceneProperty;
   tiles?: TileProperty[];
@@ -54,6 +55,13 @@ export type GlobeProperty = {
   enableLighting?: boolean;
   atmosphere?: GlobeAtmosphereProperty;
   depthTestAgainstTerrain?: boolean;
+};
+
+export type GeoidProperty = {
+  server: {
+    url: string;
+    geoidProperty: string;
+  };
 };
 
 export type GlobeAtmosphereProperty = {
