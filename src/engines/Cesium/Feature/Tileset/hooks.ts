@@ -19,7 +19,6 @@ import {
   Cesium3DTileContent,
   Color,
   Viewer,
-  createGooglePhotorealistic3DTileset,
 } from "cesium";
 import { pick } from "lodash-es";
 import { MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -74,7 +73,6 @@ const useData = (layer: ComputedLayer | undefined) => {
           ? data.layers.join(",")
           : data?.layers
         : undefined,
-      googleMapApiKey: data?.serviceTokens?.googleMapApiKey,
     };
   }, [layer]);
 };
@@ -478,7 +476,7 @@ export const useHooks = ({
   } = useClippingBox({ clipping: experimental_clipping, boxId });
 
   const [style, setStyle] = useState<Cesium3DTileStyle>();
-  const { url, type, idProperty, googleMapApiKey } = useData(layer);
+  const { url, type, idProperty } = useData(layer);
   const shouldUseFeatureIndex = !disableIndexingFeature && !!idProperty;
 
   const [isTilesetReady, setIsTilesetReady] = useState(false);
@@ -730,18 +728,20 @@ export const useHooks = ({
   const googleMapPhotorealisticResource = useMemo(() => {
     if (type !== "google-photorealistic" || !isVisible) return null;
 
-    const loadTileset = async () => {
+    const loadResource = async () => {
       try {
-        const tileset = await createGooglePhotorealistic3DTileset(googleMapApiKey);
-        return tileset.resource;
+        const resource = IonResource.fromAssetId(2275207, {
+          accessToken: meta?.cesiumIonAccessToken as string | undefined,
+        });
+        return resource;
       } catch (error) {
         console.error(`Error loading Photorealistic 3D Tiles tileset: ${error}`);
         throw error;
       }
     };
 
-    return loadTileset();
-  }, [type, isVisible, googleMapApiKey]);
+    return loadResource();
+  }, [type, isVisible, meta?.cesiumIonAccessToken]);
 
   const tilesetUrl = useMemo(() => {
     return type === "osm-buildings" && isVisible
