@@ -19,6 +19,7 @@ import {
   Cesium3DTileContent,
   Color,
   Viewer,
+  createGooglePhotorealistic3DTileset,
 } from "cesium";
 import { pick } from "lodash-es";
 import { MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -73,6 +74,7 @@ const useData = (layer: ComputedLayer | undefined) => {
           ? data.layers.join(",")
           : data?.layers
         : undefined,
+      googleMapApiKey: data?.serviceTokens?.googleMapApiKey,
     };
   }, [layer]);
 };
@@ -90,15 +92,14 @@ const makeFeatureId = (
   }
   const featureId = getBuiltinFeatureId(tileFeature);
   return generateIDWithMD5(
-    `${coordinates.x}-${coordinates.y}-${coordinates.z}-${featureId}-${
-      !(tileFeature instanceof Model)
-        ? JSON.stringify(
-            // Read only root properties.
-            Object.entries(convertCesium3DTileFeatureProperties(tileFeature))
-              .filter((_k, v) => typeof v === "string" || typeof v === "number")
-              .map(([k, v]) => `${k}${v}`),
-          )
-        : ""
+    `${coordinates.x}-${coordinates.y}-${coordinates.z}-${featureId}-${!(tileFeature instanceof Model)
+      ? JSON.stringify(
+        // Read only root properties.
+        Object.entries(convertCesium3DTileFeatureProperties(tileFeature))
+          .filter((_k, v) => typeof v === "string" || typeof v === "number")
+          .map(([k, v]) => `${k}${v}`),
+      )
+      : ""
     }`,
   );
 };
@@ -476,7 +477,7 @@ export const useHooks = ({
   } = useClippingBox({ clipping: experimental_clipping, boxId });
 
   const [style, setStyle] = useState<Cesium3DTileStyle>();
-  const { url, type, idProperty } = useData(layer);
+  const { url, type, idProperty, googleMapApiKey } = useData(layer);
   const shouldUseFeatureIndex = !disableIndexingFeature && !!idProperty;
 
   const [isTilesetReady, setIsTilesetReady] = useState(false);
@@ -728,26 +729,31 @@ export const useHooks = ({
   const googleMapPhotorealisticResource = useMemo(() => {
     if (type !== "google-photorealistic" || !isVisible) return null;
 
-    const loadResource = async () => {
+    const loadTileset = async () => {
       try {
-        const resource = IonResource.fromAssetId(2275207, {
-          accessToken: meta?.cesiumIonAccessToken as string | undefined,
-        });
-        return resource;
+        if (googleMapApiKey) {
+          const tileset = await createGooglePhotorealistic3DTileset(googleMapApiKey);
+          return tileset.resource;
+        } else {
+          const resource = IonResource.fromAssetId(2275207, {
+            accessToken: meta?.cesiumIonAccessToken as string | undefined,
+          });
+          return resource;
+        }
       } catch (error) {
         console.error(`Error loading Photorealistic 3D Tiles tileset: ${error}`);
         throw error;
       }
     };
 
-    return loadResource();
-  }, [type, isVisible, meta?.cesiumIonAccessToken]);
+    return loadTileset();
+  }, [type, isVisible, googleMapApiKey, meta?.cesiumIonAccessToken]);
 
   const tilesetUrl = useMemo(() => {
     return type === "osm-buildings" && isVisible
       ? IonResource.fromAssetId(96188, {
-          accessToken: meta?.cesiumIonAccessToken as string | undefined,
-        }) // https://github.com/CesiumGS/cesium/blob/main/packages/engine/Source/Scene/createOsmBuildings.js#L53
+        accessToken: meta?.cesiumIonAccessToken as string | undefined,
+      }) // https://github.com/CesiumGS/cesium/blob/main/packages/engine/Source/Scene/createOsmBuildings.js#L53
       : googleMapPhotorealisticResource && isVisible
         ? googleMapPhotorealisticResource
         : type === "3dtiles" && isVisible
@@ -772,7 +778,7 @@ export const useHooks = ({
       property?.imageBasedLightIntensity ?? viewerProperty?.scene?.imageBasedLighting?.intensity;
     const sphericalHarmonicCoefficients = arrayToCartecian3(
       property?.sphericalHarmonicCoefficients ??
-        viewerProperty?.scene?.imageBasedLighting?.sphericalHarmonicCoefficients,
+      viewerProperty?.scene?.imageBasedLighting?.sphericalHarmonicCoefficients,
       imageBasedLightIntensity,
     );
 
