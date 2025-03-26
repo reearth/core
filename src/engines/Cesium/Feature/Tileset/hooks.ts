@@ -92,15 +92,14 @@ const makeFeatureId = (
   }
   const featureId = getBuiltinFeatureId(tileFeature);
   return generateIDWithMD5(
-    `${coordinates.x}-${coordinates.y}-${coordinates.z}-${featureId}-${
-      !(tileFeature instanceof Model)
-        ? JSON.stringify(
-            // Read only root properties.
-            Object.entries(convertCesium3DTileFeatureProperties(tileFeature))
-              .filter((_k, v) => typeof v === "string" || typeof v === "number")
-              .map(([k, v]) => `${k}${v}`),
-          )
-        : ""
+    `${coordinates.x}-${coordinates.y}-${coordinates.z}-${featureId}-${!(tileFeature instanceof Model)
+      ? JSON.stringify(
+        // Read only root properties.
+        Object.entries(convertCesium3DTileFeatureProperties(tileFeature))
+          .filter((_k, v) => typeof v === "string" || typeof v === "number")
+          .map(([k, v]) => `${k}${v}`),
+      )
+      : ""
     }`,
   );
 };
@@ -732,8 +731,15 @@ export const useHooks = ({
 
     const loadTileset = async () => {
       try {
-        const tileset = await createGooglePhotorealistic3DTileset(googleMapApiKey);
-        return tileset.resource;
+        if (googleMapApiKey) {
+          const tileset = await createGooglePhotorealistic3DTileset(googleMapApiKey);
+          return tileset.resource;
+        } else {
+          const resource = IonResource.fromAssetId(2275207, {
+            accessToken: meta?.cesiumIonAccessToken as string | undefined,
+          });
+          return resource;
+        }
       } catch (error) {
         console.error(`Error loading Photorealistic 3D Tiles tileset: ${error}`);
         throw error;
@@ -741,13 +747,13 @@ export const useHooks = ({
     };
 
     return loadTileset();
-  }, [type, isVisible, googleMapApiKey]);
+  }, [type, isVisible, googleMapApiKey, meta?.cesiumIonAccessToken]);
 
   const tilesetUrl = useMemo(() => {
     return type === "osm-buildings" && isVisible
       ? IonResource.fromAssetId(96188, {
-          accessToken: meta?.cesiumIonAccessToken as string | undefined,
-        }) // https://github.com/CesiumGS/cesium/blob/main/packages/engine/Source/Scene/createOsmBuildings.js#L53
+        accessToken: meta?.cesiumIonAccessToken as string | undefined,
+      }) // https://github.com/CesiumGS/cesium/blob/main/packages/engine/Source/Scene/createOsmBuildings.js#L53
       : googleMapPhotorealisticResource && isVisible
         ? googleMapPhotorealisticResource
         : type === "3dtiles" && isVisible
@@ -772,7 +778,7 @@ export const useHooks = ({
       property?.imageBasedLightIntensity ?? viewerProperty?.scene?.imageBasedLighting?.intensity;
     const sphericalHarmonicCoefficients = arrayToCartecian3(
       property?.sphericalHarmonicCoefficients ??
-        viewerProperty?.scene?.imageBasedLighting?.sphericalHarmonicCoefficients,
+      viewerProperty?.scene?.imageBasedLighting?.sphericalHarmonicCoefficients,
       imageBasedLightIntensity,
     );
 
