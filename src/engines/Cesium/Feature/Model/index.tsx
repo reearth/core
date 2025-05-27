@@ -30,10 +30,7 @@ import {
 
 export type Props = FeatureProps<Property>;
 
-export type Property = ModelAppearance & {
-  location?: { lat: number; lng: number };
-  height?: number;
-};
+export type Property = ModelAppearance;
 
 export default function Model({
   id,
@@ -50,11 +47,11 @@ export default function Model({
   const coordinates = useMemo(
     () =>
       geometry?.type === "Point"
-        ? geometry.coordinates
-        : property?.location
-          ? [property.location.lng, property.location.lat, property.height ?? 0]
-          : undefined,
-    [geometry?.coordinates, geometry?.type, property?.height, property?.location],
+        ? property?.height === undefined
+          ? geometry.coordinates
+          : [...geometry.coordinates.slice(0, 2), property.height]
+        : undefined,
+    [geometry?.coordinates, geometry?.type, property?.height],
   );
   const position = useMemo(() => {
     return coordinates
