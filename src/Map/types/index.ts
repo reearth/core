@@ -212,7 +212,7 @@ export type EngineRef = {
     p2: Position3d,
     p3: Position3d,
   ) => [p1: Position3d, p2: Position3d, p3: Position3d];
-  getCredits: () => Credit[] | undefined;
+  getCredits: () => Credits | undefined;
 } & MouseEventHandles;
 
 export type EngineProps = {
@@ -261,7 +261,7 @@ export type EngineProps = {
   onLayerSelectWithRectStart?: (e: LayerSelectWithRectStart) => void;
   onLayerSelectWithRectMove?: (e: LayerSelectWithRectMove) => void;
   onLayerSelectWithRectEnd?: (e: LayerSelectWithRectEnd) => void;
-  onCreditsUpdate?: (credits: Credit[]) => void;
+  onCreditsUpdate?: (credits: Credits) => void;
 };
 
 export type LayerEditEvent = {
@@ -386,6 +386,14 @@ export type SketchRef = {
   onEditFeatureChange: (cb: SketchEditFeatureChangeCb) => void;
 };
 
-export type Credit = {
+export type CreditItem = {
   html?: string;
+};
+
+export type Credits = {
+  engine: {
+    cesium?: CreditItem;
+  };
+  lightbox: CreditItem[];
+  screen: CreditItem[];
 };

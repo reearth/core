@@ -42,6 +42,7 @@ import { MutableRefObject, useMemo } from "react";
 
 import type { Camera, Clock } from "..";
 import { ClassificationType } from "../../mantle";
+import { Credits } from "../../Map";
 import type {
   CameraOptions,
   FlyToDestination,
@@ -919,17 +920,17 @@ export function getCredits(viewer: Viewer) {
   const { lightboxCredits, screenCredits } = creditDisplay?._currentFrameCredits || {};
   const cesiumCredits = creditDisplay._currentCesiumCredit;
 
-  const credits: {
-    html?: string;
-  }[] = [
-    ...(cesiumCredits?.html ? [{ html: cesiumCredits.html }] : []),
-    ...Array.from(lightboxCredits?._array ?? []).map(c => ({
+  const credits: Credits = {
+    engine: {
+      cesium: cesiumCredits?.html ? { html: cesiumCredits.html } : undefined,
+    },
+    lightbox: Array.from(lightboxCredits?._array ?? []).map(c => ({
       html: c?.credit?.html,
     })),
-    ...Array.from(screenCredits?._array ?? []).map(c => ({
+    screen: Array.from(screenCredits?._array ?? []).map(c => ({
       html: c?.credit?.html,
     })),
-  ];
+  };
 
   return credits;
 }

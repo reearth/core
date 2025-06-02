@@ -27,7 +27,7 @@ import type {
 import { e2eAccessToken, setE2ECesiumViewer } from "../../e2eConfig";
 import { ComputedFeature, DataType, SelectedFeatureInfo, LatLng, Camera } from "../../mantle";
 import {
-  Credit,
+  Credits,
   LayerLoadEvent,
   LayerSelectWithRectEnd,
   LayerSelectWithRectMove,
@@ -130,7 +130,7 @@ export default ({
   onLayerLoad?: (e: LayerLoadEvent) => void;
   onCameraChange?: (camera: Camera) => void;
   onMount?: () => void;
-  onCreditsUpdate?: (credits: Credit[]) => void;
+  onCreditsUpdate?: (credits: Credits) => void;
 }) => {
   const cesium = useRef<CesiumComponentRef<CesiumViewer>>(null);
 
@@ -665,8 +665,8 @@ export default ({
       if (!onCreditsUpdateRef.current) return;
       const viewer = cesium.current?.cesiumElement;
       if (!viewer || viewer.isDestroyed()) return;
-      const credits: Credit[] = getCredits(viewer) ?? [];
-      onCreditsUpdateRef.current(credits);
+      const credits = getCredits(viewer);
+      onCreditsUpdateRef.current(credits as Credits);
     }, 3000);
   }, []);
 

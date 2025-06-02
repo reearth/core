@@ -12,7 +12,7 @@ import {
   type LatLng,
   type Cluster,
   type ComputedLayer,
-  type Credit,
+  type Credits,
 } from "../Map";
 import { SketchFeature, SketchType } from "../Map/Sketch/types";
 
@@ -64,7 +64,7 @@ export type CoreVisualizerProps = {
   onSketchFeatureDelete?: (layerId: string, featureId: string) => void;
   onInteractionModeChange?: (mode: InteractionModeType) => void;
   onAPIReady?: () => void;
-  onCreditsUpdate?: (credits: Credit[]) => void;
+  onCreditsUpdate?: (credits: Credits) => void;
 };
 
 export const CoreVisualizer = memo(
