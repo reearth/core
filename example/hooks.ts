@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ComputedFeature,
   ComputedLayer,
-  Credit,
+  Credits,
   LayerSelectionReason,
   LazyLayer,
   MapRef,
@@ -133,8 +133,8 @@ export default () => {
     ref.current?.sketch.deleteFeature(selectedLayer.id, selectedFeature.id);
   }, [selectedLayer, selectedFeature]);
 
-  const [_credits, setCredits] = useState<Credit[]>([]);
-  const handleCreditsUpdate = useCallback((credits: Credit[]) => {
+  const [_credits, setCredits] = useState<Credits>();
+  const handleCreditsUpdate = useCallback((credits: Credits) => {
     setCredits(credits);
   }, []);
 
