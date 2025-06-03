@@ -64,7 +64,7 @@ export type CoreVisualizerProps = {
   onSketchFeatureDelete?: (layerId: string, featureId: string) => void;
   onInteractionModeChange?: (mode: InteractionModeType) => void;
   onAPIReady?: () => void;
-  onCreditsUpdate?: (credits: Credits) => void;
+  onCreditsUpdate?: (credits?: Credits) => void;
 };
 
 export const CoreVisualizer = memo(
