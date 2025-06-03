@@ -261,7 +261,7 @@ export type EngineProps = {
   onLayerSelectWithRectStart?: (e: LayerSelectWithRectStart) => void;
   onLayerSelectWithRectMove?: (e: LayerSelectWithRectMove) => void;
   onLayerSelectWithRectEnd?: (e: LayerSelectWithRectEnd) => void;
-  onCreditsUpdate?: (credits: Credits) => void;
+  onCreditsUpdate?: (credits?: Credits) => void;
 };
 
 export type LayerEditEvent = {
