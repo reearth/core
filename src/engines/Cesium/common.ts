@@ -75,8 +75,8 @@ const drawIcon = (
 
   ctx.save();
 
-  c.width = w + shadowBlur;
-  c.height = h + shadowBlur;
+  c.width = w + shadowBlur * 2;
+  c.height = h + shadowBlur * 2;
   ctx.shadowBlur = shadowBlur;
   ctx.shadowOffsetX = shadowOffsetX;
   ctx.shadowOffsetY = shadowOffsetY;
@@ -87,14 +87,14 @@ const drawIcon = (
   if (crop === "circle") {
     ctx.fillStyle = "black";
     ctx.globalCompositeOperation = "destination-in";
-    ctx.arc(w / 2, h / 2, Math.min(w, h) / 2, 0, 2 * Math.PI);
+    ctx.arc(c.width / 2, c.height / 2, Math.min(w, h) / 2, 0, 2 * Math.PI);
     ctx.fill();
 
     if (shadow) {
       ctx.shadowColor = shadowColor;
       ctx.globalCompositeOperation = "destination-over";
       ctx.fillStyle = "black";
-      ctx.arc(w / 2, h / 2, Math.min(w, h) / 2, 0, 2 * Math.PI);
+      ctx.arc(c.width / 2, c.height / 2, Math.min(w, h) / 2, 0, 2 * Math.PI);
       ctx.fill();
     }
   } else if (shadow) {
