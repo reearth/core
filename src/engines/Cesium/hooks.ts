@@ -130,7 +130,7 @@ export default ({
   onLayerLoad?: (e: LayerLoadEvent) => void;
   onCameraChange?: (camera: Camera) => void;
   onMount?: () => void;
-  onCreditsUpdate?: (credits?: Credits) => void;
+  onCreditsUpdate?: (credits: Credits) => void;
 }) => {
   const cesium = useRef<CesiumComponentRef<CesiumViewer>>(null);
 

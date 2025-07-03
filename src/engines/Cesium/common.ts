@@ -58,6 +58,7 @@ import { DEFAULT_SCREEN_SPACE_CAMERA_ASSIGNMENTS } from "./constants";
 export const layerIdField = `__reearth_layer_id`;
 
 const defaultImageSize = 50;
+const emptyCredites: Credits = { engine: {}, lightbox: [], screen: [] };
 
 const drawIcon = (
   image: HTMLImageElement | undefined,
@@ -904,7 +905,7 @@ export function getExtrudedHeight(
 }
 
 export function getCredits(viewer: Viewer) {
-  if (!viewer) return;
+  if (!viewer) return emptyCredites;
   const creditDisplay = viewer.creditDisplay as
     | (CreditDisplay & {
         _currentFrameCredits: {
@@ -915,7 +916,7 @@ export function getCredits(viewer: Viewer) {
       })
     | undefined;
 
-  if (!creditDisplay) return;
+  if (!creditDisplay) return emptyCredites;
 
   const { lightboxCredits, screenCredits } = creditDisplay?._currentFrameCredits || {};
   const cesiumCredits = creditDisplay._currentCesiumCredit;
