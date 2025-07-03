@@ -134,7 +134,7 @@ export default () => {
   }, [selectedLayer, selectedFeature]);
 
   const [_credits, setCredits] = useState<Credits>();
-  const handleCreditsUpdate = useCallback((credits: Credits) => {
+  const handleCreditsUpdate = useCallback((credits?: Credits) => {
     setCredits(credits);
   }, []);
 
