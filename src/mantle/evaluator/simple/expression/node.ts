@@ -175,18 +175,16 @@ export class Node {
   }
   _evaluateVariableString(feature?: Feature) {
     const variableRegex = /\${(.*?)}/g;
-    let result = this._value;
-    let match = variableRegex.exec(result);
-    while (match !== null) {
-      const placeholder = match[0];
-      const variableName = match[1];
-      let property = feature?.properties[variableName];
-      if (typeof property === "undefined") {
-        property = "";
-      }
-      result = result.replace(placeholder, property);
-      match = variableRegex.exec(result);
-    }
+    const result = this._value.replace(
+      variableRegex,
+      (_placeholder: string, variableName: string) => {
+        let property = feature?.properties[variableName];
+        if (typeof property === "undefined") {
+          property = "";
+        }
+        return property;
+      },
+    );
     return result;
   }
   _evaluateVariable(feature?: Feature) {
