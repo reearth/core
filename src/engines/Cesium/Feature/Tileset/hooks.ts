@@ -92,14 +92,15 @@ const makeFeatureId = (
   }
   const featureId = getBuiltinFeatureId(tileFeature);
   return generateIDWithMD5(
-    `${coordinates.x}-${coordinates.y}-${coordinates.z}-${featureId}-${!(tileFeature instanceof Model)
-      ? JSON.stringify(
-        // Read only root properties.
-        Object.entries(convertCesium3DTileFeatureProperties(tileFeature))
-          .filter((_k, v) => typeof v === "string" || typeof v === "number")
-          .map(([k, v]) => `${k}${v}`),
-      )
-      : ""
+    `${coordinates.x}-${coordinates.y}-${coordinates.z}-${featureId}-${
+      !(tileFeature instanceof Model)
+        ? JSON.stringify(
+            // Read only root properties.
+            Object.entries(convertCesium3DTileFeatureProperties(tileFeature))
+              .filter((_k, v) => typeof v === "string" || typeof v === "number")
+              .map(([k, v]) => `${k}${v}`),
+          )
+        : ""
     }`,
   );
 };
@@ -222,20 +223,25 @@ const useFeature = ({
         const style = computedFeature?.["3dtiles"];
 
         COMMON_STYLE_PROPERTIES.forEach(({ name, convert }) => {
+          const val = convertStyle(style?.[name], convert);
+
           if (name === "color") {
-            if (isFeatureSelected) {
-              raw.color =
-                typeof layer["3dtiles"]?.selectedFeatureColor === "string"
-                  ? toColor(layer["3dtiles"]?.selectedFeatureColor) ?? raw.color
-                  : raw.color;
-              return;
+            // Reset color to default so that new style could update all.
+            raw.color = DEFAULT_FEATURE_COLOR;
+
+            // Apply color from style.
+            if (val !== undefined) {
+              raw.color = val;
             }
 
-            raw.color = DEFAULT_FEATURE_COLOR;
-          }
-          const val = convertStyle(style?.[name], convert);
-          if (val !== undefined) {
-            raw[name] = val;
+            // Apply color for selected feature.
+            if (isFeatureSelected && typeof layer["3dtiles"]?.selectedFeatureColor === "string") {
+              raw.color = toColor(layer["3dtiles"]?.selectedFeatureColor) ?? val;
+            }
+          } else {
+            if (val !== undefined) {
+              raw[name] = val;
+            }
           }
         });
 
@@ -752,8 +758,8 @@ export const useHooks = ({
   const tilesetUrl = useMemo(() => {
     return type === "osm-buildings" && isVisible
       ? IonResource.fromAssetId(96188, {
-        accessToken: meta?.cesiumIonAccessToken as string | undefined,
-      }) // https://github.com/CesiumGS/cesium/blob/main/packages/engine/Source/Scene/createOsmBuildings.js#L53
+          accessToken: meta?.cesiumIonAccessToken as string | undefined,
+        }) // https://github.com/CesiumGS/cesium/blob/main/packages/engine/Source/Scene/createOsmBuildings.js#L53
       : googleMapPhotorealisticResource && isVisible
         ? googleMapPhotorealisticResource
         : type === "3dtiles" && isVisible
@@ -778,7 +784,7 @@ export const useHooks = ({
       property?.imageBasedLightIntensity ?? viewerProperty?.scene?.imageBasedLighting?.intensity;
     const sphericalHarmonicCoefficients = arrayToCartecian3(
       property?.sphericalHarmonicCoefficients ??
-      viewerProperty?.scene?.imageBasedLighting?.sphericalHarmonicCoefficients,
+        viewerProperty?.scene?.imageBasedLighting?.sphericalHarmonicCoefficients,
       imageBasedLightIntensity,
     );
 
