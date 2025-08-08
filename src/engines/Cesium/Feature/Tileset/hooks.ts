@@ -237,7 +237,6 @@ const useFeature = ({
             // Apply color for selected feature.
             if (isFeatureSelected && typeof layer["3dtiles"]?.selectedFeatureColor === "string") {
               raw.color = toColor(layer["3dtiles"]?.selectedFeatureColor) ?? val;
-              return;
             }
           } else {
             if (val !== undefined) {
