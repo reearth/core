@@ -791,9 +791,22 @@ export default ({
   };
 };
 
+const hasValidFeatureProperties = (feature: any): boolean => {
+  return !!(
+    feature &&
+    feature._content &&
+    feature._content.featureTables &&
+    typeof feature.getPropertyIds === "function"
+  );
+};
+
 function tileProperties(
   t: Cesium3DTileFeature | Cesium3DTilePointFeature,
 ): { key: string; value: any }[] {
+  if (!hasValidFeatureProperties(t)) {
+    return [];
+  }
+
   return t
     .getPropertyIds()
     .reduce<

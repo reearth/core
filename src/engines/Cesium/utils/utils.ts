@@ -392,10 +392,24 @@ export const convertEntityDescription = (
   return description;
 };
 
+const hasFeatureProperties = (feature: any): boolean => {
+  return !!(
+    feature &&
+    feature._content &&
+    feature._content.featureTables &&
+    typeof feature.getPropertyIds === "function"
+  );
+};
+
 export const convertCesium3DTileFeatureProperties = (
   feature: Cesium3DTileFeature | Cesium3DTilePointFeature,
 ) => {
-  return Object.fromEntries(feature.getPropertyIds().map(id => [id, feature.getProperty(id)]));
+  if (!hasFeatureProperties(feature)) {
+    return {};
+  }
+
+  const propertyIds = feature.getPropertyIds();
+  return Object.fromEntries(propertyIds.map(id => [id, feature.getProperty(id)]));
 };
 
 export const convertObjToComputedFeature = (

@@ -79,14 +79,28 @@ const useData = (layer: ComputedLayer | undefined) => {
   }, [layer]);
 };
 
+const canGetFeatureProperty = (feature: any): boolean => {
+  return !!(
+    feature &&
+    feature._content &&
+    feature._content.featureTables &&
+    typeof feature.getProperty === "function"
+  );
+};
+
 const makeFeatureId = (
   tileFeature: InternalCesium3DTileFeature,
   content: Cesium3DTileContent,
   idProperty?: string,
 ) => {
   const coordinates = content.tile.boundingSphere.center;
-  const specifiedId =
-    idProperty && !(tileFeature instanceof Model) ? tileFeature.getProperty(idProperty) : undefined;
+  let specifiedId: string | undefined;
+
+  // Safely get property with validation
+  if (idProperty && !(tileFeature instanceof Model) && canGetFeatureProperty(tileFeature)) {
+    specifiedId = tileFeature.getProperty(idProperty);
+  }
+
   if (specifiedId) {
     return specifiedId as string;
   }
