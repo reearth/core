@@ -4,7 +4,7 @@ import { CZML_SIMPLE } from "./czml_simple";
 import { GEOJSON_MARKER } from "./geojson_marker";
 import { GEOJSON_SIMPLE } from "./geojson_simple";
 import { GOOGLE_PHOTOREALISTIC_3DTILES } from "./google_photorealistic_3dtiles";
-import { LAND_USE, LSLD_SAPPORO, LSLD_NIJIMA } from "./mvt";
+import { LAND_USE, LSLD_SAPPORO, LSLD_NIJIMA, KUMAGAYA_BLDG } from "./mvt";
 import { OSM_BUILDINGS } from "./osm_buildings";
 import { THREEDTILES_SIMPLE } from "./threedtiles_simple";
 
@@ -18,4 +18,5 @@ export const TEST_LAYERS: Layer[] = [
   OSM_BUILDINGS,
   THREEDTILES_SIMPLE,
   CZML_SIMPLE,
+  KUMAGAYA_BLDG,
 ];
