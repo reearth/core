@@ -29,10 +29,11 @@ import type { InternalCesium3DTileFeature } from "../types";
 
 export const convertCartesian3ToPosition = (
   cesium?: CesiumViewer,
-  pos?: Cartesian3,
+  pos?: Cartesian3
 ): { lat: number; lng: number; height: number } | undefined => {
   if (!pos) return;
-  const cartographic = cesium?.scene.globe.ellipsoid.cartesianToCartographic(pos);
+  const cartographic =
+    cesium?.scene.globe.ellipsoid.cartesianToCartographic(pos);
   if (!cartographic) return;
   return {
     lat: CesiumMath.toDegrees(cartographic.latitude),
@@ -44,10 +45,14 @@ export const convertCartesian3ToPosition = (
 export const translationWithClamping = (
   trs: TranslationRotationScale,
   allowEnterGround: boolean,
-  terrainHeightEstimate: number,
+  terrainHeightEstimate: number
 ) => {
   if (!allowEnterGround) {
-    const cartographic = Cartographic.fromCartesian(trs.translation, undefined, new Cartographic());
+    const cartographic = Cartographic.fromCartesian(
+      trs.translation,
+      undefined,
+      new Cartographic()
+    );
     const boxBottomHeight = cartographic.height - trs.scale.z / 2;
     const floorHeight = terrainHeightEstimate;
     if (boxBottomHeight < floorHeight) {
@@ -69,8 +74,8 @@ export function lookupFeatures(
   cb: (
     feature: InternalCesium3DTileFeature,
     content: Cesium3DTileContent,
-    batchId?: number,
-  ) => void | Promise<void>,
+    batchId?: number
+  ) => void | Promise<void>
 ) {
   if (!c) return;
 
@@ -88,14 +93,14 @@ export function lookupFeatures(
     }
     cb(f, c, i);
   }
-  c.innerContents?.forEach(c => lookupFeatures(c, cb));
+  c.innerContents?.forEach((c) => lookupFeatures(c, cb));
   return;
 }
 
 const findFeatureFrom3DTile = (
   tile: Cesium3DTile,
   featureId?: string,
-  featureIndex?: TilesetFeatureIndex,
+  featureIndex?: TilesetFeatureIndex
 ): Cesium3DTileFeature | void => {
   let target: InternalCesium3DTileFeature | undefined = undefined;
 
@@ -106,7 +111,7 @@ const findFeatureFrom3DTile = (
     }
   }
 
-  lookupFeatures(tile.content, f => {
+  lookupFeatures(tile.content, (f) => {
     const tag = getTag(f);
     if (tag?.featureId === featureId) {
       target = f;
@@ -129,7 +134,7 @@ export function findEntity(
   viewer: CesiumViewer,
   layerId?: string,
   featureId?: string,
-  withoutTileFeature?: boolean,
+  withoutTileFeature?: boolean
 ):
   | Entity
   | Cesium3DTileset
@@ -147,13 +152,13 @@ export function findEntity(
 
   // we can store groundPrimitives as a state as aren't saved as unique entities in the viewer, i.e Workaround for making FlyTo for HeatMaps: @pyshx
 
-  entity = viewer.entities.values.find(e => getTag(e)?.[keyName] === id);
+  entity = viewer.entities.values.find((e) => getTag(e)?.[keyName] === id);
   if (entity) return entity;
 
   for (const ds of [viewer.dataSourceDisplay.dataSources, viewer.dataSources]) {
     for (let i = 0; i < ds.length; i++) {
       const entities = ds.get(i).entities.values;
-      const e = entities.find(e => getTag(e)?.[keyName] === id);
+      const e = entities.find((e) => getTag(e)?.[keyName] === id);
       if (e) {
         return e;
       }
@@ -205,9 +210,9 @@ const findFeaturesFrom3DTile = <T = InternalCesium3DTileFeature>(
   tile: Cesium3DTile,
   featureId: string[],
   convert?: (f: InternalCesium3DTileFeature) => T,
-  targets: Set<T> = new Set(),
+  targets: Set<T> = new Set()
 ) => {
-  lookupFeatures(tile.content, f => {
+  lookupFeatures(tile.content, (f) => {
     const tag = getTag(f);
     if (featureId.includes(tag?.featureId ?? "")) {
       const r = convert?.(f);
@@ -224,11 +229,13 @@ const findFeaturesFrom3DTile = <T = InternalCesium3DTileFeature>(
   }
 };
 
-const filterEntity = <T = Entity | Cesium3DTileset | InternalCesium3DTileFeature>(
+const filterEntity = <
+  T = Entity | Cesium3DTileset | InternalCesium3DTileFeature,
+>(
   es: Entity[],
   layerId: string,
   featureId: string[],
-  convert?: (e: Entity | Cesium3DTileset | InternalCesium3DTileFeature) => T,
+  convert?: (e: Entity | Cesium3DTileset | InternalCesium3DTileFeature) => T
 ) => {
   const result: T[] = [];
   for (const e of es) {
@@ -245,14 +252,16 @@ const filterEntity = <T = Entity | Cesium3DTileset | InternalCesium3DTileFeature
   return result;
 };
 
-const findEntityFromDatasource = <T = Entity | Cesium3DTileset | InternalCesium3DTileFeature>(
+const findEntityFromDatasource = <
+  T = Entity | Cesium3DTileset | InternalCesium3DTileFeature,
+>(
   viewer: Viewer,
   layerId: string,
   featureId: string[],
   convert?: (
     e: Entity | Cesium3DTileset | InternalCesium3DTileFeature,
-    layer?: Cesium3DTileset | DataSource,
-  ) => T,
+    layer?: Cesium3DTileset | DataSource
+  ) => T
 ) => {
   let datasources: T[] = [];
   for (const ds of [viewer.dataSourceDisplay.dataSources, viewer.dataSources]) {
@@ -267,14 +276,16 @@ const findEntityFromDatasource = <T = Entity | Cesium3DTileset | InternalCesium3
   return datasources;
 };
 
-const findTile3DFeaturesFromScene = <T = Entity | Cesium3DTileset | InternalCesium3DTileFeature>(
+const findTile3DFeaturesFromScene = <
+  T = Entity | Cesium3DTileset | InternalCesium3DTileFeature,
+>(
   viewer: Viewer,
   layerId: string,
   featureId: string[],
   convert?: (
     e: Entity | Cesium3DTileset | InternalCesium3DTileFeature,
-    layer?: Cesium3DTileset | DataSource,
-  ) => T,
+    layer?: Cesium3DTileset | DataSource
+  ) => T
 ) => {
   const targets: Set<T> = new Set();
   // Find Cesium3DTileFeature
@@ -290,9 +301,9 @@ const findTile3DFeaturesFromScene = <T = Entity | Cesium3DTileset | InternalCesi
     const featureIndex = tag.featureIndex;
     if (featureIndex) {
       const featuresFromCache = featureId
-        .flatMap(id => featureIndex.find(id) as InternalCesium3DTileFeature[])
+        .flatMap((id) => featureIndex.find(id) as InternalCesium3DTileFeature[])
         .filter((f): f is InternalCesium3DTileFeature => !!f)
-        .map(f => convert?.(f, prim))
+        .map((f) => convert?.(f, prim))
         .filter((f): f is NonNullable<T> => !!f);
 
       return featuresFromCache;
@@ -307,19 +318,31 @@ const findTile3DFeaturesFromScene = <T = Entity | Cesium3DTileset | InternalCesi
   return [];
 };
 
-export function findFeaturesFromLayer<T = Entity | Cesium3DTileset | InternalCesium3DTileFeature>(
+export function findFeaturesFromLayer<
+  T = Entity | Cesium3DTileset | InternalCesium3DTileFeature,
+>(
   viewer: CesiumViewer,
   layerId: string,
   featureId: string[],
   convert?: (
     e: Entity | Cesium3DTileset | InternalCesium3DTileFeature,
-    layer?: Cesium3DTileset | DataSource,
-  ) => T,
+    layer?: Cesium3DTileset | DataSource
+  ) => T
 ): NonNullable<T>[] {
-  const entity = filterEntity(viewer.entities.values, layerId, featureId, convert);
+  const entity = filterEntity(
+    viewer.entities.values,
+    layerId,
+    featureId,
+    convert
+  );
   if (entity.length) return entity as NonNullable<T>[];
 
-  const datasources: T[] = findEntityFromDatasource(viewer, layerId, featureId, convert);
+  const datasources: T[] = findEntityFromDatasource(
+    viewer,
+    layerId,
+    featureId,
+    convert
+  );
   if (datasources.length) {
     return datasources as NonNullable<T>[];
   }
@@ -330,7 +353,7 @@ export function findFeaturesFromLayer<T = Entity | Cesium3DTileset | InternalCes
 export const getEntityContent = (
   entity: Entity | ImageryLayerFeatureInfo,
   time: JulianDate,
-  defaultContent: InfoboxProperty["defaultContent"],
+  defaultContent: InfoboxProperty["defaultContent"]
 ): DefaultInfobox["content"] => {
   const content: Record<
     Exclude<InfoboxProperty["defaultContent"], undefined>,
@@ -357,14 +380,17 @@ export const getEntityContent = (
     },
   };
 
-  return defaultContent ? content[defaultContent] : content.attributes ?? content.description;
+  return defaultContent
+    ? content[defaultContent]
+    : content.attributes ?? content.description;
 };
 
-function propertiesToTableContent(properties: Record<string, any>): { key: string; value: any }[] {
-  return Object.entries(properties).reduce<{ key: string; value: [string, string] }[]>(
-    (a, [key, value]) => [...a, { key, value }],
-    [],
-  );
+function propertiesToTableContent(
+  properties: Record<string, any>
+): { key: string; value: any }[] {
+  return Object.entries(properties).reduce<
+    { key: string; value: [string, string] }[]
+  >((a, [key, value]) => [...a, { key, value }], []);
 }
 
 // Just a shortcut to the private property.
@@ -376,47 +402,58 @@ export function getPixelRatio(scene: Scene): number {
   ).pixelRatio;
 }
 
-export const convertEntityProperties = (currentTime: JulianDate, entity: Entity) => {
+export const convertEntityProperties = (
+  currentTime: JulianDate,
+  entity: Entity
+) => {
   const properties = entity.properties?.getValue(currentTime);
   return entity.properties && properties
-    ? Object.fromEntries(entity.properties.propertyNames.map(key => [key, properties[key]]))
+    ? Object.fromEntries(
+        entity.properties.propertyNames.map((key) => [key, properties[key]])
+      )
     : {};
 };
 
 export const convertEntityDescription = (
   currentTime: JulianDate,
-  entity: Entity,
+  entity: Entity
 ): string | undefined => {
   const description = entity.description?.getValue(currentTime);
   if (typeof description !== "string") return;
   return description;
 };
 
-const hasFeatureProperties = (feature: any): boolean => {
+export const hasValidFeatureProperties = (feature: any): boolean => {
   return !!(
     feature &&
     feature._content &&
     feature._content.featureTables &&
-    typeof feature.getPropertyIds === "function"
+    typeof feature.getPropertyIds === "function" &&
+    typeof feature.getProperty === "function"
   );
 };
 
 export const convertCesium3DTileFeatureProperties = (
-  feature: Cesium3DTileFeature | Cesium3DTilePointFeature,
+  feature: Cesium3DTileFeature | Cesium3DTilePointFeature
 ) => {
-  if (!hasFeatureProperties(feature)) {
+  if (!hasValidFeatureProperties(feature)) {
     return {};
   }
 
   const propertyIds = feature.getPropertyIds();
-  return Object.fromEntries(propertyIds.map(id => [id, feature.getProperty(id)]));
+  return Object.fromEntries(
+    propertyIds.map((id) => [id, feature.getProperty(id)])
+  );
 };
 
 export const convertObjToComputedFeature = (
   currentTime: JulianDate,
-  obj: object,
+  obj: object
 ): [layerId: string | undefined, feature: ComputedFeature] | undefined => {
-  if (obj instanceof Cesium3DTileFeature || obj instanceof Cesium3DTilePointFeature) {
+  if (
+    obj instanceof Cesium3DTileFeature ||
+    obj instanceof Cesium3DTilePointFeature
+  ) {
     const tag = getTag(obj);
     return [
       tag?.layerId,

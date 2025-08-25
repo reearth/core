@@ -13,8 +13,19 @@ import {
   ShadowMap,
   ImageryLayer,
 } from "cesium";
-import { MutableRefObject, RefObject, useCallback, useEffect, useMemo, useRef } from "react";
-import type { CesiumComponentRef, CesiumMovementEvent, RootEventTarget } from "resium";
+import {
+  MutableRefObject,
+  RefObject,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+} from "react";
+import type {
+  CesiumComponentRef,
+  CesiumMovementEvent,
+  RootEventTarget,
+} from "resium";
 
 import type {
   LayerSelectionReason,
@@ -25,7 +36,13 @@ import type {
   LayerVisibilityEvent,
 } from "..";
 import { e2eAccessToken, setE2ECesiumViewer } from "../../e2eConfig";
-import { ComputedFeature, DataType, SelectedFeatureInfo, LatLng, Camera } from "../../mantle";
+import {
+  ComputedFeature,
+  DataType,
+  SelectedFeatureInfo,
+  LatLng,
+  Camera,
+} from "../../mantle";
 import {
   Credits,
   LayerLoadEvent,
@@ -50,7 +67,11 @@ import { useOverrideGlobeShader } from "./hooks/useOverrideGlobeShader/useOverri
 import useViewerProperty from "./hooks/useViewerProperty";
 import { InternalCesium3DTileFeature } from "./types";
 import { makeMouseEventProps } from "./utils/mouse";
-import { findEntity, getEntityContent } from "./utils/utils";
+import {
+  findEntity,
+  getEntityContent,
+  hasValidFeatureProperties,
+} from "./utils/utils";
 
 interface CustomGlobeSurface {
   tileProvider: {
@@ -60,7 +81,10 @@ interface CustomGlobeSurface {
   };
 }
 
-type CesiumMouseEvent = (movement: CesiumMovementEvent, target: RootEventTarget) => void;
+type CesiumMouseEvent = (
+  movement: CesiumMovementEvent,
+  target: RootEventTarget
+) => void;
 type CesiumMouseWheelEvent = (delta: number) => void;
 
 export default ({
@@ -114,13 +138,17 @@ export default ({
     layerId?: string,
     featureId?: string,
     options?: LayerSelectionReason,
-    info?: SelectedFeatureInfo,
+    info?: SelectedFeatureInfo
   ) => void;
-  onLayerDrag?: (layerId: string, featureId: string | undefined, position: LatLng) => void;
+  onLayerDrag?: (
+    layerId: string,
+    featureId: string | undefined,
+    position: LatLng
+  ) => void;
   onLayerDrop?: (
     layerId: string,
     featureId: string | undefined,
-    position: LatLng | undefined,
+    position: LatLng | undefined
   ) => void;
   onLayerEdit?: (e: LayerEditEvent) => void;
   onLayerSelectWithRectStart?: (e: LayerSelectWithRectStart) => void;
@@ -170,10 +198,12 @@ export default ({
         })
       | undefined;
     if (!shadowMap) return;
-    shadowMap.softShadows = property?.scene?.shadow?.shadowMap?.softShadows ?? false;
+    shadowMap.softShadows =
+      property?.scene?.shadow?.shadowMap?.softShadows ?? false;
     shadowMap.darkness = property?.scene?.shadow?.shadowMap?.darkness ?? 0.3;
     shadowMap.size = property?.scene?.shadow?.shadowMap?.size ?? 2048;
-    shadowMap.maximumDistance = property?.scene?.shadow?.shadowMap?.maximumDistance ?? 5000;
+    shadowMap.maximumDistance =
+      property?.scene?.shadow?.shadowMap?.maximumDistance ?? 5000;
     shadowMap.fadingEnabled = true;
     shadowMap.normalOffset = true;
 
@@ -286,10 +316,10 @@ export default ({
       // Find ImageryLayerFeature
       const ImageryLayerDataTypes: DataType[] = [];
       const layers = layersRef?.current?.findAll(
-        layer =>
+        (layer) =>
           layer.type === "simple" &&
           !!layer.data?.type &&
-          ImageryLayerDataTypes.includes(layer.data?.type),
+          ImageryLayerDataTypes.includes(layer.data?.type)
       );
 
       if (layers?.length) {
@@ -298,7 +328,7 @@ export default ({
           ((): [ComputedFeature, string] | void => {
             for (const layer of layers) {
               const f = layer.computed?.features.find(
-                feature => feature.id !== selectedLayerId?.featureId,
+                (feature) => feature.id !== selectedLayerId?.featureId
               );
               if (f) {
                 return [f, layer.id];
@@ -329,7 +359,7 @@ export default ({
                 },
               }
             : undefined,
-          { feature: tag.computedFeature },
+          { feature: tag.computedFeature }
         );
       }
       return;
@@ -337,7 +367,9 @@ export default ({
 
     if (entity) {
       const layer = tag?.layerId
-        ? layersRef?.current?.overriddenLayers().find(l => l.id === tag.layerId) ??
+        ? layersRef?.current
+            ?.overriddenLayers()
+            .find((l) => l.id === tag.layerId) ??
           layersRef?.current?.findById(tag.layerId)
         : undefined;
       // Sometimes only featureId is specified, so we need to sync entity tag.
@@ -350,12 +382,15 @@ export default ({
                 title: entity.name,
                 content: getEntityContent(
                   entity,
-                  cesium.current?.cesiumElement?.clock.currentTime ?? new JulianDate(),
-                  tag?.layerId ? layer?.infobox?.property?.defaultContent : undefined,
+                  cesium.current?.cesiumElement?.clock.currentTime ??
+                    new JulianDate(),
+                  tag?.layerId
+                    ? layer?.infobox?.property?.defaultContent
+                    : undefined
                 ),
               },
             }
-          : undefined,
+          : undefined
       );
     }
   }, [cesium, selectedLayerId, onLayerSelect, layersRef, featureFlags]);
@@ -365,13 +400,13 @@ export default ({
       property?.scene?.imageBasedLighting?.sphericalHarmonicCoefficients
         ? arrayToCartecian3(
             property?.scene?.imageBasedLighting?.sphericalHarmonicCoefficients,
-            property?.scene?.imageBasedLighting?.intensity,
+            property?.scene?.imageBasedLighting?.intensity
           )
         : undefined,
     [
       property?.scene?.imageBasedLighting?.sphericalHarmonicCoefficients,
       property?.scene?.imageBasedLighting?.intensity,
-    ],
+    ]
   );
 
   useOverrideGlobeShader({
@@ -385,7 +420,11 @@ export default ({
   });
 
   const handleMouseEvent = useCallback(
-    (type: keyof MouseEvents, e: CesiumMovementEvent, target: RootEventTarget) => {
+    (
+      type: keyof MouseEvents,
+      e: CesiumMovementEvent,
+      target: RootEventTarget
+    ) => {
       if (engineAPI.mouseEventCallbacks[type]?.length > 0) {
         const viewer = cesium.current?.cesiumElement;
         if (!viewer || viewer.isDestroyed()) return;
@@ -393,19 +432,19 @@ export default ({
         if (!props) return;
         const layerId = getLayerId(target);
         if (layerId) props.layerId = layerId;
-        engineAPI.mouseEventCallbacks[type].forEach(cb => cb(props));
+        engineAPI.mouseEventCallbacks[type].forEach((cb) => cb(props));
       }
     },
-    [engineAPI],
+    [engineAPI]
   );
 
   const handleMouseWheel = useCallback(
     (delta: number) => {
       if (engineAPI.mouseEventCallbacks.wheel.length > 0) {
-        engineAPI.mouseEventCallbacks.wheel.forEach(cb => cb({ delta }));
+        engineAPI.mouseEventCallbacks.wheel.forEach((cb) => cb({ delta }));
       }
     },
-    [engineAPI],
+    [engineAPI]
   );
 
   const mouseEventHandles = useMemo(() => {
@@ -431,9 +470,12 @@ export default ({
         handleMouseWheel(delta);
       },
     };
-    (Object.keys(mouseEvents) as (keyof MouseEvents)[]).forEach(type => {
+    (Object.keys(mouseEvents) as (keyof MouseEvents)[]).forEach((type) => {
       if (type !== "wheel")
-        mouseEvents[type] = (e: CesiumMovementEvent, target: RootEventTarget) => {
+        mouseEvents[type] = (
+          e: CesiumMovementEvent,
+          target: RootEventTarget
+        ) => {
           handleMouseEvent(type as keyof MouseEvents, e, target);
         };
     });
@@ -462,10 +504,17 @@ export default ({
         viewer.selectedEntity = undefined;
       }
 
-      if (target && "id" in target && target.id instanceof Entity && isSelectable(target.id)) {
+      if (
+        target &&
+        "id" in target &&
+        target.id instanceof Entity &&
+        isSelectable(target.id)
+      ) {
         const tag = getTag(target.id);
         const layer = tag?.layerId
-          ? layersRef?.current?.overriddenLayers().find(l => l.id === tag.layerId) ??
+          ? layersRef?.current
+              ?.overriddenLayers()
+              .find((l) => l.id === tag.layerId) ??
             layersRef?.current?.findById(tag.layerId)
           : undefined;
         onLayerSelect?.(
@@ -478,11 +527,13 @@ export default ({
                   content: getEntityContent(
                     target.id,
                     viewer.clock.currentTime ?? new JulianDate(),
-                    tag?.layerId ? layer?.infobox?.property?.defaultContent : undefined,
+                    tag?.layerId
+                      ? layer?.infobox?.property?.defaultContent
+                      : undefined
                   ),
                 },
               }
-            : undefined,
+            : undefined
         );
         prevSelectedEntity.current = target.id;
         if (target.id instanceof Entity && !tag?.hideIndicator) {
@@ -495,7 +546,8 @@ export default ({
 
       if (
         target &&
-        (target instanceof Cesium3DTileFeature || target instanceof Cesium3DTilePointFeature)
+        (target instanceof Cesium3DTileFeature ||
+          target instanceof Cesium3DTilePointFeature)
       ) {
         const tag = getTag(target);
         if (tag) {
@@ -514,7 +566,7 @@ export default ({
                   },
                 }
               : undefined,
-            { feature: tag.computedFeature },
+            { feature: tag.computedFeature }
           );
           prevSelectedEntity.current = target;
         }
@@ -540,7 +592,8 @@ export default ({
 
       if (
         target?.primitive &&
-        (target.primitive instanceof Primitive || target.primitive instanceof GroundPrimitive)
+        (target.primitive instanceof Primitive ||
+          target.primitive instanceof GroundPrimitive)
       ) {
         const primitive = target.primitive;
         const tag = getTag(primitive);
@@ -558,17 +611,26 @@ export default ({
         const pickRay = scene.camera.getPickRay(e.position);
 
         if (pickRay) {
-          const l = await scene.imageryLayers.pickImageryLayerFeatures(pickRay, scene);
+          const l = await scene.imageryLayers.pickImageryLayerFeatures(
+            pickRay,
+            scene
+          );
 
           // Find the topmost overlaid feature.
-          const f = l?.findLast(f => {
+          const f = l?.findLast((f) => {
             const appearanceType = f?.data?.appearanceType;
-            return appearanceType && f?.data?.feature?.[appearanceType]?.show !== false;
+            return (
+              appearanceType &&
+              f?.data?.feature?.[appearanceType]?.show !== false
+            );
           });
 
           const appearanceType = f?.data?.appearanceType;
 
-          if (appearanceType && f?.data?.feature?.[appearanceType]?.show !== false) {
+          if (
+            appearanceType &&
+            f?.data?.feature?.[appearanceType]?.show !== false
+          ) {
             const tag = getTag(f.imageryLayer);
 
             const pos = f.position;
@@ -587,13 +649,17 @@ export default ({
             }
 
             const layer = tag?.layerId
-              ? layersRef?.current?.overriddenLayers().find(l => l.id === tag.layerId) ??
+              ? layersRef?.current
+                  ?.overriddenLayers()
+                  .find((l) => l.id === tag.layerId) ??
                 layersRef?.current?.findById(tag.layerId)
               : undefined;
             const content = getEntityContent(
               f.data.feature ?? f,
               viewer.clock.currentTime ?? new JulianDate(),
-              tag?.layerId ? layer?.infobox?.property?.defaultContent : undefined,
+              tag?.layerId
+                ? layer?.infobox?.property?.defaultContent
+                : undefined
             );
             prevSelectedImageryFeatureId.current = f.data.featureId;
             onLayerSelect?.(
@@ -609,7 +675,7 @@ export default ({
                 : undefined,
               {
                 feature: f.data.feature,
-              },
+              }
             );
 
             return;
@@ -627,7 +693,7 @@ export default ({
       featureFlags,
       selectedLayerId?.featureId,
       selectedLayerId?.layerId,
-    ],
+    ]
   );
 
   // E2E test
@@ -694,7 +760,7 @@ export default ({
       onLayerLoad,
       timelineManagerRef,
       updateCredits,
-    ],
+    ]
   );
 
   useEffect(() => {
@@ -702,7 +768,8 @@ export default ({
     if (globe) {
       const surface = (globe as any)._surface as CustomGlobeSurface;
       if (surface) {
-        surface.tileProvider._debug.wireframe = property?.debug?.showGlobeWireframe ?? false;
+        surface.tileProvider._debug.wireframe =
+          property?.debug?.showGlobeWireframe ?? false;
       }
     }
   }, [property?.debug?.showGlobeWireframe]);
@@ -723,14 +790,21 @@ export default ({
     });
   }, [time, timelineManagerRef]);
 
-  const { sceneLight, sceneBackgroundColor, sceneMsaaSamples, sceneMode } = useViewerProperty({
-    property,
-    cesium,
-  });
+  const { sceneLight, sceneBackgroundColor, sceneMsaaSamples, sceneMode } =
+    useViewerProperty({
+      property,
+      cesium,
+    });
 
   useLayerDragDrop({ cesium, onLayerDrag, onLayerDrop, isLayerDraggable });
 
-  useExplicitRender({ cesium, requestingRenderMode, isLayerDragging, shouldRender, property });
+  useExplicitRender({
+    cesium,
+    requestingRenderMode,
+    isLayerDragging,
+    shouldRender,
+    property,
+  });
 
   const {
     cameraViewBoundaries,
@@ -791,17 +865,8 @@ export default ({
   };
 };
 
-const hasValidFeatureProperties = (feature: any): boolean => {
-  return !!(
-    feature &&
-    feature._content &&
-    feature._content.featureTables &&
-    typeof feature.getPropertyIds === "function"
-  );
-};
-
 function tileProperties(
-  t: Cesium3DTileFeature | Cesium3DTilePointFeature,
+  t: Cesium3DTileFeature | Cesium3DTilePointFeature
 ): { key: string; value: any }[] {
   if (!hasValidFeatureProperties(t)) {
     return [];
