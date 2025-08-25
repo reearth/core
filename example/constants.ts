@@ -19,6 +19,7 @@ export const TILES = [
   "default_label",
   "default_road",
   "open_street_map",
+  "esri_world_topo",
   "black_marble",
   "japan_gsi_standard",
 ];
