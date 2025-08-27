@@ -10,6 +10,22 @@ import {
 
 import { JapanGSIOptimalBVmapLabelImageryProvider } from "./labels/JapanGSIOptimalBVmapVectorMapLabel/JapanGSIOptimalBVmapLabelImageryProvider";
 
+const PRESET_TILE_TYPES = [
+  "default",
+  "default_label",
+  "default_road",
+  "open_street_map",
+  "black_marble",
+  "japan_gsi_standard",
+  "url",
+];
+
+export type PresetTileType = (typeof PRESET_TILE_TYPES)[number];
+
+export const isValidPresetTileType = (type: string | undefined): type is PresetTileType => {
+  return PRESET_TILE_TYPES.includes(type as PresetTileType);
+};
+
 export const tiles = {
   default: ({ cesiumIonAccessToken } = {}) =>
     IonImageryProvider.fromAssetId(IonWorldImageryStyle.AERIAL, {
@@ -26,8 +42,7 @@ export const tiles = {
   open_street_map: () =>
     new OpenStreetMapImageryProvider({
       url: "https://tile.openstreetmap.org",
-      credit:
-        '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      credit: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     }),
   black_marble: ({ cesiumIonAccessToken } = {}) =>
     IonImageryProvider.fromAssetId(3812, {
@@ -43,15 +58,13 @@ export const tiles = {
     url
       ? new UrlTemplateImageryProvider({
           url,
-          tileDiscardPolicy: heatmap
-            ? new DiscardEmptyTileImagePolicy()
-            : undefined,
+          tileDiscardPolicy: heatmap ? new DiscardEmptyTileImagePolicy() : undefined,
           minimumLevel: tile_zoomLevel?.[0],
           maximumLevel: tile_zoomLevel?.[1],
         })
       : null,
 } as {
-  [key: string]: (opts?: {
+  [K in PresetTileType]: (opts?: {
     url?: string;
     cesiumIonAccessToken?: string;
     heatmap?: boolean;
