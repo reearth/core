@@ -25,7 +25,7 @@ export const tiles = {
     }).catch(console.error),
   open_street_map: () =>
     new OpenStreetMapImageryProvider({
-      url: "https://tile.openstreetmap.org/{zoom}/{x}/{y}.png",
+      url: "https://tile.openstreetmap.org",
       credit:
         '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     }),
