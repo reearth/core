@@ -8,7 +8,7 @@ import { isEqual } from "lodash-es";
 import { useCallback, useMemo, useRef, useLayoutEffect, useState, useEffect } from "react";
 import { ImageryLayer } from "resium";
 
-import { isValidPresetTileType, tiles as tilePresets } from "./presets";
+import { isValidPresetTileType, PresetTileType, tiles as tilePresets } from "./presets";
 
 export type ImageryLayerData = {
   id: string;
@@ -90,7 +90,7 @@ export function useImageryProviders({
   tiles?: Tile[];
   cesiumIonAccessToken?: string;
   presets: {
-    [key: string]: (opts?: {
+    [K in PresetTileType]: (opts?: {
       url?: string;
       cesiumIonAccessToken?: string;
       heatmap?: boolean;
@@ -100,7 +100,7 @@ export function useImageryProviders({
 }): { providers: Providers; updated: boolean } {
   const newTile = useCallback(
     (t: Tile, ciat?: string) =>
-      presets[isValidPresetTileType(t.type) ? t.type : "default"]({
+      presets[isValidPresetTileType(t.type) ? t.type : "default"]?.({
         url: t.url,
         cesiumIonAccessToken: ciat,
         heatmap: t.heatmap,
