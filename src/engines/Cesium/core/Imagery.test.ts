@@ -6,7 +6,7 @@ import { type Tile, useImageryProviders } from "./Imagery";
 test("useImageryProviders", () => {
   const provider = vi.fn(({ url }: { url?: string } = {}): any => ({ hoge: url }));
   const provider2 = vi.fn(({ url }: { url?: string } = {}): any => ({ hoge2: url }));
-  const presets = { default: provider, foobar: provider2 };
+  const presets = { default: provider, default_label: provider2 };
   const { result, rerender } = renderHook(
     ({ tiles, cesiumIonAccessToken }: { tiles: Tile[]; cesiumIonAccessToken?: string }) =>
       useImageryProviders({
@@ -14,8 +14,13 @@ test("useImageryProviders", () => {
         presets,
         cesiumIonAccessToken,
       }),
-    { initialProps: { tiles: [{ id: "1", type: "default" }] } },
+    { initialProps: { tiles: [{ id: "1", type: "default" }], cesiumIonAccessToken: undefined } },
   );
+
+  const typedRerender = rerender as (props: {
+    tiles: Tile[];
+    cesiumIonAccessToken?: string;
+  }) => void;
 
   expect(result.current.providers).toEqual({ "1": ["default", undefined, { hoge: undefined }] });
   expect(result.current.updated).toBe(true);
@@ -23,14 +28,14 @@ test("useImageryProviders", () => {
   const prevImageryProvider = result.current.providers["1"][2];
 
   // re-render with same tiles
-  rerender({ tiles: [{ id: "1", type: "default" }] });
+  typedRerender({ tiles: [{ id: "1", type: "default" }] });
 
   expect(result.current.providers).toEqual({ "1": ["default", undefined, { hoge: undefined }] });
   expect(result.current.providers["1"][2]).toBe(prevImageryProvider); // 1's provider should be reused
   expect(provider).toBeCalledTimes(1);
 
   // update a tile URL
-  rerender({ tiles: [{ id: "1", type: "default", url: "a" }] });
+  typedRerender({ tiles: [{ id: "1", type: "default", url: "a" }] });
 
   expect(result.current.providers).toEqual({ "1": ["default", "a", { hoge: "a" }] });
   expect(result.current.providers["1"][2]).not.toBe(prevImageryProvider);
@@ -40,7 +45,7 @@ test("useImageryProviders", () => {
   const prevImageryProvider2 = result.current.providers["1"][2];
 
   // add a tile with URL
-  rerender({
+  typedRerender({
     tiles: [
       { id: "2", type: "default" },
       { id: "1", type: "default", url: "a" },
@@ -56,7 +61,7 @@ test("useImageryProviders", () => {
   expect(provider).toBeCalledTimes(3);
 
   // sort tiles
-  rerender({
+  typedRerender({
     tiles: [
       { id: "1", type: "default", url: "a" },
       { id: "2", type: "default" },
@@ -72,7 +77,7 @@ test("useImageryProviders", () => {
   expect(provider).toBeCalledTimes(3);
 
   // delete a tile
-  rerender({
+  typedRerender({
     tiles: [{ id: "1", type: "default", url: "a" }],
     cesiumIonAccessToken: "a",
   });
@@ -85,18 +90,31 @@ test("useImageryProviders", () => {
   expect(provider).toBeCalledTimes(4);
 
   // update a tile type
-  rerender({
-    tiles: [{ id: "1", type: "foobar", url: "u" }],
+  typedRerender({
+    tiles: [{ id: "1", type: "default_label", url: "u" }],
     cesiumIonAccessToken: "a",
   });
 
   expect(result.current.providers).toEqual({
-    "1": ["foobar", "u", { hoge2: "u" }],
+    "1": ["default_label", "u", { hoge2: "u" }],
   });
   expect(result.current.updated).toBe(true);
   expect(provider).toBeCalledTimes(4);
   expect(provider2).toBeCalledTimes(1);
 
-  rerender({ tiles: [] });
+  // update a tile type to unexpected type
+  typedRerender({
+    tiles: [{ id: "1", type: "unexpected_type", url: "u" }],
+  });
+
+  expect(result.current.providers).toEqual({
+    // unexpected type is treated as "default"
+    "1": ["unexpected_type", "u", { hoge: "u" }],
+  });
+  expect(result.current.updated).toBe(true);
+  expect(provider).toBeCalledTimes(5);
+  expect(provider2).toBeCalledTimes(1);
+
+  typedRerender({ tiles: [] });
   expect(result.current.providers).toEqual({});
 });

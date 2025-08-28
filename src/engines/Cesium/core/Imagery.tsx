@@ -8,7 +8,7 @@ import { isEqual } from "lodash-es";
 import { useCallback, useMemo, useRef, useLayoutEffect, useState, useEffect } from "react";
 import { ImageryLayer } from "resium";
 
-import { tiles as tilePresets } from "./presets";
+import { isValidPresetTileType, PresetTileType, tiles as tilePresets } from "./presets";
 
 export type ImageryLayerData = {
   id: string;
@@ -90,7 +90,7 @@ export function useImageryProviders({
   tiles?: Tile[];
   cesiumIonAccessToken?: string;
   presets: {
-    [key: string]: (opts?: {
+    [K in PresetTileType]: (opts?: {
       url?: string;
       cesiumIonAccessToken?: string;
       heatmap?: boolean;
@@ -100,7 +100,7 @@ export function useImageryProviders({
 }): { providers: Providers; updated: boolean } {
   const newTile = useCallback(
     (t: Tile, ciat?: string) =>
-      presets[t.type || "default"]({
+      presets[isValidPresetTileType(t.type) ? t.type : "default"]({
         url: t.url,
         cesiumIonAccessToken: ciat,
         heatmap: t.heatmap,
@@ -113,11 +113,14 @@ export function useImageryProviders({
   const tileKeys = tiles.map(t => t.id).join(",");
   const prevTileKeys = useRef(tileKeys);
   const prevProviders = useRef<Providers>({});
-  const zoomLevels = useMemo(() => tiles.map(t => {
-      if (t.id && t.zoomLevel) return { [t.id]: t.zoomLevel };
-      return
-  }),
-  [tiles]);
+  const zoomLevels = useMemo(
+    () =>
+      tiles.map(t => {
+        if (t.id && t.zoomLevel) return { [t.id]: t.zoomLevel };
+        return;
+      }),
+    [tiles],
+  );
   const prevZoomLevels = useRef(zoomLevels);
 
   // Manage TileProviders so that TileProvider does not need to be recreated each time tiles are updated.

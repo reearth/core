@@ -22,6 +22,7 @@ export const TILES = [
   "esri_world_topo",
   "black_marble",
   "japan_gsi_standard",
+  "test_unexpected_type",
 ];
 
 export const SKETCH_TOOLS: SketchType[] = [
