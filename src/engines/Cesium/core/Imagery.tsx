@@ -100,7 +100,7 @@ export function useImageryProviders({
 }): { providers: Providers; updated: boolean } {
   const newTile = useCallback(
     (t: Tile, ciat?: string) =>
-      presets[isValidPresetTileType(t.type) ? t.type : "default"]?.({
+      presets[isValidPresetTileType(t.type) ? t.type : "default"]({
         url: t.url,
         cesiumIonAccessToken: ciat,
         heatmap: t.heatmap,
