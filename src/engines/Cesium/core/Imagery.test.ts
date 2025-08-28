@@ -102,6 +102,19 @@ test("useImageryProviders", () => {
   expect(provider).toBeCalledTimes(4);
   expect(provider2).toBeCalledTimes(1);
 
+  // update a tile type to unexpected type
+  typedRerender({
+    tiles: [{ id: "1", type: "unexpected_type", url: "u" }],
+  });
+
+  expect(result.current.providers).toEqual({
+    // unexpected type is treated as "default"
+    "1": ["unexpected_type", "u", { hoge: "u" }],
+  });
+  expect(result.current.updated).toBe(true);
+  expect(provider).toBeCalledTimes(5);
+  expect(provider2).toBeCalledTimes(1);
+
   typedRerender({ tiles: [] });
   expect(result.current.providers).toEqual({});
 });
