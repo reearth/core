@@ -1,5 +1,6 @@
 import { CoreVisualizer } from "@reearth/core";
 
+import ContextConsumer from "./components/ContextConsumer";
 import OptionsPanel from "./components/OptionsPanel";
 import "@/global.css";
 import SelectionPanel from "./components/SelectionPanel";
@@ -82,8 +83,9 @@ function App() {
         onCameraChange={setCurrentCamera}
         onSketchTypeChangeProp={setSketchTool}
         layers={layers}
-        onCreditsUpdate={handleCreditsUpdate}
-      />
+        onCreditsUpdate={handleCreditsUpdate}>
+        <ContextConsumer />
+      </CoreVisualizer>
     </div>
   );
 }

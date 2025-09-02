@@ -177,7 +177,7 @@ const convertStyle = (val: any, convert: StyleProperty["convert"]) => {
 
 const useFeature = ({
   id,
-  tileset,
+  tilesetRef,
   idProperty,
   layer,
   viewer,
@@ -189,7 +189,7 @@ const useFeature = ({
   isTilesetReady,
 }: {
   id?: string;
-  tileset: MutableRefObject<Cesium3DTileset | undefined>;
+  tilesetRef: MutableRefObject<Cesium3DTileset | undefined>;
   idProperty?: string;
   layer?: ComputedLayer;
   viewer?: Viewer;
@@ -327,10 +327,10 @@ const useFeature = ({
   handleTilesetLoadRef.current = handleTilesetLoad;
   useEffect(
     () =>
-      tileset.current?.tileLoad.addEventListener((t: Cesium3DTile) =>
+      tilesetRef.current?.tileLoad.addEventListener((t: Cesium3DTile) =>
         handleTilesetLoadRef.current(t),
       ),
-    [tileset, isTilesetReady],
+    [tilesetRef, isTilesetReady],
   );
 
   const handleTilesetUnload = useCallback(
@@ -346,10 +346,10 @@ const useFeature = ({
   handleTilesetUnloadRef.current = handleTilesetUnload;
   useEffect(
     () =>
-      tileset.current?.tileUnload.addEventListener((t: Cesium3DTile) =>
+      tilesetRef.current?.tileUnload.addEventListener((t: Cesium3DTile) =>
         handleTilesetUnloadRef.current(t),
       ),
-    [tileset, isTilesetReady],
+    [tilesetRef, isTilesetReady],
   );
 
   useEffect(() => {
@@ -487,6 +487,8 @@ export const useHooks = ({
   const shouldUseFeatureIndex = !disableIndexingFeature && !!idProperty;
 
   const [isTilesetReady, setIsTilesetReady] = useState(false);
+  const [isTilesetCompReady, setIsTilesetCompReady] = useState(false);
+  const [isTilesetRefReady, setIsTilesetRefReady] = useState(false);
 
   const prevPlanes = useRef(_planes);
   const planes = useMemo(() => {
@@ -566,6 +568,7 @@ export const useHooks = ({
         (tileset?.cesiumElement as any)[layerIdField] = layer.id;
       }
       tilesetRef.current = tileset?.cesiumElement;
+      setIsTilesetRefReady(!!tileset?.cesiumElement);
     },
     [id, layer?.id, featureIndex, shouldUseFeatureIndex],
   );
@@ -602,7 +605,7 @@ export const useHooks = ({
 
   useFeature({
     id,
-    tileset: tilesetRef,
+    tilesetRef,
     layer,
     idProperty,
     viewer,
@@ -806,12 +809,17 @@ export const useHooks = ({
 
   const handleReady = useCallback(
     (tileset: Cesium3DTileset) => {
-      setIsTilesetReady(true);
+      setIsTilesetCompReady(true);
       onLayerFetch?.({ properties: tileset.properties });
       onLayerLoad?.({ layerId: layerIdRef.current });
     },
     [onLayerFetch, onLayerLoad],
   );
+
+  useEffect(() => {
+    if (!isTilesetCompReady || !isTilesetRefReady) return;
+    setIsTilesetReady(true);
+  }, [isTilesetCompReady, isTilesetRefReady]);
 
   useEffect(() => {
     updateCredits?.();
