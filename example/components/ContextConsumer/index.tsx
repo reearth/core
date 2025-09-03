@@ -1,30 +1,25 @@
 import { Cross2Icon } from "@radix-ui/react-icons";
-import { FC, useState } from "react";
+import { useContext, useState } from "react";
 
-import { ComputedFeature, LazyLayer } from "@reearth/core";
+import { coreContext } from "@reearth/core";
 
 import { OptionSection } from "../OptionsPanel/common";
+import { Button } from "../ui/button";
 
-import { Button } from "@/components/ui/button";
-
-type SelectionPanelProps = {
-  selectedLayer: LazyLayer | undefined;
-  selectedFeature: ComputedFeature | undefined;
-};
-
-const SelectionPanel: FC<SelectionPanelProps> = ({ selectedLayer, selectedFeature }) => {
+export const ContextConsumer = () => {
+  const { selectedLayer, selectedComputedFeature } = useContext(coreContext);
   const [open, setOpen] = useState(false);
 
   return (
     <>
-      <Button size="sm" className="absolute z-10 left-2 top-2" onClick={() => setOpen(true)}>
-        Selections
+      <Button size="sm" className="absolute z-10 left-2 bottom-10" onClick={() => setOpen(true)}>
+        Core Context
       </Button>
       <div
-        className={`absolute top-0 left-0 z-20 p-2 transition-all  w-96 ${open ? "" : "-translate-x-full"}`}>
+        className={`absolute bottom-0 left-0 z-20 p-2 transition-all w-96 ${open ? "" : "-translate-x-full"}`}>
         <div className="flex flex-col gap-6 p-4 bg-white rounded-md shadow-md">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold">Selections</h3>
+            <h3 className="text-lg font-semibold">Core Context</h3>
             <Button size="sm" variant="ghost" className="p-2" onClick={() => setOpen(false)}>
               <Cross2Icon className="w-4 h-4" />
             </Button>
@@ -37,9 +32,9 @@ const SelectionPanel: FC<SelectionPanelProps> = ({ selectedLayer, selectedFeatur
               </span>
             </OptionSection>
 
-            <OptionSection title="SelectedFeature">
+            <OptionSection title="SelectedComputedFeature">
               <span className="text-sm break-all">
-                {selectedFeature ? JSON.stringify(selectedFeature) : "undefined"}
+                {selectedComputedFeature ? JSON.stringify(selectedComputedFeature) : "undefined"}
               </span>
             </OptionSection>
           </div>
@@ -49,4 +44,4 @@ const SelectionPanel: FC<SelectionPanelProps> = ({ selectedLayer, selectedFeatur
   );
 };
 
-export default SelectionPanel;
+export default ContextConsumer;

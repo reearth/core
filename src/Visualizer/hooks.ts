@@ -82,7 +82,7 @@ export default function useHooks(
       info: SelectedFeatureInfo | undefined,
     ) => {
       const isSketchLayer =
-        selectedLayer.layer?.layer.type === "simple" &&
+        selectedLayer.layer?.layer?.type === "simple" &&
         selectedLayer.layer?.layer?.data?.isSketchLayer;
       // Sketch layer feature has a fixed featureId, we need to exclude it from the skip condition
       if (
