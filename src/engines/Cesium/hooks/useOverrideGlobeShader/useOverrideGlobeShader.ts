@@ -257,7 +257,7 @@ export const useOverrideGlobeShader = ({
       shaders.push(IBLFS);
     }
 
-    if (isCustomHeatmapEnabled) {
+    if (isCustomHeatmapEnabled && globe.terrainProvider.hasVertexNormals) {
       // This will log the variables needed in the shader below.
       // we need the minHeight, maxHeight and logarithmic
       matchers.push(shaderForTerrainHeatmap);
@@ -321,5 +321,10 @@ export const useOverrideGlobeShader = ({
         makeGlobeShadersDirty(globe);
       }
     };
-  }, [cesium, isCustomHeatmapEnabled, isIBLEnabled]);
+  }, [
+    cesium,
+    isCustomHeatmapEnabled,
+    isIBLEnabled,
+    cesium.current?.cesiumElement?.scene.globe.terrainProvider.hasVertexNormals,
+  ]);
 };
