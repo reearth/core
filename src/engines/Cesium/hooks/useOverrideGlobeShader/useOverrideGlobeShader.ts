@@ -63,6 +63,12 @@ function makeGlobeShadersDirty(globe: Globe): void {
   // reset surface shader source to the initial state (assuming that we never
   // use custom material on globe).
   // ref: https://github.com/CesiumGS/cesium/blob/1.106/packages/engine/Source/Scene/Globe.js#L562-L572
+
+  // Safety check: ensure globe's internal properties exist before manipulation
+  if (!globe || globe.isDestroyed() || !(globe as any)._surface) {
+    return;
+  }
+
   const material = globe.material;
   if (material == null) {
     globe.material = Material.fromType("Color");
@@ -74,8 +80,9 @@ function makeGlobeShadersDirty(globe: Globe): void {
 }
 
 function withUniforms(globe: PrivateCesiumGlobe, add?: Record<string, () => any>) {
-  const mm = (globe._surface?._tileProvider as any)?.materialUniformMap ?? {};
-  (globe._surface!._tileProvider as any).materialUniformMap = { ...mm, ...(add ?? {}) };
+  if (!globe._surface?._tileProvider) return;
+  const mm = (globe._surface._tileProvider as any)?.materialUniformMap ?? {};
+  (globe._surface._tileProvider as any).materialUniformMap = { ...mm, ...(add ?? {}) };
 }
 
 function removeUniforms(globe: PrivateCesiumGlobe, keys: string[]) {
