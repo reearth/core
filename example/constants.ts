@@ -1,7 +1,5 @@
 import { SketchType } from "@reearth/core";
 
-export const DEFAULT_TILE = "open_street_map";
-
 export const DEFAULT_LAYERS: string[] = [];
 
 export const DEFAULT_CAMERA = {
