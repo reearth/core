@@ -12,7 +12,7 @@ import {
   ViewerProperty,
 } from "@reearth/core";
 
-import { DEFAULT_CAMERA, DEFAULT_LAYERS, DEFAULT_TILE } from "./constants";
+import { DEFAULT_CAMERA, DEFAULT_LAYERS, TILES } from "./constants";
 import { DEFAULT_VIEWER_PROPERTY } from "./scene";
 import { TEST_LAYERS } from "./testLayers";
 
@@ -53,7 +53,11 @@ export default () => {
     [],
   );
 
-  const [currentTile, setCurrentTile] = useState(DEFAULT_TILE);
+  const [currentTile, setCurrentTile] = useState(
+    TILES.includes(DEFAULT_VIEWER_PROPERTY.tiles?.[0]?.type ?? "")
+      ? DEFAULT_VIEWER_PROPERTY.tiles?.[0]?.type
+      : undefined,
+  );
   const [currentCamera, setCurrentCamera] = useState(DEFAULT_CAMERA);
   const [terrainEnabled, setTerrainEnabled] = useState(true);
   const [hideUnderground, setHideUnderground] = useState(false);
@@ -62,13 +66,15 @@ export default () => {
   const viewerProperty: ViewerProperty = useMemo(
     () => ({
       ...DEFAULT_VIEWER_PROPERTY,
-      tiles: [
-        {
-          id: "default",
-          type: currentTile,
-          opacity: 1,
-        },
-      ],
+      tiles: currentTile
+        ? [
+            {
+              id: "default",
+              type: currentTile,
+              opacity: 1,
+            },
+          ]
+        : DEFAULT_VIEWER_PROPERTY.tiles,
       terrain: {
         ...DEFAULT_VIEWER_PROPERTY.terrain,
         enabled: terrainEnabled,

@@ -69,4 +69,11 @@ export const DEFAULT_VIEWER_PROPERTY: ViewerProperty = {
       geoidProperty: "geoid",
     },
   },
+  tiles: [
+    {
+      id: "default",
+      type: "open_street_map",
+      opacity: 1,
+    },
+  ],
 };
