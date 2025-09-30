@@ -21,7 +21,7 @@ import { SKETCH_TOOLS, TILES } from "@/constants";
 import { TEST_LAYERS } from "@/testLayers";
 
 type OptionsPanelProps = {
-  currentTile: string;
+  currentTile?: string;
   setCurrentTile: (v: string) => void;
   terrainEnabled: boolean;
   setTerrainEnabled: (v: boolean) => void;
