@@ -187,6 +187,7 @@ const useFeature = ({
   onComputedFeatureFetch,
   shouldUseFeatureIndex,
   isTilesetReady,
+  useExternalStyle,
 }: {
   id?: string;
   tilesetRef: MutableRefObject<Cesium3DTileset | undefined>;
@@ -199,6 +200,7 @@ const useFeature = ({
   selectedFeatureIdsRef: MutableRefObject<string[]>;
   shouldUseFeatureIndex?: boolean;
   isTilesetReady: boolean;
+  useExternalStyle?: boolean;
 }) => {
   const cachedFeaturesRef = useRef<CachedFeature[]>([]);
   const cachedCalculatedLayerRef = useRef(layer);
@@ -220,49 +222,51 @@ const useFeature = ({
 
         const computedFeature = evalFeature(layer, { ...feature?.feature, properties });
 
-        const style = computedFeature?.["3dtiles"];
+        if (!useExternalStyle) {
+          const style = computedFeature?.["3dtiles"];
 
-        COMMON_STYLE_PROPERTIES.forEach(({ name, convert }) => {
-          const val = convertStyle(style?.[name], convert);
-
-          if (name === "color") {
-            // Reset color to default so that new style could update all.
-            raw.color = DEFAULT_FEATURE_COLOR;
-
-            // Apply color from style.
-            if (val !== undefined) {
-              raw.color = val;
-            }
-
-            // Apply color for selected feature.
-            if (isFeatureSelected && typeof layer["3dtiles"]?.selectedFeatureColor === "string") {
-              raw.color = toColor(layer["3dtiles"]?.selectedFeatureColor) ?? val;
-            }
-          } else {
-            if (val !== undefined) {
-              raw[name] = val;
-            }
-          }
-        });
-
-        if (raw instanceof Cesium3DTilePointFeature) {
-          POINT_STYLE_PROPERTIES.forEach(({ name, convert }) => {
+          COMMON_STYLE_PROPERTIES.forEach(({ name, convert }) => {
             const val = convertStyle(style?.[name], convert);
-            if (val !== undefined) {
-              raw[name] = val;
+
+            if (name === "color") {
+              // Reset color to default so that new style could update all.
+              raw.color = DEFAULT_FEATURE_COLOR;
+
+              // Apply color from style.
+              if (val !== undefined) {
+                raw.color = val;
+              }
+
+              // Apply color for selected feature.
+              if (isFeatureSelected && typeof layer["3dtiles"]?.selectedFeatureColor === "string") {
+                raw.color = toColor(layer["3dtiles"]?.selectedFeatureColor) ?? val;
+              }
+            } else {
+              if (val !== undefined) {
+                raw[name] = val;
+              }
             }
           });
-        }
 
-        if ("style" in raw) {
-          raw.style = new Cesium3DTileStyle(
-            // TODO: Convert value if it's necessary
-            MODEL_STYLE_PROPERTIES.reduce((res, { name, convert }) => {
-              const val = convertStyle(style?.[name as keyof typeof style], convert);
-              if (val === undefined) return res;
-              return { ...res, [name]: val };
-            }, {}),
-          );
+          if (raw instanceof Cesium3DTilePointFeature) {
+            POINT_STYLE_PROPERTIES.forEach(({ name, convert }) => {
+              const val = convertStyle(style?.[name], convert);
+              if (val !== undefined) {
+                raw[name] = val;
+              }
+            });
+          }
+
+          if ("style" in raw) {
+            raw.style = new Cesium3DTileStyle(
+              // TODO: Convert value if it's necessary
+              MODEL_STYLE_PROPERTIES.reduce((res, { name, convert }) => {
+                const val = convertStyle(style?.[name as keyof typeof style], convert);
+                if (val === undefined) return res;
+                return { ...res, [name]: val };
+              }, {}),
+            );
+          }
         }
 
         attachTag(feature.raw, {
@@ -276,7 +280,7 @@ const useFeature = ({
       }
       return;
     },
-    [evalFeature, layerId, viewer, shouldUseFeatureIndex, selectedFeatureIdsRef],
+    [evalFeature, layerId, viewer, shouldUseFeatureIndex, selectedFeatureIdsRef, useExternalStyle],
   );
 
   const handleTilesetLoad = useCallback(
@@ -615,6 +619,7 @@ export const useHooks = ({
     selectedFeatureIdsRef,
     shouldUseFeatureIndex,
     isTilesetReady,
+    useExternalStyle: !!styleUrl,
   });
 
   const [terrainHeightEstimate, setTerrainHeightEstimate] = useState(0);
@@ -730,10 +735,22 @@ export const useHooks = ({
     }
     (async () => {
       const res = await fetch(styleUrl);
-      if (!res.ok) return;
-      setStyle(new Cesium3DTileStyle(await res.json()));
+      if (!res.ok) {
+        console.warn("Failed to fetch style from:", styleUrl);
+        return;
+      }
+      const styleData = await res.json();
+      const newStyle = new Cesium3DTileStyle(styleData);
+      setStyle(newStyle);
     })();
   }, [styleUrl]);
+
+  // Apply style to tileset when both external style and tileset are ready
+  useEffect(() => {
+    if (style && tilesetRef.current && isTilesetReady) {
+      tilesetRef.current.style = style;
+    }
+  }, [style, isTilesetReady]);
 
   const googleMapPhotorealisticResource = useMemo(() => {
     if (type !== "google-photorealistic" || !isVisible) return null;
