@@ -112,7 +112,7 @@ export default ({ init, engineRef, timelineManagerRef }: Props) => {
     const currentTime = current.getTime();
 
     const convertedStartTime = startTime > currentTime ? currentTime : startTime;
-    const convertedStopTime = stopTime <= currentTime ? currentTime + DEFAULT_RANGE : stopTime;
+    const convertedStopTime = stopTime < currentTime ? currentTime + DEFAULT_RANGE : stopTime;
 
     return {
       start: new Date(convertedStartTime),
