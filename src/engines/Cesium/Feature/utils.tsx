@@ -236,6 +236,9 @@ export const extractSimpleLayer = (
   if (l?.type !== "simple") {
     return;
   }
+  // Proxy object lead to issues when creating mvt imagery provider, so convert to plain object
+  // Not sure for other types, but to keep consistency, convert all simple layers here
+  // It should be okey since simple layer data is supposed to be simple enough and computed data should not be included
   return toPlainObject(l);
 };
 
