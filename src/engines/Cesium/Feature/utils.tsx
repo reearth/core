@@ -17,7 +17,7 @@ import {
   GroundPrimitive,
 } from "cesium";
 import md5 from "js-md5";
-import { pick } from "lodash-es";
+import { cloneDeep, pick } from "lodash-es";
 import {
   ComponentProps,
   ComponentType,
@@ -236,11 +236,18 @@ export const extractSimpleLayer = (
   if (l?.type !== "simple") {
     return;
   }
-  return l;
+  // Proxy object lead to issues when creating mvt imagery provider, so convert to plain object
+  // Not sure for other types, but to keep consistency, convert all simple layers here
+  // It should be okey since simple layer data is supposed to be simple enough and computed data should not be included
+  return toPlainObject(l);
 };
 
 export const extractSimpleLayerData = (layer: ComputedLayer | undefined): Data | undefined => {
   return extractSimpleLayer(layer)?.data;
+};
+
+export const toPlainObject = <T,>(obj: T): T => {
+  return cloneDeep(obj);
 };
 
 export const toColor = (c?: string) => {
