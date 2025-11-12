@@ -1,6 +1,9 @@
 import { useRef } from "react";
 
-import { Args, Args3, Args2 } from "../reearthTypes";
+// Utility types for partial function application
+type Args<F> = F extends (a: any, ...args: infer P) => any ? P : never;
+type Args2<F> = F extends (a: any, b: any, ...args: infer P) => any ? P : never;
+type Args3<F> = F extends (a: any, b: any, c: any, ...args: infer P) => any ? P : never;
 
 /**
  * Often we want to make an array of keys of an object type,

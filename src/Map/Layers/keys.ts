@@ -9,7 +9,6 @@ export const layerKeys = objKeys<
   // layer
   children: 1,
   data: 1,
-  infobox: 1,
   properties: 1,
   tags: 1,
   title: 1,

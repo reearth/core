@@ -28,7 +28,6 @@ function convertLegacyLayerCommon(l: LegacyLayer): any {
       title: l.title,
       visible: l.isVisible,
       creator: l.creator,
-      infobox: l.infobox,
       tags: l.tags,
       ...(Object.keys(compat).length ? { compat } : {}),
     },

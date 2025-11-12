@@ -21,8 +21,7 @@ import {
   DataSource,
 } from "cesium";
 
-import { ComputedFeature, DefaultInfobox } from "../../../Map";
-import { InfoboxProperty } from "../../../reearthTypes";
+import { ComputedFeature } from "../../../Map";
 import { getTag } from "../Feature";
 import { TilesetFeatureIndex } from "../Feature/Tileset/TilesetFeatureIndex";
 import type { InternalCesium3DTileFeature } from "../types";
@@ -325,46 +324,6 @@ export function findFeaturesFromLayer<T = Entity | Cesium3DTileset | InternalCes
   }
 
   return findTile3DFeaturesFromScene(viewer, layerId, featureId, convert);
-}
-
-export const getEntityContent = (
-  entity: Entity | ImageryLayerFeatureInfo,
-  time: JulianDate,
-  defaultContent: InfoboxProperty["defaultContent"],
-): DefaultInfobox["content"] => {
-  const content: Record<
-    Exclude<InfoboxProperty["defaultContent"], undefined>,
-    DefaultInfobox["content"]
-  > = {
-    description: {
-      type: "html",
-      value:
-        entity instanceof ImageryLayerFeatureInfo
-          ? entity.description
-          : entity.description?.getValue(time),
-    },
-    attributes: {
-      type: "table",
-      value:
-        !(entity instanceof Entity) &&
-        "properties" in entity &&
-        entity.properties &&
-        typeof entity.properties === "object"
-          ? propertiesToTableContent(entity.properties)
-          : entity instanceof Entity && entity.properties
-            ? propertiesToTableContent(entity.properties.getValue(time))
-            : [],
-    },
-  };
-
-  return defaultContent ? content[defaultContent] : content.attributes ?? content.description;
-};
-
-function propertiesToTableContent(properties: Record<string, any>): { key: string; value: any }[] {
-  return Object.entries(properties).reduce<{ key: string; value: [string, string] }[]>(
-    (a, [key, value]) => [...a, { key, value }],
-    [],
-  );
 }
 
 // Just a shortcut to the private property.

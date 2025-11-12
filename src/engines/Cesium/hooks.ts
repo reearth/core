@@ -5,7 +5,6 @@ import {
   Cartesian3,
   Ion,
   Cesium3DTileset,
-  JulianDate,
   Cesium3DTilePointFeature,
   Model,
   Cartographic,
@@ -58,7 +57,7 @@ import { InternalCesium3DTileFeature } from "./types";
 import useEngineRef from "./useEngineRef";
 import { useOverrideGlobeShader } from "./useOverrideGlobeShader";
 import { makeMouseEventProps } from "./utils/mouse";
-import { convertCartesian3ToPosition, findEntity, getEntityContent } from "./utils/utils";
+import { convertCartesian3ToPosition, findEntity } from "./utils/utils";
 
 interface CustomGlobeSurface {
   tileProvider: {
@@ -445,49 +444,16 @@ export default ({
     if (entity && entity instanceof Cesium3DTileFeature) {
       const tag = getTag(entity);
       if (tag) {
-        const content = tileProperties(entity);
-        onLayerSelect?.(
-          tag.layerId,
-          String(tag.featureId),
-          content.length
-            ? {
-                defaultInfobox: {
-                  title: entity.getProperty("name"),
-                  content: {
-                    type: "table",
-                    value: content,
-                  },
-                },
-              }
-            : undefined,
-          { feature: tag.computedFeature },
-        );
+        onLayerSelect?.(tag.layerId, String(tag.featureId), undefined, {
+          feature: tag.computedFeature,
+        });
       }
       return;
     }
 
     if (entity) {
-      const layer = tag?.layerId
-        ? layersRef?.current?.overriddenLayers().find(l => l.id === tag.layerId) ??
-          layersRef?.current?.findById(tag.layerId)
-        : undefined;
       // Sometimes only featureId is specified, so we need to sync entity tag.
-      onLayerSelect?.(
-        tag?.layerId,
-        tag?.featureId,
-        entity instanceof Entity && (entity.description || entity.properties)
-          ? {
-              defaultInfobox: {
-                title: entity.name,
-                content: getEntityContent(
-                  entity,
-                  cesium.current?.cesiumElement?.clock.currentTime ?? new JulianDate(),
-                  tag?.layerId ? layer?.infobox?.property?.defaultContent : undefined,
-                ),
-              },
-            }
-          : undefined,
-      );
+      onLayerSelect?.(tag?.layerId, tag?.featureId, undefined);
     }
   }, [cesium, selectedLayerId, onLayerSelect, layersRef, featureFlags]);
 
@@ -592,26 +558,7 @@ export default ({
 
       if (target && "id" in target && target.id instanceof Entity && isSelectable(target.id)) {
         const tag = getTag(target.id);
-        const layer = tag?.layerId
-          ? layersRef?.current?.overriddenLayers().find(l => l.id === tag.layerId) ??
-            layersRef?.current?.findById(tag.layerId)
-          : undefined;
-        onLayerSelect?.(
-          tag?.layerId,
-          tag?.featureId,
-          !!target.id.description || !!target.id.properties
-            ? {
-                defaultInfobox: {
-                  title: layer?.title ?? target.id.name,
-                  content: getEntityContent(
-                    target.id,
-                    viewer.clock.currentTime ?? new JulianDate(),
-                    tag?.layerId ? layer?.infobox?.property?.defaultContent : undefined,
-                  ),
-                },
-              }
-            : undefined,
-        );
+        onLayerSelect?.(tag?.layerId, tag?.featureId, undefined);
         prevSelectedEntity.current = target.id;
         if (target.id instanceof Entity && !tag?.hideIndicator) {
           viewer.selectedEntity = target.id;
@@ -627,23 +574,9 @@ export default ({
       ) {
         const tag = getTag(target);
         if (tag) {
-          const content = tileProperties(target);
-          onLayerSelect?.(
-            tag.layerId,
-            String(tag.featureId),
-            content.length
-              ? {
-                  defaultInfobox: {
-                    title: target.getProperty("name"),
-                    content: {
-                      type: "table",
-                      value: tileProperties(target),
-                    },
-                  },
-                }
-              : undefined,
-            { feature: tag.computedFeature },
-          );
+          onLayerSelect?.(tag.layerId, String(tag.featureId), undefined, {
+            feature: tag.computedFeature,
+          });
           prevSelectedEntity.current = target;
         }
         return;
@@ -711,31 +644,10 @@ export default ({
               });
             }
 
-            const layer = tag?.layerId
-              ? layersRef?.current?.overriddenLayers().find(l => l.id === tag.layerId) ??
-                layersRef?.current?.findById(tag.layerId)
-              : undefined;
-            const content = getEntityContent(
-              f.data.feature ?? f,
-              viewer.clock.currentTime ?? new JulianDate(),
-              tag?.layerId ? layer?.infobox?.property?.defaultContent : undefined,
-            );
             prevSelectedImageryFeatureId.current = f.data.featureId;
-            onLayerSelect?.(
-              f.data.layerId,
-              f.data.featureId,
-              content.value.length
-                ? {
-                    defaultInfobox: {
-                      title: layer?.title ?? f.name,
-                      content,
-                    },
-                  }
-                : undefined,
-              {
-                feature: f.data.feature,
-              },
-            );
+            onLayerSelect?.(f.data.layerId, f.data.featureId, undefined, {
+              feature: f.data.feature,
+            });
 
             return;
           }
@@ -990,16 +902,6 @@ export default ({
     layerSelectWithRectEventHandlers,
   };
 };
-
-function tileProperties(
-  t: Cesium3DTileFeature | Cesium3DTilePointFeature,
-): { key: string; value: any }[] {
-  return t
-    .getPropertyIds()
-    .reduce<
-      { key: string; value: any }[]
-    >((a, b) => [...a, { key: b, value: t.getProperty(b) }], []);
-}
 
 function getLayerId(target: RootEventTarget): string | undefined {
   if (target && "id" in target && target.id instanceof Entity) {

@@ -1,11 +1,8 @@
 import { expect, test } from "vitest";
 
-import { Infobox } from "../../reearthTypes";
-
 import { convertLayer, getCompat } from "./backward";
 import type { Tag } from "./types";
 
-const infobox: Infobox = { blocks: [], property: { default: { position: { value: "left" } } } };
 const tags: Tag[] = [{ id: "x", label: "x" }];
 
 test("group", () => {
@@ -28,7 +25,6 @@ test("group", () => {
       },
       title: "title",
       creator: "creator",
-      infobox,
       tags,
     }),
   ).toEqual({
@@ -42,7 +38,6 @@ test("group", () => {
     title: "title",
     isVisible: true,
     creator: "creator",
-    infobox,
     tags,
     pluginId: "reearth",
     extensionId: "hoge",
@@ -64,7 +59,6 @@ test("item", () => {
       },
       title: "title",
       creator: "creator",
-      infobox,
       tags,
     }),
   ).toEqual({
@@ -72,7 +66,6 @@ test("item", () => {
     isVisible: true,
     title: "title",
     creator: "creator",
-    infobox,
     tags,
     pluginId: "reearth",
     extensionId: "hoge",

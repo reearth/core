@@ -1,13 +1,10 @@
-import { Infobox } from "../../reearthTypes";
-
-export type LegacyLayer<P = any, IBP = any> = {
+export type LegacyLayer<P = any> = {
   id: string;
   type?: string;
   pluginId?: string;
   extensionId?: string;
   title?: string;
   property?: P;
-  infobox?: Infobox<IBP>;
   isVisible?: boolean;
   propertyId?: string;
   tags?: Tag[];

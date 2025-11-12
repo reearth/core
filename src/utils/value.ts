@@ -1,7 +1,25 @@
 import { Color } from "cesium";
 
 import { LayerAppearanceTypes } from "../mantle";
-import { ValueType as GQLValueType } from "../reearthTypes";
+
+// GraphQL Value Type enum
+export enum GQLValueType {
+  BOOL = "bool",
+  LATLNG = "latlng",
+  LATLNGHEIGHT = "latlngheight",
+  NUMBER = "number",
+  COORDINATES = "coordinates",
+  POLYGON = "polygon",
+  RECT = "rect",
+  REF = "ref",
+  STRING = "string",
+  URL = "url",
+  CAMERA = "camera",
+  TYPOGRAPHY = "typography",
+  SPACING = "spacing",
+  ARRAY = "array",
+  TIMELINE = "timeline",
+}
 
 export type LatLng = {
   lat: number;
@@ -120,21 +138,21 @@ export type ValueTypes = {
 };
 
 const valueTypeMapper: Record<GQLValueType, ValueType> = {
-  [GQLValueType.Bool]: "bool",
-  [GQLValueType.Number]: "number",
-  [GQLValueType.String]: "string",
-  [GQLValueType.Url]: "url",
-  [GQLValueType.Latlng]: "latlng",
-  [GQLValueType.Latlngheight]: "latlngheight",
-  [GQLValueType.Camera]: "camera",
-  [GQLValueType.Typography]: "typography",
-  [GQLValueType.Coordinates]: "coordinates",
-  [GQLValueType.Polygon]: "polygon",
-  [GQLValueType.Rect]: "rect",
-  [GQLValueType.Ref]: "ref",
-  [GQLValueType.Spacing]: "spacing",
-  [GQLValueType.Array]: "array",
-  [GQLValueType.Timeline]: "timeline",
+  [GQLValueType.BOOL]: "bool",
+  [GQLValueType.NUMBER]: "number",
+  [GQLValueType.STRING]: "string",
+  [GQLValueType.URL]: "url",
+  [GQLValueType.LATLNG]: "latlng",
+  [GQLValueType.LATLNGHEIGHT]: "latlngheight",
+  [GQLValueType.CAMERA]: "camera",
+  [GQLValueType.TYPOGRAPHY]: "typography",
+  [GQLValueType.COORDINATES]: "coordinates",
+  [GQLValueType.POLYGON]: "polygon",
+  [GQLValueType.RECT]: "rect",
+  [GQLValueType.REF]: "ref",
+  [GQLValueType.SPACING]: "spacing",
+  [GQLValueType.ARRAY]: "array",
+  [GQLValueType.TIMELINE]: "timeline",
 };
 
 export type ValueType = keyof ValueTypes;
