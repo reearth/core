@@ -5,7 +5,6 @@ import { resolve } from "path";
 
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
-import cesium from "vite-plugin-cesium";
 import dts from "vite-plugin-dts";
 import svgr from "vite-plugin-svgr";
 import { configDefaults } from "vitest/config";
@@ -14,7 +13,6 @@ export default defineConfig(() => ({
   plugins: [
     svgr(),
     react(),
-    cesium({ rebuildCesium: true }),
     dts({ rollupTypes: true }),
   ],
   build: {
