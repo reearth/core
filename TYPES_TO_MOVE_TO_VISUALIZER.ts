@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * TYPES TO MOVE TO VISUALIZER PACKAGE
  *
@@ -192,7 +193,7 @@ export type NaiveBlock<P = any> = Omit<InfoboxBlock<P>, "id">;
  */
 export function generateDefaultInfobox(
   layerTitle?: string,
-  featureProperties?: Record<string, any>
+  featureProperties?: Record<string, any>,
 ): DefaultInfobox | undefined {
   if (!featureProperties) return undefined;
 
@@ -217,10 +218,7 @@ export function generateDefaultInfobox(
 /**
  * Example utility: Convert HTML description to infobox content
  */
-export function descriptionToInfobox(
-  description: string,
-  title?: string
-): DefaultInfobox {
+export function descriptionToInfobox(description: string, title?: string): DefaultInfobox {
   return {
     title,
     content: {
@@ -237,7 +235,7 @@ export function descriptionToInfobox(
 export function getDefaultInfoboxContent(
   defaultContent: InfoboxProperty["defaultContent"],
   description?: string,
-  properties?: Record<string, any>
+  properties?: Record<string, any>,
 ): DefaultInfobox["content"] | undefined {
   switch (defaultContent) {
     case "description":
@@ -245,7 +243,7 @@ export function getDefaultInfoboxContent(
       return { type: "html", value: description };
 
     case "attributes":
-    default:
+    default: {
       if (!properties) return undefined;
       const entries = Object.entries(properties).map(([key, value]) => ({
         key,
@@ -253,6 +251,7 @@ export function getDefaultInfoboxContent(
       }));
       if (entries.length === 0) return undefined;
       return { type: "table", value: entries };
+    }
   }
 }
 

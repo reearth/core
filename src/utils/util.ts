@@ -1,8 +1,11 @@
 import { useRef } from "react";
 
 // Utility types for partial function application
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Args<F> = F extends (a: any, ...args: infer P) => any ? P : never;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Args2<F> = F extends (a: any, b: any, ...args: infer P) => any ? P : never;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Args3<F> = F extends (a: any, b: any, c: any, ...args: infer P) => any ? P : never;
 
 /**

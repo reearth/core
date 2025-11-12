@@ -14,13 +14,7 @@ export type {
   LayerSimple,
   EvalFeature,
 } from "../Layer";
-export type {
-  LazyLayer,
-  Ref,
-  NaiveLayer,
-  LayerSelectionReason,
-  OverriddenLayer,
-} from "./hooks";
+export type { LazyLayer, Ref, NaiveLayer, LayerSelectionReason, OverriddenLayer } from "./hooks";
 export type {
   ClusterComponentType,
   ClusterComponentProps,

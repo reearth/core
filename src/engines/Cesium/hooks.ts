@@ -660,7 +660,6 @@ export default ({
     [
       onLayerSelect,
       mouseEventHandles,
-      layersRef,
       featureFlags,
       selectedLayerId?.featureId,
       selectedLayerId?.layerId,

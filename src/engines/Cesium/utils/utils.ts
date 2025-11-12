@@ -11,7 +11,6 @@ import {
   Cesium3DTileFeature,
   JulianDate,
   Model,
-  ImageryLayerFeatureInfo,
   Scene,
   Viewer,
   Cesium3DTilePointFeature,

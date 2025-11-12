@@ -109,6 +109,7 @@ export type EXPERIMENTAL_clipping = {
   roll?: number;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Array = any[];
 
 export type Timeline = {
@@ -157,6 +158,7 @@ const valueTypeMapper: Record<GQLValueType, ValueType> = {
 
 export type ValueType = keyof ValueTypes;
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const valueFromGQL = (val: any, type: GQLValueType) => {
   const t = valueTypeFromGQL(type);
   if (typeof val === "undefined" || val === null || !t) {
@@ -188,10 +190,13 @@ export const valueFromGQL = (val: any, type: GQLValueType) => {
 export function valueToGQL<T extends ValueType>(
   val: ValueTypes[T] | null | undefined,
   type: T,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): any {
   if (type === "camera" && val && typeof val === "object" && "height" in val) {
     return {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ...(val as any),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       altitude: (val as any).height,
     };
   }
