@@ -227,8 +227,8 @@ export const toCSSFont = (t?: Typography, d?: Typography) => {
   const ff = getCSSFontFamily(t?.fontFamily ?? d?.fontFamily)
     ?.replace("'", '"')
     .trim();
-  return `${t?.italic ?? d?.italic ? "italic " : ""}${
-    t?.bold ?? d?.bold ? "bold " : (t?.fontWeight ?? d?.fontWeight ?? "") + " "
+  return `${(t?.italic ?? d?.italic) ? "italic " : ""}${
+    (t?.bold ?? d?.bold) ? "bold " : (t?.fontWeight ?? d?.fontWeight ?? "") + " "
   }${t?.fontSize ?? d?.fontSize ?? 16}px ${
     ff ? (ff.includes(`"`) ? ff : `"${ff}"`) : "sans-serif"
   }`;

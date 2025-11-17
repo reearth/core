@@ -95,10 +95,10 @@ export default function useHooks(
       const computedLayer = await layer?.();
       const computedFeature =
         layerId && featureId
-          ? (isSketchLayer
+          ? ((isSketchLayer
               ? computedLayer?.features?.find(f => f.id === featureId)
               : mapRef.current?.engine.findComputedFeatureById?.(layerId, featureId)) ??
-            info?.feature
+            info?.feature)
           : undefined;
 
       selectFeature(

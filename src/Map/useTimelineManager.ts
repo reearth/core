@@ -101,7 +101,7 @@ export default ({ init, engineRef, timelineManagerRef }: Props) => {
   const [options, setOptions] = useState<TimelineOptions>({
     animation: init?.animation ?? false,
     stepType: init?.stepType ?? "rate",
-    multiplier: init?.stepType === "fixed" ? init?.step ?? 1 : init?.multiplier ?? 1,
+    multiplier: init?.stepType === "fixed" ? (init?.step ?? 1) : (init?.multiplier ?? 1),
     rangeType: init?.rangeType ?? "unbounded",
   });
 

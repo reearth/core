@@ -60,14 +60,14 @@ export type MarkerAppearance = {
   label?: boolean;
   labelText?: string;
   labelPosition?:
-  | "left"
-  | "right"
-  | "top"
-  | "bottom"
-  | "lefttop"
-  | "leftbottom"
-  | "righttop"
-  | "rightbottom";
+    | "left"
+    | "right"
+    | "top"
+    | "bottom"
+    | "lefttop"
+    | "leftbottom"
+    | "righttop"
+    | "rightbottom";
   labelTypography?: Typography;
   labelBackground?: boolean;
   labelBackgroundColor?: string;

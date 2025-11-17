@@ -9,7 +9,7 @@ import { LegacyCluster } from "./types";
 import type { LegacyLayer } from ".";
 
 export function convertLegacyLayer(l: LegacyLayer | undefined): Layer | undefined {
-  return l ? convertLegacyLayerGroup(l) ?? convertLegacyLayerItem(l) : undefined;
+  return l ? (convertLegacyLayerGroup(l) ?? convertLegacyLayerItem(l)) : undefined;
 }
 
 function convertLegacyLayerCommon(l: LegacyLayer): any {

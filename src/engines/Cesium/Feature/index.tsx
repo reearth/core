@@ -176,7 +176,7 @@ export default function Feature({
         <C
           {...props}
           key={!useTransition ? componentId : undefined}
-          id={!useTransition ? componentId : f?.id ?? layer.id}
+          id={!useTransition ? componentId : (f?.id ?? layer.id)}
           property={f ? f[k] : layer[k] || pickProperty(k, layer)}
           geometry={f?.geometry}
           feature={f}

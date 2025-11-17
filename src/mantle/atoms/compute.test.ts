@@ -79,7 +79,7 @@ test("computeAtom", async () => {
     result.current.set({ type: "setLayer", layer });
   });
 
-  expect(result.current.result).toEqual({
+  (expect(result.current.result).toEqual({
     id: "xxx",
     layer,
     status: "ready",
@@ -94,7 +94,7 @@ test("computeAtom", async () => {
         features: [],
         originalFeatures: [],
       }),
-    );
+    ));
 
   // delete delegatedDataTypes
   act(() => {

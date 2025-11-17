@@ -243,7 +243,7 @@ const parseGPXWithCustomParser = (
           extensions[name] = parseFloat(
             (extension as Element).innerHTML != undefined
               ? (extension as Element).innerHTML
-              : (extension as Element).childNodes[0].textContent ?? "",
+              : ((extension as Element).childNodes[0].textContent ?? ""),
           );
         }
 
@@ -325,7 +325,7 @@ const getElementValue = (parent: Element, tag: string): string => {
   if (element !== null) {
     return element.innerHTML != undefined
       ? element.innerHTML
-      : element.childNodes[0].textContent ?? "";
+      : (element.childNodes[0].textContent ?? "");
   } else return "";
 };
 

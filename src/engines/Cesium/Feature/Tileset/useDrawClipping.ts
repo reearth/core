@@ -69,11 +69,11 @@ export const useDrawClipping = ({
       const polygon = turf.polygon([surfacePoints.map(p => [p.lng, p.lat])]);
       const center = turf.centroid(polygon);
       const baseHeight = viewer?.scene
-        ? (await sampleTerrainHeight(
+        ? ((await sampleTerrainHeight(
             viewer?.scene,
             center.geometry.coordinates[0],
             center.geometry.coordinates[1],
-          )) ?? 0
+          )) ?? 0)
         : 0;
       setBaseHeight(baseHeight);
 
