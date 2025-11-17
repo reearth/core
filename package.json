@@ -60,7 +60,7 @@
     "jotai": "1.12.1",
     "js-md5": "0.7.3",
     "jsep": "1.4.0",
-    "jsonpath-plus": "7.2.0",
+    "jsonpath-plus": "^10.3.0",
     "jszip": "3.10.1",
     "lodash-es": "4.17.21",
     "lru-cache": "8.0.4",
@@ -133,7 +133,7 @@
     "vite-plugin-dts": "4.5.4",
     "vite-plugin-svgr": "4.5.0",
     "vite-tsconfig-paths": "^4.3.2",
-    "vitest": "1.0.4",
+    "vitest": "^4.0.9",
     "web-streams-polyfill": "3.2.1"
   },
   "resolutions": {
