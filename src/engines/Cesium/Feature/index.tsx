@@ -1,4 +1,4 @@
-import LRUCache from "lru-cache";
+import { LRUCache } from "lru-cache";
 import { useEffect, useMemo } from "react";
 
 import type { AppearanceTypes, FeatureComponentProps, ComputedLayer } from "../..";
