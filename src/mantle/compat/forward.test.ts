@@ -1,11 +1,8 @@
 import { expect, test } from "vitest";
 
-import { Infobox } from "../../reearthTypes";
-
 import { convertLegacyCluster, convertLegacyLayer } from "./forward";
 import type { LegacyCluster, Tag } from "./types";
 
-const infobox: Infobox = { blocks: [], property: { default: { position: { value: "left" } } } };
 const tags: Tag[] = [{ id: "x", label: "x" }];
 
 test("group", () => {
@@ -15,7 +12,6 @@ test("group", () => {
       isVisible: true,
       title: "title",
       creator: "aaa",
-      infobox,
       tags,
       extensionId: "a",
       propertyId: "p",
@@ -38,7 +34,6 @@ test("group", () => {
       extensionId: "a",
       propertyId: "p",
     },
-    infobox,
     tags,
     creator: "aaa",
     children: [

@@ -315,9 +315,6 @@ test("add, replace, delete", () => {
           {
             type: "simple",
             title: "A",
-            infobox: {
-              blocks: [{ extensionId: "a" }],
-            },
           },
         ],
       },
@@ -338,8 +335,6 @@ test("add, replace, delete", () => {
   expect(l.children[0].children[0].id).toHaveLength(idLength);
   expect(l.children[0].children[0].type).toBe("simple");
   expect(l.children[0].children[0].title).toBe("A");
-  expect(l.children[0].children[0].infobox?.blocks?.[0].id).toBeTypeOf("string");
-  expect(l.children[0].children[0].infobox?.blocks?.[0].id).toHaveLength(idLength);
 
   rerender();
 
@@ -351,9 +346,6 @@ test("add, replace, delete", () => {
       id: l.children[0].children[0].id,
       type: "simple",
       title: "A",
-      infobox: {
-        blocks: [{ id: l.children[0].children[0].infobox?.blocks?.[0].id, extensionId: "a" }],
-      },
     },
   ]);
 

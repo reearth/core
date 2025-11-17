@@ -68,7 +68,7 @@ export function computeAtom(cache?: typeof globalDataFeaturesCache) {
       features: get(finalFeatures) ?? [],
       originalFeatures:
         currentLayer.type === "simple" && currentLayer.data
-          ? get(dataAtoms.getAll)(currentLayer.id, currentLayer.data)?.flat() ?? []
+          ? (get(dataAtoms.getAll)(currentLayer.id, currentLayer.data)?.flat() ?? [])
           : [],
       properties: currentLayer.type === "simple" ? currentLayer.properties : undefined,
       ...get(computedResult)?.layer,

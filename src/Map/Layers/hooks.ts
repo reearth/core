@@ -91,26 +91,14 @@ export type Ref = {
   overriddenLayers: () => OverriddenLayer[];
 };
 
-export type DefaultInfobox = {
-  title?: string;
-  content:
-    | {
-        type: "table";
-        value: { key: string; value: string }[];
-      }
-    | { type: "html"; value: string };
-};
-
 export type OverriddenLayer = Omit<Layer, "type" | "children">;
 
 export type LayerSelectionReason = {
   reason?: string;
-  defaultInfobox?: DefaultInfobox;
 };
 
 export type FeatureSelectionReason = {
   reason?: string;
-  defaultInfobox?: DefaultInfobox;
 };
 
 export default function useHooks({
@@ -270,15 +258,11 @@ export default function useHooks({
 
       const newLayer = { ...rawLayer, id: uuidv4() };
 
-      // generate ids for layers and blocks
+      // generate ids for layers
       walkLayers([newLayer], l => {
         if (!l.id) {
           l.id = uuidv4();
         }
-        l.infobox?.blocks?.forEach(b => {
-          if (b.id) return;
-          b.id = uuidv4();
-        });
         layerMap.set(l.id, l);
         atomMap.set(l.id, computeAtom());
       });

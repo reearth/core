@@ -22,7 +22,6 @@ export type {
   LayerSelectionReason,
   Cluster,
   EvalFeature,
-  DefaultInfobox,
   OverriddenLayer,
 } from "./Layers";
 

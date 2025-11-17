@@ -54,7 +54,7 @@ export const useHooks = ({
   const [outlineColorCb] = useState(
     () =>
       new CallbackProperty(
-        () => (isActiveRef.current ? activeOutlineColor ?? outlineColor : outlineColor),
+        () => (isActiveRef.current ? (activeOutlineColor ?? outlineColor) : outlineColor),
         false,
       ),
   );

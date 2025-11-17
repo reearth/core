@@ -55,7 +55,7 @@ export default function ({ isSelected, camera }: { isSelected?: boolean; camera?
       );
     } else if (mode === 2) {
       const fov =
-        (prevMode ?? 0) === 1 ? cameraRef.current?.fov : prevCamera.current?.fov ?? defaultFOV;
+        (prevMode ?? 0) === 1 ? cameraRef.current?.fov : (prevCamera.current?.fov ?? defaultFOV);
       flyTo?.(
         { fov },
         {

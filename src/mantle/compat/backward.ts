@@ -17,7 +17,6 @@ function convertLayerCommon(l: Layer): any {
       isVisible: l.visible,
       title: l.title,
       creator: l.creator,
-      infobox: l.infobox,
       tags: l.tags,
       property: l.compat?.property,
       propertyId: l.compat?.propertyId,

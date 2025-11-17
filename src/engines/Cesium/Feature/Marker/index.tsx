@@ -228,7 +228,7 @@ export default function Marker({ property, id, isVisible, geometry, layer, featu
         position={
           useTransition
             ? (translateCallbackProperty as unknown as PositionProperty)
-            : translatedCoords ?? pos
+            : (translatedCoords ?? pos)
         }
         layerId={layer?.id}
         featureId={feature?.id}

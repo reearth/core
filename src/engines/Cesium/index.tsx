@@ -210,7 +210,7 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
       <ScreenSpaceCameraController
         maximumZoomDistance={
           property?.camera?.limiter?.enabled
-            ? property.camera?.limiter?.targetArea?.height ?? Number.POSITIVE_INFINITY
+            ? (property.camera?.limiter?.targetArea?.height ?? Number.POSITIVE_INFINITY)
             : Number.POSITIVE_INFINITY
         }
         enableCollisionDetection={!property?.camera?.allowEnterGround}

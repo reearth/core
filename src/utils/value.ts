@@ -1,7 +1,25 @@
 import { Color } from "cesium";
 
 import { LayerAppearanceTypes } from "../mantle";
-import { ValueType as GQLValueType } from "../reearthTypes";
+
+// GraphQL Value Type enum
+export enum GQLValueType {
+  BOOL = "bool",
+  LATLNG = "latlng",
+  LATLNGHEIGHT = "latlngheight",
+  NUMBER = "number",
+  COORDINATES = "coordinates",
+  POLYGON = "polygon",
+  RECT = "rect",
+  REF = "ref",
+  STRING = "string",
+  URL = "url",
+  CAMERA = "camera",
+  TYPOGRAPHY = "typography",
+  SPACING = "spacing",
+  ARRAY = "array",
+  TIMELINE = "timeline",
+}
 
 export type LatLng = {
   lat: number;
@@ -91,6 +109,7 @@ export type EXPERIMENTAL_clipping = {
   roll?: number;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Array = any[];
 
 export type Timeline = {
@@ -120,25 +139,26 @@ export type ValueTypes = {
 };
 
 const valueTypeMapper: Record<GQLValueType, ValueType> = {
-  [GQLValueType.Bool]: "bool",
-  [GQLValueType.Number]: "number",
-  [GQLValueType.String]: "string",
-  [GQLValueType.Url]: "url",
-  [GQLValueType.Latlng]: "latlng",
-  [GQLValueType.Latlngheight]: "latlngheight",
-  [GQLValueType.Camera]: "camera",
-  [GQLValueType.Typography]: "typography",
-  [GQLValueType.Coordinates]: "coordinates",
-  [GQLValueType.Polygon]: "polygon",
-  [GQLValueType.Rect]: "rect",
-  [GQLValueType.Ref]: "ref",
-  [GQLValueType.Spacing]: "spacing",
-  [GQLValueType.Array]: "array",
-  [GQLValueType.Timeline]: "timeline",
+  [GQLValueType.BOOL]: "bool",
+  [GQLValueType.NUMBER]: "number",
+  [GQLValueType.STRING]: "string",
+  [GQLValueType.URL]: "url",
+  [GQLValueType.LATLNG]: "latlng",
+  [GQLValueType.LATLNGHEIGHT]: "latlngheight",
+  [GQLValueType.CAMERA]: "camera",
+  [GQLValueType.TYPOGRAPHY]: "typography",
+  [GQLValueType.COORDINATES]: "coordinates",
+  [GQLValueType.POLYGON]: "polygon",
+  [GQLValueType.RECT]: "rect",
+  [GQLValueType.REF]: "ref",
+  [GQLValueType.SPACING]: "spacing",
+  [GQLValueType.ARRAY]: "array",
+  [GQLValueType.TIMELINE]: "timeline",
 };
 
 export type ValueType = keyof ValueTypes;
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const valueFromGQL = (val: any, type: GQLValueType) => {
   const t = valueTypeFromGQL(type);
   if (typeof val === "undefined" || val === null || !t) {
@@ -170,10 +190,13 @@ export const valueFromGQL = (val: any, type: GQLValueType) => {
 export function valueToGQL<T extends ValueType>(
   val: ValueTypes[T] | null | undefined,
   type: T,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): any {
   if (type === "camera" && val && typeof val === "object" && "height" in val) {
     return {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ...(val as any),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       altitude: (val as any).height,
     };
   }
@@ -204,8 +227,8 @@ export const toCSSFont = (t?: Typography, d?: Typography) => {
   const ff = getCSSFontFamily(t?.fontFamily ?? d?.fontFamily)
     ?.replace("'", '"')
     .trim();
-  return `${t?.italic ?? d?.italic ? "italic " : ""}${
-    t?.bold ?? d?.bold ? "bold " : (t?.fontWeight ?? d?.fontWeight ?? "") + " "
+  return `${(t?.italic ?? d?.italic) ? "italic " : ""}${
+    (t?.bold ?? d?.bold) ? "bold " : (t?.fontWeight ?? d?.fontWeight ?? "") + " "
   }${t?.fontSize ?? d?.fontSize ?? 16}px ${
     ff ? (ff.includes(`"`) ? ff : `"${ff}"`) : "sans-serif"
   }`;

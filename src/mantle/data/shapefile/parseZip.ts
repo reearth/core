@@ -3,6 +3,7 @@ import proj4 from "proj4";
 
 import { parseDbf } from "./parseDbf";
 import { parseShp } from "./parseShp";
+
 import { combine } from ".";
 
 export async function parseZip(buffer: ArrayBuffer): Promise<GeoJSON.GeoJSON | GeoJSON.GeoJSON[]> {

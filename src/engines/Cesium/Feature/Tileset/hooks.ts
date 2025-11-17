@@ -783,7 +783,7 @@ export const useHooks = ({
       : googleMapPhotorealisticResource && isVisible
         ? googleMapPhotorealisticResource
         : type === "3dtiles" && isVisible
-          ? url ?? tileset
+          ? (url ?? tileset)
           : null;
   }, [type, isVisible, meta?.cesiumIonAccessToken, googleMapPhotorealisticResource, url, tileset]);
 
