@@ -15,11 +15,11 @@ export const Cesium: Story = {
   args: {
     ready: true,
     engine: "cesium",
-    sceneProperty: {
+    viewerProperty: {
       tiles: [
         {
           id: "default",
-          tile_type: "default",
+          type: "default",
         },
       ],
     },
@@ -72,57 +72,13 @@ export const API: Story = {
   args: {
     ready: true,
     engine: "cesium",
-    sceneProperty: {
+    viewerProperty: {
       tiles: [
         {
           id: "default",
-          tile_type: "default",
+          type: "default",
         },
       ],
-    },
-  },
-};
-
-export const Plugin = {
-  args: {
-    ready: true,
-    engine: "cesium",
-    sceneProperty: {
-      tiles: [
-        {
-          id: "default",
-          tile_type: "default",
-        },
-      ],
-    },
-    widgetAlignSystem: {
-      outer: {
-        left: {
-          top: {
-            align: "start",
-            widgets: [
-              {
-                id: "plugin",
-                pluginId: "plugin",
-                extensionId: "test",
-                ...({
-                  __REEARTH_SOURCECODE: `reearth.layers.add(${JSON.stringify({
-                    id: "l",
-                    type: "simple",
-                    data: {
-                      type: "geojson",
-                      value: { type: "Feature", geometry: { type: "Point", coordinates: [0, 0] } },
-                    },
-                    marker: {
-                      imageColor: "#fff",
-                    },
-                  })});`,
-                } as any),
-              },
-            ],
-          },
-        },
-      },
     },
   },
 };

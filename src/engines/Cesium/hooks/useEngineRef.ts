@@ -4,11 +4,9 @@ import { ClockStep, JulianDate, Math as CesiumMath } from "cesium";
 import { useImperativeHandle, Ref, RefObject, useMemo, useRef } from "react";
 import { CesiumComponentRef } from "resium";
 
-import type { EngineRef, MouseEventProps, Feature, ComputedFeature } from "..";
-import { MouseEventCallbacks, TickEventCallback } from "../../Map";
-import { SketchType } from "../../Map/Sketch/types";
-import { Position2d, Position3d } from "../../types";
-
+import type { EngineRef, MouseEventProps, Feature, ComputedFeature } from "../..";
+import { MouseEventCallbacks, TickEventCallback, SketchType } from "../../../Map";
+import { Position2d, Position3d } from "../../../types";
 import {
   getLocationFromScreen,
   flyTo,
@@ -34,11 +32,13 @@ import {
   cartesianToLatLngHeight,
   getExtrudedHeight,
   getOverriddenScreenSpaceCameraOptions,
-} from "./common";
-import { attachTag, getTag } from "./Feature";
-import { PickedFeature, pickManyFromViewportAsFeature } from "./pickMany";
-import { createGeometry } from "./Sketch/createGeometry";
-import { CursorType } from "./types";
+  getCredits,
+} from "../common";
+import { attachTag, getTag } from "../Feature";
+import { getGeometryFromEntity } from "../helpers/getGeometryFromEntity";
+import { PickedFeature, pickManyFromViewportAsFeature } from "../pickMany";
+import { createGeometry } from "../Sketch/createGeometry";
+import { CursorType } from "../types";
 import {
   convertCesium3DTileFeatureProperties,
   convertEntityDescription,
@@ -46,7 +46,7 @@ import {
   convertObjToComputedFeature,
   findEntity,
   findFeaturesFromLayer,
-} from "./utils/utils";
+} from "../utils/utils";
 
 export default function useEngineRef(
   ref: Ref<EngineRef>,
@@ -55,18 +55,18 @@ export default function useEngineRef(
   const cancelCameraFlight = useRef<() => void>();
   const mouseEventCallbacks = useRef<MouseEventCallbacks>({
     click: [],
-    doubleclick: [],
-    mousedown: [],
-    mouseup: [],
-    rightclick: [],
-    rightdown: [],
-    rightup: [],
-    middleclick: [],
-    middledown: [],
-    middleup: [],
-    mousemove: [],
-    mouseenter: [],
-    mouseleave: [],
+    doubleClick: [],
+    mouseDown: [],
+    mouseUp: [],
+    rightClick: [],
+    rightDown: [],
+    rightUp: [],
+    middleClick: [],
+    middleDown: [],
+    middleUp: [],
+    mouseMove: [],
+    mouseEnter: [],
+    mouseLeave: [],
     wheel: [],
   });
   const tickEventCallback = useRef<TickEventCallback[]>([]);
@@ -239,6 +239,8 @@ export default function useEngineRef(
       setView: camera => {
         const viewer = cesium.current?.cesiumElement;
         if (!viewer || viewer.isDestroyed()) return false;
+        if (camera.lat === undefined || camera.lng === undefined || camera.height === undefined)
+          return false;
         const scene = viewer.scene;
         if (camera.lng || camera.lat || camera.height) {
           const xyz = Cesium.Cartesian3.fromDegrees(camera.lng, camera.lat, camera.height);
@@ -259,14 +261,30 @@ export default function useEngineRef(
         }
         return;
       },
-      getExtrudedHeight: (position, windowPosition) => {
+      getExtrudedHeight: (position, windowPosition, allowNegative) => {
         const viewer = cesium.current?.cesiumElement;
         if (!viewer || viewer.isDestroyed()) return;
         return getExtrudedHeight(
           viewer.scene,
           new Cesium.Cartesian3(position[0], position[1], position[2]),
           new Cesium.Cartesian2(windowPosition[0], windowPosition[1]),
+          allowNegative,
         );
+      },
+      getExtrudedPoint: (position, extrudedHeight) => {
+        if (!position || !extrudedHeight) return;
+        const viewer = cesium.current?.cesiumElement;
+        if (!viewer || viewer.isDestroyed()) return;
+        const point = new Cesium.Cartesian3(position[0], position[1], position[2]);
+        const cartesianScratch = new Cesium.Cartesian3();
+        const normal = viewer.scene?.globe.ellipsoid.geodeticSurfaceNormal(point, cartesianScratch);
+        if (!normal) return;
+        const extrudedPoint = Cesium.Cartesian3.add(
+          point,
+          Cesium.Cartesian3.multiplyByScalar(normal, extrudedHeight, cartesianScratch),
+          cartesianScratch,
+        );
+        return [extrudedPoint.x, extrudedPoint.y, extrudedPoint.z];
       },
       getSurfaceDistance: (point1, point2) => {
         const viewer = cesium.current?.cesiumElement;
@@ -539,13 +557,15 @@ export default function useEngineRef(
         const oldTransform = Cesium.Matrix4.clone(camera.transform);
 
         const center = getCenterCamera({ camera, scene });
-        // Get fixed frame from center to globe ellipsoid.
-        const frame = Cesium.Transforms.eastNorthUpToFixedFrame(
-          center || camera.positionWC,
-          scene.globe.ellipsoid,
-        );
+        if (center || camera.positionWC) {
+          // Get fixed frame from center to globe ellipsoid.
+          const frame = Cesium.Transforms.eastNorthUpToFixedFrame(
+            center || camera.positionWC,
+            scene.globe.ellipsoid,
+          );
 
-        camera.lookAtTransform(frame);
+          camera.lookAtTransform(frame);
+        }
 
         if (viewer.scene.mode !== Cesium.SceneMode.SCENE3D) {
           camera.move(
@@ -675,40 +695,40 @@ export default function useEngineRef(
         mouseEventCallbacks.current.click.push(cb);
       },
       onDoubleClick: (cb: (props: MouseEventProps) => void) => {
-        mouseEventCallbacks.current.doubleclick.push(cb);
+        mouseEventCallbacks.current.doubleClick.push(cb);
       },
       onMouseDown: (cb: (props: MouseEventProps) => void) => {
-        mouseEventCallbacks.current.mousedown.push(cb);
+        mouseEventCallbacks.current.mouseDown.push(cb);
       },
       onMouseUp: (cb: (props: MouseEventProps) => void) => {
-        mouseEventCallbacks.current.mouseup.push(cb);
+        mouseEventCallbacks.current.mouseUp.push(cb);
       },
       onRightClick: (cb: (props: MouseEventProps) => void) => {
-        mouseEventCallbacks.current.rightclick.push(cb);
+        mouseEventCallbacks.current.rightClick.push(cb);
       },
       onRightDown: (cb: (props: MouseEventProps) => void) => {
-        mouseEventCallbacks.current.rightdown.push(cb);
+        mouseEventCallbacks.current.rightDown.push(cb);
       },
       onRightUp: (cb: (props: MouseEventProps) => void) => {
-        mouseEventCallbacks.current.rightup.push(cb);
+        mouseEventCallbacks.current.rightUp.push(cb);
       },
       onMiddleClick: (cb: (props: MouseEventProps) => void) => {
-        mouseEventCallbacks.current.middleclick.push(cb);
+        mouseEventCallbacks.current.middleClick.push(cb);
       },
       onMiddleDown: (cb: (props: MouseEventProps) => void) => {
-        mouseEventCallbacks.current.middledown.push(cb);
+        mouseEventCallbacks.current.middleDown.push(cb);
       },
       onMiddleUp: (cb: (props: MouseEventProps) => void) => {
-        mouseEventCallbacks.current.middleup.push(cb);
+        mouseEventCallbacks.current.middleUp.push(cb);
       },
       onMouseMove: (cb: (props: MouseEventProps) => void) => {
-        mouseEventCallbacks.current.mousemove.push(cb);
+        mouseEventCallbacks.current.mouseMove.push(cb);
       },
       onMouseEnter: (cb: (props: MouseEventProps) => void) => {
-        mouseEventCallbacks.current.mouseenter.push(cb);
+        mouseEventCallbacks.current.mouseEnter.push(cb);
       },
       onMouseLeave: (cb: (props: MouseEventProps) => void) => {
-        mouseEventCallbacks.current.mouseleave.push(cb);
+        mouseEventCallbacks.current.mouseLeave.push(cb);
       },
       onWheel: (cb: (props: MouseEventProps) => void) => {
         mouseEventCallbacks.current.wheel.push(cb);
@@ -829,6 +849,7 @@ export default function useEngineRef(
             tag.computedFeature ?? {
               type: "computedFeature",
               id: tag.featureId,
+              geometry: getGeometryFromEntity(viewer.clock.currentTime, entity),
               properties: convertEntityProperties(viewer.clock.currentTime, entity),
               metaData: {
                 description: convertEntityDescription(viewer.clock.currentTime, entity),
@@ -936,6 +957,32 @@ export default function useEngineRef(
         tickEventCallback.current = tickEventCallback.current.filter(c => c !== cb) || [];
       },
       tickEventCallback,
+      calcRectangleControlPoint: (p1: Position3d, p2: Position3d, p3: Position3d) => {
+        const pp1 = new Cesium.Cartesian3(...p1);
+        const pp2 = new Cesium.Cartesian3(...p2);
+        const pp3 = new Cesium.Cartesian3(...p3);
+        const cartesianScratch1 = new Cesium.Cartesian3();
+        const cartesianScratch2 = new Cesium.Cartesian3();
+        const projection = Cesium.Cartesian3.projectVector(
+          Cesium.Cartesian3.subtract(pp3, pp1, cartesianScratch1),
+          Cesium.Cartesian3.subtract(pp2, pp1, cartesianScratch2),
+          cartesianScratch1,
+        );
+        const offset = Cesium.Cartesian3.subtract(
+          pp3,
+          Cesium.Cartesian3.add(pp1, projection, cartesianScratch1),
+          cartesianScratch2,
+        );
+        const pp4 = Cesium.Cartesian3.midpoint(pp1, pp2, cartesianScratch1);
+        const pp5 = Cesium.Cartesian3.add(pp4, offset, cartesianScratch2);
+        const p5 = [pp5.x, pp5.y, pp5.z] as Position3d;
+        return [p1, p2, p5];
+      },
+      getCredits: () => {
+        const viewer = cesium.current?.cesiumElement;
+        if (!viewer || viewer.isDestroyed()) return;
+        return getCredits(viewer);
+      },
     };
   }, [cesium]);
 

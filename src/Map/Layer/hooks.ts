@@ -107,12 +107,15 @@ export default function useHooks({
     };
   }, [layer, forceUpdateFeatures]);
 
-  const prevForceUpdatableData = useRef<Pick<Data, "csv" | "jsonProperties">>();
+  const prevForceUpdatableData = useRef<Pick<Data, "csv" | "jsonProperties" | "value">>();
   useLayoutEffect(() => {
     const data = layer?.type === "simple" ? layer.data : undefined;
-    const forceUpdatableData = pick(data, "csv", "jsonProperties");
+    const forceUpdatableData = pick(data, "csv", "jsonProperties", "value");
 
-    if (isEqual(forceUpdatableData, prevForceUpdatableData.current) || !data?.url) {
+    if (
+      isEqual(forceUpdatableData, prevForceUpdatableData.current) ||
+      (!data?.url && !data?.value)
+    ) {
       return;
     }
 

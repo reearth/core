@@ -1,5 +1,7 @@
 import type { RefObject } from "react";
 
+import { GeoidRef } from "./Geoid/types";
+import { SpatialIdRef } from "./SpatialId/types";
 import type { EngineRef, LayersRef, SketchRef } from "./types";
 import { TimelineManagerRef } from "./useTimelineManager";
 import { FunctionKeys, WrappedRef, wrapRef } from "./utils";
@@ -8,6 +10,8 @@ export type MapRef = {
   engine: WrappedRef<EngineRef>;
   layers: WrappedRef<LayersRef>;
   sketch: WrappedRef<SketchRef>;
+  spatialId?: WrappedRef<SpatialIdRef>;
+  geoid: WrappedRef<GeoidRef>;
   timeline?: TimelineManagerRef;
 };
 
@@ -82,6 +86,7 @@ const engineRefKeys: FunctionKeys<EngineRef> = {
   unselectFeatures: 1,
   pickManyFromViewport: 1,
   getExtrudedHeight: 1,
+  getExtrudedPoint: 1,
   getSurfaceDistance: 1,
   equalsEpsilon2d: 1,
   equalsEpsilon3d: 1,
@@ -89,6 +94,8 @@ const engineRefKeys: FunctionKeys<EngineRef> = {
   setCursor: 1,
   bringToFront: 1,
   sendToBack: 1,
+  calcRectangleControlPoint: 1,
+  getCredits: 1,
 };
 
 const layersRefKeys: FunctionKeys<LayersRef> = {
@@ -103,6 +110,8 @@ const layersRefKeys: FunctionKeys<LayersRef> = {
   findByTags: 1,
   hide: 1,
   isLayer: 1,
+  isComputedLayer: 1,
+  isTempLayer: 1,
   layers: 1,
   override: 1,
   replace: 1,
@@ -117,31 +126,48 @@ const layersRefKeys: FunctionKeys<LayersRef> = {
 };
 
 const sketchRefKeys: FunctionKeys<SketchRef> = {
+  getType: 1,
   setType: 1,
-  setColor: 1,
-  setDefaultAppearance: 1,
-  createDataOnly: 1,
-  disableShadow: 1,
-  enableRelativeHeight: 1,
-  allowRightClickToAbort: 1,
-  allowAutoResetInteractionMode: 1,
+  getOptions: 1,
+  overrideOptions: 1,
+  editFeature: 1,
+  applyEdit: 1,
+  cancelEdit: 1,
+  deleteFeature: 1,
+  onEditFeatureChange: 1,
+};
+
+const spatialIdRefKeys: FunctionKeys<SpatialIdRef> = {
+  pickSpace: 1,
+  exitPickSpace: 1,
+  onSpacePick: 1,
+};
+
+const geoidRefKeys: FunctionKeys<GeoidRef> = {
+  getGeoidHeight: 1,
 };
 
 export function mapRef({
   engineRef,
   layersRef,
   sketchRef,
+  spatialIdRef,
+  geoidRef,
   timelineManagerRef,
 }: {
   engineRef: RefObject<EngineRef>;
   layersRef: RefObject<LayersRef>;
   sketchRef: RefObject<SketchRef>;
+  spatialIdRef: RefObject<SpatialIdRef>;
+  geoidRef: RefObject<GeoidRef>;
   timelineManagerRef?: TimelineManagerRef;
 }): MapRef {
   return {
     engine: wrapRef(engineRef, engineRefKeys),
     layers: wrapRef(layersRef, layersRefKeys),
     sketch: wrapRef(sketchRef, sketchRefKeys),
+    spatialId: wrapRef(spatialIdRef, spatialIdRefKeys),
+    geoid: wrapRef(geoidRef, geoidRefKeys),
     timeline: timelineManagerRef,
   };
 }

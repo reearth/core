@@ -46,6 +46,7 @@ export interface ExtrudedMeasurementProps {
   b: Cartesian3;
   extrudedHeight: number;
   color?: Color;
+  showLine?: boolean;
 }
 
 export const ExtrudedMeasurement: FC<ExtrudedMeasurementProps> = ({
@@ -53,6 +54,7 @@ export const ExtrudedMeasurement: FC<ExtrudedMeasurementProps> = ({
   b,
   extrudedHeight,
   color,
+  showLine,
 }) => {
   const position = useConstant(() => new Cartesian3());
   return (
@@ -64,7 +66,7 @@ export const ExtrudedMeasurement: FC<ExtrudedMeasurementProps> = ({
             : `${(extrudedHeight / 1000).toFixed(1)} km`}
         </MeasurementText>
       </ScreenSpaceElement>
-      <MeasurementLine a={a} b={b} color={color} />
+      {showLine && <MeasurementLine a={a} b={b} color={color} />}
     </>
   );
 };

@@ -5,13 +5,14 @@ import { ComputedFeature } from "../mantle";
 import {
   Map,
   type MapRef,
-  type SceneProperty,
+  type ViewerProperty,
   type Layer,
   type LayerSelectionReason,
   type Camera,
   type LatLng,
   type Cluster,
   type ComputedLayer,
+  type Credits,
 } from "../Map";
 import { SketchFeature, SketchType } from "../Map/Sketch/types";
 
@@ -33,9 +34,10 @@ export type CoreVisualizerProps = {
   engine?: EngineType;
   isBuilt?: boolean;
   isEditable?: boolean;
-  sceneProperty?: SceneProperty;
+  viewerProperty?: ViewerProperty;
   layers?: Layer[];
   clusters?: Cluster[]; // TODO: remove completely from beta core
+  time?: string | Date;
   camera?: Camera;
   interactionMode?: InteractionModeType;
   shouldRender?: boolean;
@@ -45,6 +47,7 @@ export type CoreVisualizerProps = {
   ready?: boolean;
   hiddenLayers?: string[];
   zoomedLayerId?: string;
+  displayCredits?: boolean;
   onCameraChange?: (camera: Camera) => void;
   onLayerDrop?: (layerId: string, propertyKey: string, position: LatLng | undefined) => void;
   onLayerSelect?: (
@@ -57,7 +60,11 @@ export type CoreVisualizerProps = {
   onMount?: () => void;
   onSketchTypeChangeProp?: (type: SketchType | undefined) => void;
   onSketchFeatureCreate?: (feature: SketchFeature | null) => void;
+  onSketchFeatureUpdate?: (feature: SketchFeature | null) => void;
+  onSketchFeatureDelete?: (layerId: string, featureId: string) => void;
   onInteractionModeChange?: (mode: InteractionModeType) => void;
+  onAPIReady?: () => void;
+  onCreditsUpdate?: (credits?: Credits) => void;
 };
 
 export const CoreVisualizer = memo(
@@ -67,16 +74,18 @@ export const CoreVisualizer = memo(
         engine,
         isBuilt,
         isEditable,
-        sceneProperty,
+        viewerProperty,
         layers,
         clusters,
         small,
         ready,
         hiddenLayers,
         camera: initialCamera,
+        time,
         interactionMode,
         shouldRender,
         meta,
+        displayCredits = true,
         style,
         zoomedLayerId,
         children,
@@ -88,6 +97,10 @@ export const CoreVisualizer = memo(
         onMount,
         onSketchTypeChangeProp,
         onSketchFeatureCreate,
+        onSketchFeatureUpdate,
+        onSketchFeatureDelete,
+        onAPIReady,
+        onCreditsUpdate,
       },
       ref: Ref<MapRef | null>,
     ) => {
@@ -97,13 +110,12 @@ export const CoreVisualizer = memo(
         selectedFeature,
         camera,
         featureFlags,
-        overriddenSceneProperty,
         isLayerDragging,
         timelineManagerRef,
-        cursor,
         cameraForceHorizontalRoll,
         coreContextValue,
         containerStyle,
+        overriddenInteractionMode,
         handleLayerSelect,
         handleLayerDrag,
         handleLayerDrop,
@@ -111,6 +123,8 @@ export const CoreVisualizer = memo(
         handleCameraChange,
         handleInteractionModeChange,
         handleSketchPluginFeatureCreate,
+        handleSketchPluginFeatureUpdate,
+        handleSketchPluginFeatureDelete,
         handleSketchTypeChange,
         handleLayerVisibility,
         handleLayerLoad,
@@ -121,8 +135,8 @@ export const CoreVisualizer = memo(
         {
           camera: initialCamera,
           interactionMode,
-          sceneProperty,
           zoomedLayerId,
+          viewerProperty,
           onLayerSelect,
           onCameraChange,
           onZoomToLayer,
@@ -151,16 +165,17 @@ export const CoreVisualizer = memo(
                 isLayerDragging={isLayerDragging}
                 isLayerDraggable={isEditable}
                 meta={meta}
+                displayCredits={displayCredits}
                 style={style}
                 featureFlags={featureFlags}
                 shouldRender={shouldRender}
-                property={overriddenSceneProperty}
+                property={viewerProperty}
+                time={time}
                 small={small}
                 ready={ready}
                 timelineManagerRef={timelineManagerRef}
-                interactionMode={interactionMode}
+                interactionMode={overriddenInteractionMode}
                 selectedFeature={selectedFeature}
-                cursor={cursor}
                 onCameraChange={handleCameraChange}
                 onLayerDrag={handleLayerDrag}
                 onLayerDrop={handleLayerDrop}
@@ -169,6 +184,10 @@ export const CoreVisualizer = memo(
                 overrideInteractionMode={handleInteractionModeChange}
                 onSketchFeatureCreate={onSketchFeatureCreate}
                 onSketchPluginFeatureCreate={handleSketchPluginFeatureCreate}
+                onSketchFeatureUpdate={onSketchFeatureUpdate}
+                onSketchPluginFeatureUpdate={handleSketchPluginFeatureUpdate}
+                onSketchFeatureDelete={onSketchFeatureDelete}
+                onSketchPluginFeatureDelete={handleSketchPluginFeatureDelete}
                 onSketchTypeChange={handleSketchTypeChange}
                 onMount={onMount}
                 onLayerVisibility={handleLayerVisibility}
@@ -176,6 +195,8 @@ export const CoreVisualizer = memo(
                 onLayerSelectWithRectStart={handleLayerSelectWithRectStart}
                 onLayerSelectWithRectMove={handleLayerSelectWithRectMove}
                 onLayerSelectWithRectEnd={handleLayerSelectWithRectEnd}
+                onAPIReady={onAPIReady}
+                onCreditsUpdate={onCreditsUpdate}
               />
               <coreContext.Provider value={coreContextValue}>{children}</coreContext.Provider>
             </div>

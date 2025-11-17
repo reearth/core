@@ -8,15 +8,15 @@ import { Viewer, Globe, Material, Cartesian3 } from "cesium";
 import { RefObject, useCallback, useEffect, useMemo, useRef } from "react";
 import { CesiumComponentRef } from "resium";
 
-import { TerrainProperty } from "..";
-import { useImmutableFunction } from "../../hooks/useRefFunction";
-import { StringMatcher } from "../../utils/StringMatcher";
+import { TerrainProperty } from "../../..";
+import { useImmutableFunction } from "../../../../hooks/useRefFunction";
+import { StringMatcher } from "../../../../utils/StringMatcher";
+import { createColorMapImage } from "../../Feature/HeatMap/colorMap";
+import GlobeFSDefinitions from "../../Shaders/OverriddenShaders/GlobeFS/Definitions.glsl?raw";
+import HeatmapForTerrainFS from "../../Shaders/OverriddenShaders/GlobeFS/HeatmapForTerrain.glsl?raw";
+import IBLFS from "../../Shaders/OverriddenShaders/GlobeFS/IBL.glsl?raw";
+import { PrivateCesiumGlobe } from "../../types";
 
-import { createColorMapImage } from "./Feature/HeatMap/colorMap";
-import GlobeFSDefinitions from "./Shaders/OverriddenShaders/GlobeFS/Definitions.glsl?raw";
-import HeatmapForTerrainFS from "./Shaders/OverriddenShaders/GlobeFS/HeatmapForTerrain.glsl?raw";
-import IBLFS from "./Shaders/OverriddenShaders/GlobeFS/IBL.glsl?raw";
-import { PrivateCesiumGlobe } from "./types";
 import { VertexTerrainElevationMaterial } from "./VertexTerrainElevationMaterial";
 
 const defaultMatcher = new StringMatcher()
@@ -63,6 +63,12 @@ function makeGlobeShadersDirty(globe: Globe): void {
   // reset surface shader source to the initial state (assuming that we never
   // use custom material on globe).
   // ref: https://github.com/CesiumGS/cesium/blob/1.106/packages/engine/Source/Scene/Globe.js#L562-L572
+
+  // Safety check: ensure globe's internal properties exist before manipulation
+  if (!globe || globe.isDestroyed() || !(globe as any)._surface) {
+    return;
+  }
+
   const material = globe.material;
   if (material == null) {
     globe.material = Material.fromType("Color");
@@ -71,6 +77,18 @@ function makeGlobeShadersDirty(globe: Globe): void {
     globe.material = undefined;
     globe.material = material;
   }
+}
+
+function withUniforms(globe: PrivateCesiumGlobe, add?: Record<string, () => any>) {
+  if (!globe._surface?._tileProvider) return;
+  const mm = (globe._surface._tileProvider as any)?.materialUniformMap ?? {};
+  (globe._surface._tileProvider as any).materialUniformMap = { ...mm, ...(add ?? {}) };
+}
+
+function removeUniforms(globe: PrivateCesiumGlobe, keys: string[]) {
+  const tp = globe._surface?._tileProvider as any;
+  if (!tp?.materialUniformMap) return;
+  for (const k of keys) delete tp.materialUniformMap[k];
 }
 
 const useIBL = ({
@@ -122,17 +140,19 @@ const useIBL = ({
 
 const useTerrainHeatmap = ({
   cesium,
-  terrain: {
-    heatmapType,
-    heatmapMaxHeight,
-    heatmapMinHeight,
-    heatmapLogarithmic,
-    heatmapColorLUT,
-  } = {},
+  terrain,
 }: {
   cesium: RefObject<CesiumComponentRef<Viewer>>;
   terrain: TerrainProperty | undefined;
 }) => {
+  const {
+    type: heatmapType,
+    maxHeight: heatmapMaxHeight,
+    minHeight: heatmapMinHeight,
+    logarithmic: heatmapLogarithmic,
+    colorLUT: heatmapColorLUT,
+  } = terrain?.elevationHeatMap ?? {};
+
   const isCustomHeatmapEnabled = useMemo(() => heatmapType === "custom", [heatmapType]);
 
   const shaderForTerrainHeatmap = useMemo(
@@ -182,6 +202,18 @@ const useTerrainHeatmap = ({
   return { isCustomHeatmapEnabled, shaderForTerrainHeatmap };
 };
 
+async function waitTerrainReady(scene: any) {
+  const t = scene.terrain;
+  if (t?.ready) return;
+  await new Promise<void>(resolve => {
+    if (!t) return resolve();
+    const off = t.readyEvent.addEventListener(() => {
+      off();
+      resolve();
+    });
+  });
+}
+
 export const useOverrideGlobeShader = ({
   cesium,
   sphericalHarmonicCoefficients,
@@ -199,6 +231,8 @@ export const useOverrideGlobeShader = ({
   enableLighting?: boolean;
   terrain: TerrainProperty | undefined;
 }) => {
+  const applyingRef = useRef(false);
+
   const { uniformMapForIBL, isIBLEnabled, shaderForIBL } = useIBL({
     sphericalHarmonicCoefficients,
     globeImageBasedLighting,
@@ -206,6 +240,7 @@ export const useOverrideGlobeShader = ({
     enableLighting,
   });
 
+  // Terrain Heatmap is actually a built-in feature for globe, it renders as a heatmap using terrain height data.
   const { isCustomHeatmapEnabled, shaderForTerrainHeatmap } = useTerrainHeatmap({
     cesium,
     terrain,
@@ -220,75 +255,85 @@ export const useOverrideGlobeShader = ({
 
   const needUpdateGlobeRef = useRef(false);
 
-  const handleGlobeShader = useCallback(() => {
+  const handleGlobeShader = useCallback(async () => {
     // NOTE: Support the spherical harmonic coefficient only when the terrain normal is enabled.
     // Because it's difficult to control the shader for the entire globe.
     // ref: https://github.com/CesiumGS/cesium/blob/af4e2bebbef25259f049b05822adf2958fce11ff/packages/engine/Source/Shaders/GlobeFS.glsl#L408
     if (!cesium.current?.cesiumElement || !needUpdateGlobeRef.current) return;
 
-    const globe = cesium.current.cesiumElement.scene.globe as PrivateCesiumGlobe;
+    if (applyingRef.current) return;
+    applyingRef.current = true;
 
-    const surfaceShaderSet = globe._surfaceShaderSet;
-    if (!surfaceShaderSet) {
-      if (import.meta.env.DEV) {
-        throw new Error("`globe._surfaceShaderSet` could not found");
+    try {
+      const { scene } = cesium.current.cesiumElement;
+      await waitTerrainReady(scene);
+
+      const globe = cesium.current.cesiumElement.scene.globe as PrivateCesiumGlobe;
+
+      // Reset shaders first so we patch the freshest base
+      makeGlobeShadersDirty(globe);
+
+      const surfaceShaderSet = globe._surfaceShaderSet;
+      if (!surfaceShaderSet) {
+        if (import.meta.env.DEV) {
+          throw new Error("`globe._surfaceShaderSet` could not found");
+        }
+        return;
       }
-      return;
-    }
 
-    const baseFragmentShaderSource = surfaceShaderSet.baseFragmentShaderSource;
+      const baseFragmentShaderSource = surfaceShaderSet.baseFragmentShaderSource;
+      const GlobeFS =
+        baseFragmentShaderSource?.sources[baseFragmentShaderSource.sources.length - 1];
 
-    const GlobeFS = baseFragmentShaderSource?.sources[baseFragmentShaderSource.sources.length - 1];
-
-    if (!GlobeFS || !baseFragmentShaderSource) {
-      if (import.meta.env.DEV) {
-        throw new Error("GlobeFS could not find.");
+      if (!GlobeFS || !baseFragmentShaderSource) {
+        if (import.meta.env.DEV) {
+          throw new Error("GlobeFS could not find.");
+        }
+        return;
       }
-      return;
-    }
 
-    const matchers: StringMatcher[] = [];
-    const shaders: string[] = [];
-    if (isIBLEnabled && globe.enableLighting && globe.terrainProvider.hasVertexNormals) {
-      matchers.push(shaderForIBL);
-      shaders.push(IBLFS);
-    }
+      const matchers: StringMatcher[] = [];
+      const shaders: string[] = [];
+      const terrainHasNormals = !!(globe.terrainProvider as any)?.hasVertexNormals;
 
-    if (isCustomHeatmapEnabled) {
-      // This will log the variables needed in the shader below.
-      // we need the minHeight, maxHeight and logarithmic
-      matchers.push(shaderForTerrainHeatmap);
-      shaders.push(HeatmapForTerrainFS);
-    }
-
-    // This means there is no overridden shader.
-    if (!matchers.length) return;
-
-    needUpdateGlobeRef.current = false;
-
-    if (!globe?._surface?._tileProvider) {
-      if (import.meta.env.DEV) {
-        throw new Error("`globe._surface._tileProvider.materialUniformMap` could not found");
+      if (isIBLEnabled && globe.enableLighting && terrainHasNormals) {
+        matchers.push(shaderForIBL);
+        shaders.push(IBLFS);
       }
-      return;
+
+      if (isCustomHeatmapEnabled && terrainHasNormals) {
+        // This will log the variables needed in the shader below.
+        // we need the minHeight, maxHeight and logarithmic
+        matchers.push(shaderForTerrainHeatmap);
+        shaders.push(HeatmapForTerrainFS);
+      }
+
+      // This means there is no overridden shader.
+      if (!matchers.length) return;
+
+      needUpdateGlobeRef.current = false;
+
+      if (!globe?._surface?._tileProvider) {
+        if (import.meta.env.DEV) {
+          throw new Error("`globe._surface._tileProvider.materialUniformMap` could not found");
+        }
+        return;
+      }
+
+      const replacedGlobeFS = defaultMatcher.concat(...matchers).execute(GlobeFS);
+
+      withUniforms(globe, isIBLEnabled ? uniformMapForIBL : undefined);
+
+      surfaceShaderSet.baseFragmentShaderSource = new ShaderSource({
+        sources: [
+          ...baseFragmentShaderSource.sources.slice(0, -1),
+          GlobeFSDefinitions + replacedGlobeFS + shaders.join(""),
+        ],
+        defines: baseFragmentShaderSource.defines,
+      });
+    } finally {
+      applyingRef.current = false;
     }
-
-    makeGlobeShadersDirty(globe);
-
-    const replacedGlobeFS = defaultMatcher.concat(...matchers).execute(GlobeFS);
-
-    globe._surface._tileProvider.materialUniformMap = {
-      ...(globe._surface._tileProvider.materialUniformMap ?? {}),
-      ...uniformMapForIBL,
-    };
-
-    surfaceShaderSet.baseFragmentShaderSource = new ShaderSource({
-      sources: [
-        ...baseFragmentShaderSource.sources.slice(0, -1),
-        GlobeFSDefinitions + replacedGlobeFS + shaders.join(""),
-      ],
-      defines: baseFragmentShaderSource.defines,
-    });
   }, [
     cesium,
     isCustomHeatmapEnabled,
@@ -314,6 +359,10 @@ export const useOverrideGlobeShader = ({
 
     return () => {
       if (!globe.isDestroyed()) {
+        removeUniforms(globe, [
+          "u_reearth_sphericalHarmonicCoefficients",
+          "u_reearth_globeImageBasedLighting",
+        ]);
         // Reset customized shader to default
         makeGlobeShadersDirty(globe);
       }

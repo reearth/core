@@ -9,7 +9,8 @@ import type {
   ComputedFeature,
   LayerSimple,
 } from "../../mantle";
-import { SceneProperty } from "../types";
+import { SketchEditingFeature } from "../Sketch";
+import { ViewerProperty } from "../types";
 
 import useHooks, { type Atom, type EvalFeature } from "./hooks";
 
@@ -25,11 +26,12 @@ export type CommonProps = {
   isHidden?: boolean;
   isSelected?: boolean;
   meta?: Record<string, unknown>;
+  sketchEditingFeature?: SketchEditingFeature;
 };
 
 export type FeatureComponentProps = {
   layer: ComputedLayer;
-  sceneProperty?: SceneProperty;
+  viewerProperty?: ViewerProperty;
   onFeatureRequest?: (range: DataRange) => void;
   onLayerFetch?: (value: Partial<Pick<LayerSimple, "properties">>) => void;
   onFeatureFetch?: (features: Feature[]) => void;
@@ -44,7 +46,7 @@ export type Props = {
   atom?: Atom;
   overrides?: Record<string, any>;
   delegatedDataTypes?: DataType[];
-  sceneProperty?: any;
+  viewerProperty?: ViewerProperty;
   selectedFeatureId?: string;
   /** Feature component should be injected by a map engine. */
   Feature?: ComponentType<FeatureComponentProps>;

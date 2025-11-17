@@ -21,4 +21,4 @@ export type PrivateCesiumGlobe = Globe & {
   };
 };
 
-export type CursorType = "default" | "auto" | "help" | "pointer" | "grab" | "crosshair";
+export type CursorType = "default" | "auto" | "help" | "pointer" | "grab" | "crosshair" | "wait";

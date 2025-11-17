@@ -1,4 +1,4 @@
-import { SceneProperty } from "@reearth/core";
+import { ViewerProperty } from "@reearth/core";
 
 // Ref: https://github.com/eukarya-inc/PLATEAU-VIEW-3.0/blob/cfcb4b6a444fc9695b4089c8224016d9650cf2b7/extension/src/shared/reearth/scene/Scene.tsx#L13
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -27,33 +27,53 @@ const sphericalHarmonicCoefficients: [x: number, y: number, z: number][] = [
   [0.114833705127239, 0.114355310797691, 0.067587599158287],
 ];
 
-export const SCENE: SceneProperty = {
-  tiles: [
-    {
-      id: "default",
-      tile_type: "open_street_map",
+const TILE_LABELS: ViewerProperty["tileLabels"] = [
+  {
+    id: `label`,
+    labelType: "japan_gsi_optimal_bvmap",
+    near: 0,
+    far: 3000,
+    style: {
+      municipalities: {
+        fillColor: "#000000",
+        outlineColor: "rgba(255, 255, 255, 0.8)",
+      },
+      towns: {
+        fillColor: "rgba(0, 0, 0, 0.6)",
+      },
+      topography: {
+        fillColor: "rgba(0, 0, 0, 0.6)",
+      },
     },
-  ],
-  atmosphere: {
-    enable_lighting: true,
-    globeImageBasedLighting: true,
   },
-  camera: {
-    camera: {
-      fov: 1.0471975511965976,
-      heading: 6.075482442126033,
-      height: 4065.852019268935,
-      lat: 35.608034008903225,
-      lng: 139.7728554580092,
-      pitch: -0.45804512978428535,
-      roll: 6.2830631767616465,
+];
+
+export const DEFAULT_VIEWER_PROPERTY: ViewerProperty = {
+  tileLabels: TILE_LABELS,
+  globe: {
+    enableLighting: true,
+  },
+  scene: {
+    imageBasedLighting: {
+      enabled: true,
+      sphericalHarmonicCoefficients,
     },
   },
   terrain: {
-    terrain: true,
-    terrainNormal: true,
+    enabled: true,
+    normal: true,
   },
-  light: {
-    sphericalHarmonicCoefficients,
+  geoid: {
+    server: {
+      url: "https://api-vt.geolonia.com/api/altitude?lat=${lat}&lng=${lng}",
+      geoidProperty: "geoid",
+    },
   },
+  tiles: [
+    {
+      id: "default",
+      type: "open_street_map",
+      opacity: 1,
+    },
+  ],
 };

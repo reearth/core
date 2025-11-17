@@ -17,15 +17,16 @@ import {
   GroundPrimitive,
 } from "cesium";
 import md5 from "js-md5";
-import { pick } from "lodash-es";
+import { cloneDeep, pick } from "lodash-es";
 import {
   ComponentProps,
   ComponentType,
   ForwardedRef,
   forwardRef,
+  useCallback,
   useLayoutEffect,
   useMemo,
-  useRef,
+  useState,
 } from "react";
 import { type CesiumComponentRef, Entity } from "resium";
 
@@ -35,7 +36,7 @@ import type {
   ComputedLayer,
   FeatureComponentProps,
   Geometry,
-  SceneProperty,
+  ViewerProperty,
 } from "../..";
 import { Data, Layer, LayerSimple, TimeInterval } from "../../../mantle";
 import { FeatureIndex } from "../FeatureIndex";
@@ -48,7 +49,7 @@ export type FeatureProps<P = any> = {
   layer?: ComputedLayer;
   feature?: ComputedFeature;
   geometry?: Geometry;
-  sceneProperty?: SceneProperty;
+  viewerProperty?: ViewerProperty;
 } & Omit<FeatureComponentProps, "layer">;
 
 export type FeatureComponent = ComponentType<FeatureProps>;
@@ -86,10 +87,11 @@ function EntityExtComponent(
   }: ComponentProps<typeof Entity> & Tag,
   ref: ForwardedRef<CesiumComponentRef<CesiumEntity>>,
 ) {
-  const r = useRef<CesiumComponentRef<CesiumEntity>>(null);
+  const [entity, setEntity] = useState<CesiumComponentRef<CesiumEntity> | null>(null);
 
   useLayoutEffect(() => {
-    attachTag(r.current?.cesiumElement, {
+    if (!entity?.cesiumElement) return;
+    attachTag(entity.cesiumElement, {
       layerId: layerId || props.id,
       featureId,
       draggable,
@@ -105,9 +107,12 @@ function EntityExtComponent(
     props.id,
     unselectable,
     hideIndicator,
+    entity,
   ]);
 
-  return <Entity ref={composeRefs(ref, r)} {...props} />;
+  const handleRef = useCallback((r: CesiumComponentRef<CesiumEntity>) => setEntity(r), []);
+
+  return <Entity ref={composeRefs(ref, handleRef)} {...props} />;
 }
 
 export function attachTag(
@@ -231,11 +236,18 @@ export const extractSimpleLayer = (
   if (l?.type !== "simple") {
     return;
   }
-  return l;
+  // Proxy object lead to issues when creating mvt imagery provider, so convert to plain object
+  // Not sure for other types, but to keep consistency, convert all simple layers here
+  // It should be okey since simple layer data is supposed to be simple enough and computed data should not be included
+  return toPlainObject(l);
 };
 
 export const extractSimpleLayerData = (layer: ComputedLayer | undefined): Data | undefined => {
   return extractSimpleLayer(layer)?.data;
+};
+
+export const toPlainObject = <T,>(obj: T): T => {
+  return cloneDeep(obj);
 };
 
 export const toColor = (c?: string) => {

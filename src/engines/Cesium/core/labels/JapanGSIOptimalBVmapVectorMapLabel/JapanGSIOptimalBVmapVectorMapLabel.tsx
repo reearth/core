@@ -143,7 +143,9 @@ const LabelImageryCollection: FC<{
   imageriesAtom: Atom<KeyedImagery[]>;
   style?: AnnotationStyle;
   labelCollection?: LabelCollection;
-}> = ({ imageryProvider, imageriesAtom, style, labelCollection }) => {
+  near?: number;
+  far?: number;
+}> = ({ imageryProvider, imageriesAtom, style, labelCollection, near, far }) => {
   const imageries = useAtomValue(imageriesAtom);
   return (
     <>
@@ -155,6 +157,8 @@ const LabelImageryCollection: FC<{
             descendants={imagery.descendants}
             style={style}
             labelCollection={labelCollection}
+            near={near}
+            far={far}
           />
         </Suspense>
       ))}
@@ -164,9 +168,15 @@ const LabelImageryCollection: FC<{
 
 export interface VectorMapLabelProps {
   style?: Record<string, any>;
+  near?: number;
+  far?: number;
 }
 
-export const JapanGSIOptimalBVmapVectorMapLabel: FC<VectorMapLabelProps> = ({ style }) => {
+export const JapanGSIOptimalBVmapVectorMapLabel: FC<VectorMapLabelProps> = ({
+  style,
+  near,
+  far,
+}) => {
   const [imageryProvider, setImageryProvider] =
     useState<JapanGSIOptimalBVmapLabelImageryProvider>();
   const setRef = useCallback((handle: CesiumComponentRef<CesiumImageryLayer> | null) => {
@@ -251,6 +261,8 @@ export const JapanGSIOptimalBVmapVectorMapLabel: FC<VectorMapLabelProps> = ({ st
           imageriesAtom={imageriesAtom}
           style={style}
           labelCollection={labels}
+          near={near}
+          far={far}
         />
       )}
     </>

@@ -96,6 +96,7 @@ const FEATURE_DELEGATE_THRESHOLD = 6000;
 export default function Feature({
   layer,
   isHidden,
+  sketchEditingFeature,
   ...props
 }: FeatureComponentProps): JSX.Element | null {
   const data = extractSimpleLayerData(layer);
@@ -127,10 +128,14 @@ export default function Feature({
     if (!isRenderableAppearance(k)) return null;
 
     const useSceneSphericalHarmonicCoefficients =
-      !!props.sceneProperty?.light?.sphericalHarmonicCoefficients;
-    const useSceneSpecularEnvironmentMaps = !!props.sceneProperty?.light?.specularEnvironmentMaps;
+      !!props.viewerProperty?.scene?.imageBasedLighting?.sphericalHarmonicCoefficients;
+    const useSceneSpecularEnvironmentMaps =
+      !!props.viewerProperty?.scene?.imageBasedLighting?.specularEnvironmentMaps;
 
-    const isVisible = layer.layer.visible !== false && !isHidden;
+    const isVisible =
+      layer.layer.visible !== false &&
+      !isHidden &&
+      !(sketchEditingFeature?.layerId === layer.id && sketchEditingFeature?.feature?.id === f?.id);
 
     const componentId =
       urlMD5 +
@@ -139,7 +144,7 @@ export default function Feature({
           f?.id ?? ""
         }_${k}_${isVisible}_${useSceneSphericalHarmonicCoefficients}_${useSceneSpecularEnvironmentMaps}_${
           JSON.stringify(f?.[k]) ?? ""
-        }_${JSON.stringify(layer.transition) ?? ""}`,
+        }_${JSON.stringify(layer.transition) ?? ""}_${JSON.stringify(f?.geometry) ?? ""}`,
       );
 
     if (cacheable) {
@@ -205,9 +210,9 @@ export default function Feature({
           const isVisible = layer.layer.visible !== false && !isHidden;
           // NOTE: IBL for 3dtiles is not updated unless Tileset feature component is re-created.
           const useSceneSphericalHarmonicCoefficients =
-            !!props.sceneProperty?.light?.sphericalHarmonicCoefficients;
+            !!props.viewerProperty?.scene?.imageBasedLighting?.sphericalHarmonicCoefficients;
           const useSceneSpecularEnvironmentMaps =
-            !!props.sceneProperty?.light?.specularEnvironmentMaps;
+            !!props.viewerProperty?.scene?.imageBasedLighting?.specularEnvironmentMaps;
           const use3dtilesSphericalHarmonicCoefficients =
             layer?.layer?.type === "simple" &&
             !!layer?.layer?.["3dtiles"]?.sphericalHarmonicCoefficients;

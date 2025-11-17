@@ -109,7 +109,11 @@ export function computeAtom(cache?: typeof globalDataFeaturesCache) {
         return true;
       }
 
-      const curFeatures = processGeoJSON(currentLayer.data.value);
+      const curFeatures = processGeoJSON(
+        currentLayer.data.value,
+        undefined,
+        currentLayer.data.idProperty,
+      );
       if (curFeatures.length === prevFeatures?.length) {
         return !curFeatures.every((cur, i) => {
           const prev = prevFeatures[i];

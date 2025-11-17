@@ -62,12 +62,12 @@ export type TimelineCommit = (PlayCommand | PauseCommand | SetTimeCommand | SetO
 
 export type TimelineCommitter = {
   source:
-    | "overrideSceneProperty"
     | "widgetContext"
     | "pluginAPI"
     | "featureResource"
     | "storyTimelineBlock"
-    | "storyPage";
+    | "storyPage"
+    | "initialize";
   id?: string;
 };
 
@@ -112,7 +112,7 @@ export default ({ init, engineRef, timelineManagerRef }: Props) => {
     const currentTime = current.getTime();
 
     const convertedStartTime = startTime > currentTime ? currentTime : startTime;
-    const convertedStopTime = stopTime <= currentTime ? currentTime + DEFAULT_RANGE : stopTime;
+    const convertedStopTime = stopTime < currentTime ? currentTime + DEFAULT_RANGE : stopTime;
 
     return {
       start: new Date(convertedStartTime),
@@ -193,7 +193,9 @@ export default ({ init, engineRef, timelineManagerRef }: Props) => {
       onCommit,
       offCommit,
       handleTick,
-      tick: engineRef?.current?.tick,
+      get tick() {
+        return engineRef?.current?.tick;
+      },
     };
   }, [
     options,

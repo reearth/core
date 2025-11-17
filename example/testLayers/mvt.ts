@@ -70,3 +70,77 @@ export const LAND_USE: Layer = {
     stroke: true,
   },
 };
+
+export const LSLD_SAPPORO: Layer = {
+  id: "lsld_sapporo_mvt",
+  type: "simple",
+  data: {
+    type: "mvt",
+    url: "https://assets.cms.plateau.reearth.io/assets/ce/5a6bea-6816-4783-ada5-b193f2888737/01100_sapporo-shi_city_2020_citygml_6_op_lsld_mvt/{z}/{x}/{y}.mvt",
+    layers: "lsld",
+  },
+  polygon: {
+    show: true,
+    fillColor: {
+      expression: {
+        conditions: [
+          [
+            '(!(${attributes["urf:areaType_code"]} === "" || ${attributes["urf:areaType_code"]} === null || isNaN(Number(${attributes["urf:areaType_code"]}))) ? Number(${attributes["urf:areaType_code"]}) : null) === 1',
+            'color("#FFED4C", 1)',
+          ],
+          [
+            '(!(${attributes["urf:areaType_code"]} === "" || ${attributes["urf:areaType_code"]} === null || isNaN(Number(${attributes["urf:areaType_code"]}))) ? Number(${attributes["urf:areaType_code"]}) : null) === 2',
+            'color("#FB684C", 1)',
+          ],
+          ["true", 'color("#ffffff", 1)'],
+        ],
+      },
+    },
+  },
+  raster: {
+    minimumLevel: 8,
+    maximumLevel: 16,
+  },
+};
+
+export const LSLD_NIJIMA: Layer = {
+  id: "lsld_nijima",
+  type: "simple",
+  data: {
+    type: "mvt",
+    url: "https://assets.cms.plateau.reearth.io/assets/f1/c825d1-ead9-4326-bfd3-e97f95dc2d2d/13363_niijima-mura_city_2024_citygml_1_op_lsld_mvt/{z}/{x}/{y}.mvt",
+    layers: ["lsld"],
+    jsonProperties: ["attributes"],
+  },
+  polygon: {
+    show: {
+      expression: {
+        conditions: [
+          [
+            "${attributes['urf:disasterType_code']} === '2' && (${attributes['urf:areaType_code']} === '1' || ${attributes['urf:areaType_code']} === '2')",
+            "true",
+          ],
+          ["true", "false"],
+        ],
+      },
+    },
+    fillColor: {
+      expression: {
+        conditions: [
+          [
+            '(!(${attributes["urf:areaType_code"]} === "" || ${attributes["urf:areaType_code"]} === null || isNaN(Number(${attributes["urf:areaType_code"]}))) ? Number(${attributes["urf:areaType_code"]}) : null) === 1',
+            'color("#EDD86F", 1)',
+          ],
+          [
+            '(!(${attributes["urf:areaType_code"]} === "" || ${attributes["urf:areaType_code"]} === null || isNaN(Number(${attributes["urf:areaType_code"]}))) ? Number(${attributes["urf:areaType_code"]}) : null) === 2',
+            'color("#b35464", 1)',
+          ],
+          ["true", 'color("#ffffff", 1)'],
+        ],
+      },
+    },
+  },
+  raster: {
+    maximumLevel: 16,
+  },
+};

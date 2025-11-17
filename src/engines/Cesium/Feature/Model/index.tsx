@@ -32,14 +32,12 @@ export type Props = FeatureProps<Property>;
 
 export type Property = ModelAppearance & {
   location?: { lat: number; lng: number };
-  height?: number;
 };
-
 export default function Model({
   id,
   isVisible,
   property,
-  sceneProperty,
+  viewerProperty,
   geometry,
   layer,
   feature,
@@ -50,7 +48,9 @@ export default function Model({
   const coordinates = useMemo(
     () =>
       geometry?.type === "Point"
-        ? geometry.coordinates
+        ? property?.height === undefined
+          ? geometry.coordinates
+          : [...geometry.coordinates.slice(0, 2), property.height]
         : property?.location
           ? [property.location.lng, property.location.lat, property.height ?? 0]
           : undefined,
@@ -120,18 +120,19 @@ export default function Model({
     if (
       !property?.specularEnvironmentMaps &&
       !property?.sphericalHarmonicCoefficients &&
-      !sceneProperty?.light?.specularEnvironmentMaps &&
-      !sceneProperty?.light?.sphericalHarmonicCoefficients
+      !viewerProperty?.scene?.imageBasedLighting?.specularEnvironmentMaps &&
+      !viewerProperty?.scene?.imageBasedLighting?.sphericalHarmonicCoefficients
     )
       return ibl;
 
     const specularEnvironmentMaps =
-      property?.specularEnvironmentMaps ?? sceneProperty?.light?.specularEnvironmentMaps;
+      property?.specularEnvironmentMaps ??
+      viewerProperty?.scene?.imageBasedLighting?.specularEnvironmentMaps;
     const imageBasedLightIntensity =
-      property?.imageBasedLightIntensity ?? sceneProperty?.light?.imageBasedLightIntensity;
+      property?.imageBasedLightIntensity ?? viewerProperty?.scene?.imageBasedLighting?.intensity;
     const sphericalHarmonicCoefficients = arrayToCartecian3(
       property?.sphericalHarmonicCoefficients ??
-        sceneProperty?.light?.sphericalHarmonicCoefficients,
+        viewerProperty?.scene?.imageBasedLighting?.sphericalHarmonicCoefficients,
       imageBasedLightIntensity,
     );
 
@@ -146,9 +147,9 @@ export default function Model({
     property?.specularEnvironmentMaps,
     property?.sphericalHarmonicCoefficients,
     property?.imageBasedLightIntensity,
-    sceneProperty?.light?.specularEnvironmentMaps,
-    sceneProperty?.light?.sphericalHarmonicCoefficients,
-    sceneProperty?.light?.imageBasedLightIntensity,
+    viewerProperty?.scene?.imageBasedLighting?.specularEnvironmentMaps,
+    viewerProperty?.scene?.imageBasedLighting?.sphericalHarmonicCoefficients,
+    viewerProperty?.scene?.imageBasedLighting?.intensity,
   ]);
 
   const { viewer } = useCesium();

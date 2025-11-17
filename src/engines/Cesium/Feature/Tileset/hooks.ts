@@ -15,13 +15,11 @@ import {
   Cesium3DTileFeature,
   Model,
   Cesium3DTilePointFeature,
-  GoogleMaps as CesiumGoogleMaps,
-  Resource,
-  defaultValue,
   ImageBasedLighting,
   Cesium3DTileContent,
   Color,
   Viewer,
+  createGooglePhotorealistic3DTileset,
 } from "cesium";
 import { pick } from "lodash-es";
 import { MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -32,7 +30,7 @@ import type {
   ComputedLayer,
   Feature,
   EvalFeature,
-  SceneProperty,
+  ViewerProperty,
   Cesium3DTilesAppearance,
 } from "../../..";
 import { useRefValue } from "../../../../hooks";
@@ -57,7 +55,6 @@ import {
 } from "../utils";
 
 import { TilesetFeatureIndex } from "./TilesetFeatureIndex";
-import { GoogleMaps } from "./types";
 import { useClippingBox } from "./useClippingBox";
 import { useDrawClipping } from "./useDrawClipping";
 
@@ -77,6 +74,7 @@ const useData = (layer: ComputedLayer | undefined) => {
           ? data.layers.join(",")
           : data?.layers
         : undefined,
+      googleMapApiKey: data?.serviceTokens?.googleMapApiKey,
     };
   }, [layer]);
 };
@@ -179,7 +177,7 @@ const convertStyle = (val: any, convert: StyleProperty["convert"]) => {
 
 const useFeature = ({
   id,
-  tileset,
+  tilesetRef,
   idProperty,
   layer,
   viewer,
@@ -189,9 +187,10 @@ const useFeature = ({
   onComputedFeatureFetch,
   shouldUseFeatureIndex,
   isTilesetReady,
+  useExternalStyle,
 }: {
   id?: string;
-  tileset: MutableRefObject<Cesium3DTileset | undefined>;
+  tilesetRef: MutableRefObject<Cesium3DTileset | undefined>;
   idProperty?: string;
   layer?: ComputedLayer;
   viewer?: Viewer;
@@ -201,6 +200,7 @@ const useFeature = ({
   selectedFeatureIdsRef: MutableRefObject<string[]>;
   shouldUseFeatureIndex?: boolean;
   isTilesetReady: boolean;
+  useExternalStyle?: boolean;
 }) => {
   const cachedFeaturesRef = useRef<CachedFeature[]>([]);
   const cachedCalculatedLayerRef = useRef(layer);
@@ -222,44 +222,51 @@ const useFeature = ({
 
         const computedFeature = evalFeature(layer, { ...feature?.feature, properties });
 
-        const style = computedFeature?.["3dtiles"];
+        if (!useExternalStyle) {
+          const style = computedFeature?.["3dtiles"];
 
-        COMMON_STYLE_PROPERTIES.forEach(({ name, convert }) => {
-          if (name === "color") {
-            if (isFeatureSelected) {
-              raw.color =
-                typeof layer["3dtiles"]?.selectedFeatureColor === "string"
-                  ? toColor(layer["3dtiles"]?.selectedFeatureColor) ?? raw.color
-                  : raw.color;
-              return;
-            }
-
-            raw.color = DEFAULT_FEATURE_COLOR;
-          }
-          const val = convertStyle(style?.[name], convert);
-          if (val !== undefined) {
-            raw[name] = val;
-          }
-        });
-
-        if (raw instanceof Cesium3DTilePointFeature) {
-          POINT_STYLE_PROPERTIES.forEach(({ name, convert }) => {
+          COMMON_STYLE_PROPERTIES.forEach(({ name, convert }) => {
             const val = convertStyle(style?.[name], convert);
-            if (val !== undefined) {
-              raw[name] = val;
+
+            if (name === "color") {
+              // Reset color to default so that new style could update all.
+              raw.color = DEFAULT_FEATURE_COLOR;
+
+              // Apply color from style.
+              if (val !== undefined) {
+                raw.color = val;
+              }
+
+              // Apply color for selected feature.
+              if (isFeatureSelected && typeof layer["3dtiles"]?.selectedFeatureColor === "string") {
+                raw.color = toColor(layer["3dtiles"]?.selectedFeatureColor) ?? val;
+              }
+            } else {
+              if (val !== undefined) {
+                raw[name] = val;
+              }
             }
           });
-        }
 
-        if ("style" in raw) {
-          raw.style = new Cesium3DTileStyle(
-            // TODO: Convert value if it's necessary
-            MODEL_STYLE_PROPERTIES.reduce((res, { name, convert }) => {
-              const val = convertStyle(style?.[name as keyof typeof style], convert);
-              if (val === undefined) return res;
-              return { ...res, [name]: val };
-            }, {}),
-          );
+          if (raw instanceof Cesium3DTilePointFeature) {
+            POINT_STYLE_PROPERTIES.forEach(({ name, convert }) => {
+              const val = convertStyle(style?.[name], convert);
+              if (val !== undefined) {
+                raw[name] = val;
+              }
+            });
+          }
+
+          if ("style" in raw) {
+            raw.style = new Cesium3DTileStyle(
+              // TODO: Convert value if it's necessary
+              MODEL_STYLE_PROPERTIES.reduce((res, { name, convert }) => {
+                const val = convertStyle(style?.[name as keyof typeof style], convert);
+                if (val === undefined) return res;
+                return { ...res, [name]: val };
+              }, {}),
+            );
+          }
         }
 
         attachTag(feature.raw, {
@@ -273,7 +280,7 @@ const useFeature = ({
       }
       return;
     },
-    [evalFeature, layerId, viewer, shouldUseFeatureIndex, selectedFeatureIdsRef],
+    [evalFeature, layerId, viewer, shouldUseFeatureIndex, selectedFeatureIdsRef, useExternalStyle],
   );
 
   const handleTilesetLoad = useCallback(
@@ -324,10 +331,10 @@ const useFeature = ({
   handleTilesetLoadRef.current = handleTilesetLoad;
   useEffect(
     () =>
-      tileset.current?.tileLoad.addEventListener((t: Cesium3DTile) =>
+      tilesetRef.current?.tileLoad.addEventListener((t: Cesium3DTile) =>
         handleTilesetLoadRef.current(t),
       ),
-    [tileset, isTilesetReady],
+    [tilesetRef, isTilesetReady],
   );
 
   const handleTilesetUnload = useCallback(
@@ -343,10 +350,10 @@ const useFeature = ({
   handleTilesetUnloadRef.current = handleTilesetUnload;
   useEffect(
     () =>
-      tileset.current?.tileUnload.addEventListener((t: Cesium3DTile) =>
+      tilesetRef.current?.tileUnload.addEventListener((t: Cesium3DTile) =>
         handleTilesetUnloadRef.current(t),
       ),
-    [tileset, isTilesetReady],
+    [tilesetRef, isTilesetReady],
   );
 
   useEffect(() => {
@@ -429,7 +436,7 @@ export const useHooks = ({
   boxId,
   isVisible,
   property,
-  sceneProperty,
+  viewerProperty,
   layer,
   meta,
   evalFeature,
@@ -440,7 +447,7 @@ export const useHooks = ({
   boxId: string;
   isVisible?: boolean;
   property?: Property;
-  sceneProperty?: SceneProperty;
+  viewerProperty?: ViewerProperty;
   layer?: ComputedLayer;
   feature?: ComputedFeature;
   meta?: Record<string, unknown>;
@@ -450,7 +457,7 @@ export const useHooks = ({
 }) => {
   const { viewer } = useCesium();
   const tilesetRef = useRef<Cesium3DTilesetType>();
-  const { onLayerLoad } = useContext();
+  const { onLayerLoad, updateCredits } = useContext();
   const layerIdRef = useRef(layer?.id);
   layerIdRef.current = layer?.id;
 
@@ -460,7 +467,6 @@ export const useHooks = ({
     edgeColor,
     edgeWidth,
     experimental_clipping,
-    apiKey,
     selectedFeatureColor,
     disableIndexingFeature,
   } = property ?? {};
@@ -481,10 +487,12 @@ export const useHooks = ({
   } = useClippingBox({ clipping: experimental_clipping, boxId });
 
   const [style, setStyle] = useState<Cesium3DTileStyle>();
-  const { url, type, idProperty } = useData(layer);
+  const { url, type, idProperty, googleMapApiKey } = useData(layer);
   const shouldUseFeatureIndex = !disableIndexingFeature && !!idProperty;
 
   const [isTilesetReady, setIsTilesetReady] = useState(false);
+  const [isTilesetCompReady, setIsTilesetCompReady] = useState(false);
+  const [isTilesetRefReady, setIsTilesetRefReady] = useState(false);
 
   const prevPlanes = useRef(_planes);
   const planes = useMemo(() => {
@@ -503,8 +511,9 @@ export const useHooks = ({
     return prevPlanes.current;
   }, [_planes]);
   const clipDirection = direction === "inside" ? -1 : 1;
+
   // Create immutable object
-  const [clippingPlanes] = useState(
+  const [clippingPlanes, setClippingPlanes] = useState<CesiumClippingPlaneCollection>(
     () =>
       new CesiumClippingPlaneCollection({
         planes: planes?.map(
@@ -518,6 +527,27 @@ export const useHooks = ({
         edgeWidth: edgeWidth,
         edgeColor: toColor(edgeColor),
       }),
+  );
+  // Initialize clipping planes
+  // This is workaround to reinitialize ClippingPlanes in strict mode.
+  useEffect(
+    () => () => {
+      setClippingPlanes(
+        new CesiumClippingPlaneCollection({
+          planes: planes?.map(
+            plane =>
+              new ClippingPlane(
+                new Cartesian3(plane.normal?.x, plane.normal?.y, plane.normal?.z),
+                (plane.distance || 0) * clipDirection,
+              ),
+          ),
+          unionClippingRegions: direction === "outside",
+          edgeWidth: edgeWidth,
+          edgeColor: toColor(edgeColor),
+        }),
+      );
+    },
+    [], // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   const { drawClippingEnabled, drawClippingEdgeProps } = useDrawClipping({
@@ -542,6 +572,7 @@ export const useHooks = ({
         (tileset?.cesiumElement as any)[layerIdField] = layer.id;
       }
       tilesetRef.current = tileset?.cesiumElement;
+      setIsTilesetRefReady(!!tileset?.cesiumElement);
     },
     [id, layer?.id, featureIndex, shouldUseFeatureIndex],
   );
@@ -578,7 +609,7 @@ export const useHooks = ({
 
   useFeature({
     id,
-    tileset: tilesetRef,
+    tilesetRef,
     layer,
     idProperty,
     viewer,
@@ -588,6 +619,7 @@ export const useHooks = ({
     selectedFeatureIdsRef,
     shouldUseFeatureIndex,
     isTilesetReady,
+    useExternalStyle: !!styleUrl,
   });
 
   const [terrainHeightEstimate, setTerrainHeightEstimate] = useState(0);
@@ -703,54 +735,76 @@ export const useHooks = ({
     }
     (async () => {
       const res = await fetch(styleUrl);
-      if (!res.ok) return;
-      setStyle(new Cesium3DTileStyle(await res.json()));
+      if (!res.ok) {
+        console.warn("Failed to fetch style from:", styleUrl);
+        return;
+      }
+      const styleData = await res.json();
+      const newStyle = new Cesium3DTileStyle(styleData);
+      setStyle(newStyle);
     })();
   }, [styleUrl]);
 
-  const googleMapResource = useMemo(() => {
-    if (type !== "google-photorealistic" || !isVisible) return;
-    // Ref: https://github.com/CesiumGS/cesium/blob/b208135a095073386e5f04a59956ee11a03aa847/packages/engine/Source/Scene/createGooglePhotorealistic3DTileset.js#L30
-    const googleMaps = CesiumGoogleMaps as GoogleMaps;
-    // Default key: https://github.com/CesiumGS/cesium/blob/b208135a095073386e5f04a59956ee11a03aa847/packages/engine/Source/Core/GoogleMaps.js#L6C36-L6C36
-    const key = defaultValue(apiKey, googleMaps.defaultApiKey);
-    const credit = googleMaps.getDefaultApiKeyCredit(key);
-    return new Resource({
-      url: `${googleMaps.mapTilesApiEndpoint}3dtiles/root.json`,
-      queryParameters: { key },
-      credits: credit ? [credit] : undefined,
-    } as Resource.ConstructorOptions);
-  }, [apiKey, type, isVisible]);
+  // Apply style to tileset when both external style and tileset are ready
+  useEffect(() => {
+    if (style && tilesetRef.current && isTilesetReady) {
+      tilesetRef.current.style = style;
+    }
+  }, [style, isTilesetReady]);
+
+  const googleMapPhotorealisticResource = useMemo(() => {
+    if (type !== "google-photorealistic" || !isVisible) return null;
+
+    const loadTileset = async () => {
+      try {
+        if (googleMapApiKey) {
+          const tileset = await createGooglePhotorealistic3DTileset(googleMapApiKey);
+          return tileset.resource;
+        } else {
+          const resource = IonResource.fromAssetId(2275207, {
+            accessToken: meta?.cesiumIonAccessToken as string | undefined,
+          });
+          return resource;
+        }
+      } catch (error) {
+        console.error(`Error loading Photorealistic 3D Tiles tileset: ${error}`);
+        throw error;
+      }
+    };
+
+    return loadTileset();
+  }, [type, isVisible, googleMapApiKey, meta?.cesiumIonAccessToken]);
 
   const tilesetUrl = useMemo(() => {
     return type === "osm-buildings" && isVisible
       ? IonResource.fromAssetId(96188, {
           accessToken: meta?.cesiumIonAccessToken as string | undefined,
         }) // https://github.com/CesiumGS/cesium/blob/main/packages/engine/Source/Scene/createOsmBuildings.js#L53
-      : googleMapResource
-        ? googleMapResource
+      : googleMapPhotorealisticResource && isVisible
+        ? googleMapPhotorealisticResource
         : type === "3dtiles" && isVisible
           ? url ?? tileset
           : null;
-  }, [isVisible, tileset, url, type, meta, googleMapResource]);
+  }, [type, isVisible, meta?.cesiumIonAccessToken, googleMapPhotorealisticResource, url, tileset]);
 
   const imageBasedLighting = useMemo(() => {
     if (
       !property?.specularEnvironmentMaps &&
       !property?.sphericalHarmonicCoefficients &&
-      !sceneProperty?.light?.specularEnvironmentMaps &&
-      !sceneProperty?.light?.sphericalHarmonicCoefficients
+      !viewerProperty?.scene?.imageBasedLighting?.specularEnvironmentMaps &&
+      !viewerProperty?.scene?.imageBasedLighting?.sphericalHarmonicCoefficients
     )
       return;
 
     const ibl = new ImageBasedLighting();
     const specularEnvironmentMaps =
-      property?.specularEnvironmentMaps ?? sceneProperty?.light?.specularEnvironmentMaps;
+      property?.specularEnvironmentMaps ??
+      viewerProperty?.scene?.imageBasedLighting?.specularEnvironmentMaps;
     const imageBasedLightIntensity =
-      property?.imageBasedLightIntensity ?? sceneProperty?.light?.imageBasedLightIntensity;
+      property?.imageBasedLightIntensity ?? viewerProperty?.scene?.imageBasedLighting?.intensity;
     const sphericalHarmonicCoefficients = arrayToCartecian3(
       property?.sphericalHarmonicCoefficients ??
-        sceneProperty?.light?.sphericalHarmonicCoefficients,
+        viewerProperty?.scene?.imageBasedLighting?.sphericalHarmonicCoefficients,
       imageBasedLightIntensity,
     );
 
@@ -765,19 +819,31 @@ export const useHooks = ({
     property?.specularEnvironmentMaps,
     property?.sphericalHarmonicCoefficients,
     property?.imageBasedLightIntensity,
-    sceneProperty?.light?.specularEnvironmentMaps,
-    sceneProperty?.light?.sphericalHarmonicCoefficients,
-    sceneProperty?.light?.imageBasedLightIntensity,
+    viewerProperty?.scene?.imageBasedLighting?.specularEnvironmentMaps,
+    viewerProperty?.scene?.imageBasedLighting?.sphericalHarmonicCoefficients,
+    viewerProperty?.scene?.imageBasedLighting?.intensity,
   ]);
 
   const handleReady = useCallback(
     (tileset: Cesium3DTileset) => {
-      setIsTilesetReady(true);
+      setIsTilesetCompReady(true);
       onLayerFetch?.({ properties: tileset.properties });
       onLayerLoad?.({ layerId: layerIdRef.current });
     },
     [onLayerFetch, onLayerLoad],
   );
+
+  useEffect(() => {
+    if (!isTilesetCompReady || !isTilesetRefReady) return;
+    setIsTilesetReady(true);
+  }, [isTilesetCompReady, isTilesetRefReady]);
+
+  useEffect(() => {
+    updateCredits?.();
+    return () => {
+      updateCredits?.();
+    };
+  }, [type, updateCredits]);
 
   return {
     tilesetUrl,

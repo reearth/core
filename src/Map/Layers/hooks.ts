@@ -35,6 +35,7 @@ export type { Layer, NaiveLayer } from "../../mantle";
  */
 export type LazyLayer = Readonly<Layer> & {
   computed?: Readonly<ComputedLayer>;
+  isTempLayer?: boolean;
   // compat
   pluginId?: string;
   extensionId?: string;
@@ -52,6 +53,8 @@ export type Ref = {
   override: (id: string, layer?: (Partial<Layer> & { property?: any }) | null) => void;
   deleteLayer: (...ids: string[]) => void;
   isLayer: (obj: any) => obj is LazyLayer;
+  isComputedLayer: (obj: any) => obj is ComputedLayer;
+  isTempLayer: (layerId?: string) => boolean;
   layers: () => LazyLayer[];
   walk: <T>(
     fn: (layer: LazyLayer, index: number, parents: LazyLayer[]) => T | void,
@@ -106,6 +109,7 @@ export default function useHooks({
   requestingRenderMode,
   onLayerSelect,
   engineRef,
+  onMount,
 }: {
   layers?: Layer[];
   ref?: ForwardedRef<Ref>;
@@ -124,6 +128,7 @@ export default function useHooks({
     info: SelectedFeatureInfo | undefined,
   ) => void;
   engineRef?: RefObject<EngineRef>;
+  onMount?: () => void;
 }) {
   const layerMap = useMemo(() => new Map<string, Layer>(), []);
   const [overriddenLayers, setOverridenLayers] = useState<OverriddenLayer[]>([]);
@@ -439,6 +444,20 @@ export default function useHooks({
     [lazyLayerPrototype],
   );
 
+  const isTempLayer = useCallback(
+    (layerId?: string) => {
+      return tempLayersRef.current.some(l => l.id === layerId);
+    },
+    [tempLayersRef],
+  );
+
+  const isComputedLayer = useCallback(
+    (obj: any): obj is ComputedLayer => {
+      return typeof obj === "object" && Object.getPrototypeOf(obj) === lazyComputedLayerPrototype;
+    },
+    [lazyComputedLayerPrototype],
+  );
+
   const rootLayers = useCallback(() => {
     return [...(layersRef() ?? []), ...tempLayersRef.current]
       .map(l => findById(l.id))
@@ -535,6 +554,8 @@ export default function useHooks({
       deleteLayer,
       findByIds,
       isLayer,
+      isComputedLayer,
+      isTempLayer,
       layers: rootLayers,
       walk,
       find,
@@ -559,6 +580,8 @@ export default function useHooks({
       deleteLayer,
       findByIds,
       isLayer,
+      isComputedLayer,
+      isTempLayer,
       rootLayers,
       walk,
       find,
@@ -575,6 +598,10 @@ export default function useHooks({
       overriddenLayersGetter,
     ],
   );
+
+  useEffect(() => {
+    onMount?.();
+  }, [onMount]);
 
   const prevLayers = useRef<Layer[] | undefined>([]);
   useLayoutEffect(() => {

@@ -1,7 +1,6 @@
 import { WebMercatorTilingScheme } from "@cesium/engine";
 import {
   ImageryProvider,
-  ArcGisMapServerImageryProvider,
   IonImageryProvider,
   OpenStreetMapImageryProvider,
   IonWorldImageryStyle,
@@ -10,6 +9,22 @@ import {
 } from "cesium";
 
 import { JapanGSIOptimalBVmapLabelImageryProvider } from "./labels/JapanGSIOptimalBVmapVectorMapLabel/JapanGSIOptimalBVmapLabelImageryProvider";
+
+const PRESET_TILE_TYPES = [
+  "default",
+  "default_label",
+  "default_road",
+  "open_street_map",
+  "black_marble",
+  "japan_gsi_standard",
+  "url",
+];
+
+export type PresetTileType = (typeof PRESET_TILE_TYPES)[number];
+
+export const isValidPresetTileType = (type: string | undefined): type is PresetTileType => {
+  return PRESET_TILE_TYPES.includes(type as PresetTileType);
+};
 
 export const tiles = {
   default: ({ cesiumIonAccessToken } = {}) =>
@@ -24,39 +39,20 @@ export const tiles = {
     IonImageryProvider.fromAssetId(IonWorldImageryStyle.ROAD, {
       accessToken: cesiumIonAccessToken,
     }).catch(console.error),
-  stamen_watercolor: () =>
-    new OpenStreetMapImageryProvider({
-      url: "https://stamen-tiles.a.ssl.fastly.net/watercolor/",
-      credit: "Map tiles by Stamen Design, under CC BY 3.0. Data by OpenStreetMap, under CC BY SA.",
-      fileExtension: "jpg",
-    }),
-  stamen_toner: () =>
-    new OpenStreetMapImageryProvider({
-      url: "https://stamen-tiles.a.ssl.fastly.net/toner/",
-      credit: "Map tiles by Stamen Design, under CC BY 3.0. Data by OpenStreetMap, under CC BY SA.",
-    }),
   open_street_map: () =>
     new OpenStreetMapImageryProvider({
-      url: "https://a.tile.openstreetmap.org/",
-      credit:
-        "Copyright: Tiles © Esri — Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), TomTom, 2012",
+      url: "https://tile.openstreetmap.org",
+      credit: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     }),
-  esri_world_topo: () =>
-    ArcGisMapServerImageryProvider.fromUrl(
-      "https://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer",
-      {
-        credit:
-          "Copyright: Tiles © Esri — Esri, DeLorme, NAVTEQ, TomTom, Intermap, iPC, USGS, FAO, NPS, NRCAN, GeoBase, Kadaster NL, Ordnance Survey, Esri Japan, METI, Esri China (Hong Kong), and the GIS User Communit",
-        enablePickFeatures: false,
-      },
-    ).catch(console.error),
   black_marble: ({ cesiumIonAccessToken } = {}) =>
-    IonImageryProvider.fromAssetId(3812, { accessToken: cesiumIonAccessToken }).catch(
-      console.error,
-    ),
+    IonImageryProvider.fromAssetId(3812, {
+      accessToken: cesiumIonAccessToken,
+    }).catch(console.error),
   japan_gsi_standard: () =>
     new OpenStreetMapImageryProvider({
       url: "https://cyberjapandata.gsi.go.jp/xyz/std/",
+      credit:
+        "<a href='https://maps.gsi.go.jp/development/ichiran.html'>国土地理院</a>, Shoreline data is derived from: United States. National Imagery and Mapping Agency. \"Vector Map Level 0 (VMAP0).\" Bethesda, MD: Denver, CO: The Agency; USGS Information Services, 1997.",
     }),
   url: ({ url, heatmap, tile_zoomLevel } = {}) =>
     url
@@ -68,7 +64,7 @@ export const tiles = {
         })
       : null,
 } as {
-  [key: string]: (opts?: {
+  [K in PresetTileType]: (opts?: {
     url?: string;
     cesiumIonAccessToken?: string;
     heatmap?: boolean;

@@ -22,7 +22,6 @@ import type {
   Feature,
   ComputedFeature,
   CameraPosition,
-  LUT,
 } from "../../mantle";
 import type {
   CameraOptions,
@@ -39,9 +38,16 @@ import type {
   LayerSelectionReason,
   Ref as LayersRef,
 } from "../Layers";
-import { SketchComponentType } from "../Sketch";
-import { SketchAppearance, SketchType } from "../Sketch/types";
+import {
+  SketchType,
+  SketchOptions,
+  SketchComponentType,
+  SketchEditFeatureChangeCb,
+  SketchEditingFeature,
+} from "../Sketch/types";
 import type { TimelineManagerRef } from "../useTimelineManager";
+
+import type { SceneMode, ViewerProperty } from "./viewerProperty";
 
 export type {
   FeatureComponentProps,
@@ -72,6 +78,7 @@ export type {
   ValueType,
 } from "../../mantle";
 export * from "./event";
+export * from "./viewerProperty";
 
 export type EngineRef = {
   name: string;
@@ -87,7 +94,7 @@ export type EngineRef = {
   getLocationFromScreen: (x: number, y: number, withTerrain?: boolean) => LatLngHeight | undefined;
   sampleTerrainHeight: (lng: number, lat: number) => Promise<number | undefined>;
   computeGlobeHeight: (lng: number, lat: number, height?: number) => number | undefined;
-  getGlobeHeight: () => void;
+  getGlobeHeight: () => number | undefined;
   toXYZ: (
     lng: number,
     lat: number,
@@ -112,7 +119,12 @@ export type EngineRef = {
   getExtrudedHeight: (
     position: [x: number, y: number, z: number],
     windowPosition: [x: number, y: number],
+    allowNegative?: boolean,
   ) => number | undefined;
+  getExtrudedPoint: (
+    position: [x: number, y: number, z: number],
+    extrutedHeight: number,
+  ) => Position3d | undefined;
   getSurfaceDistance: (point1: Cartesian3, point2: Cartesian3) => number | undefined;
   equalsEpsilon2d: (
     point1: Position2d,
@@ -195,6 +207,12 @@ export type EngineRef = {
     // TODO: Get condition as expression for plugin
     condition?: (f: PickedFeature) => boolean,
   ) => PickedFeature[] | undefined;
+  calcRectangleControlPoint: (
+    p1: Position3d,
+    p2: Position3d,
+    p3: Position3d,
+  ) => [p1: Position3d, p2: Position3d, p3: Position3d];
+  getCredits: () => Credits | undefined;
 } & MouseEventHandles;
 
 export type EngineProps = {
@@ -202,7 +220,8 @@ export type EngineProps = {
   style?: CSSProperties;
   isEditable?: boolean;
   isBuilt?: boolean;
-  property?: SceneProperty;
+  property?: ViewerProperty;
+  time?: string | Date;
   camera?: Camera;
   cameraForceHorizontalRoll?: boolean;
   small?: boolean;
@@ -218,6 +237,7 @@ export type EngineProps = {
   isLayerDragging?: boolean;
   shouldRender?: boolean;
   meta?: Record<string, unknown>;
+  displayCredits?: boolean;
   layersRef?: RefObject<LayersRef>;
   requestingRenderMode?: MutableRefObject<RequestingRenderMode>;
   timelineManagerRef?: TimelineManagerRef;
@@ -241,6 +261,7 @@ export type EngineProps = {
   onLayerSelectWithRectStart?: (e: LayerSelectWithRectStart) => void;
   onLayerSelectWithRectMove?: (e: LayerSelectWithRectMove) => void;
   onLayerSelectWithRectEnd?: (e: LayerSelectWithRectEnd) => void;
+  onCreditsUpdate?: (credits?: Credits) => void;
 };
 
 export type LayerEditEvent = {
@@ -297,18 +318,18 @@ export type MouseEventCallback = (props: MouseEventProps) => void;
 export type MouseWheelEventCallback = (props: MouseEventProps) => void;
 export type MouseEventTypes =
   | "click"
-  | "doubleclick"
-  | "mousedown"
-  | "mouseup"
-  | "rightclick"
-  | "rightdown"
-  | "rightup"
-  | "middleclick"
-  | "middledown"
-  | "middleup"
-  | "mousemove"
-  | "mouseenter"
-  | "mouseleave"
+  | "doubleClick"
+  | "mouseDown"
+  | "mouseUp"
+  | "rightClick"
+  | "rightDown"
+  | "rightUp"
+  | "middleClick"
+  | "middleDown"
+  | "middleUp"
+  | "mouseMove"
+  | "mouseEnter"
+  | "mouseLeave"
   | "wheel";
 
 export type MouseEvents = {
@@ -319,18 +340,18 @@ export type MouseEvents = {
 
 export type MouseEventHandles = {
   onClick: (fn: MouseEvents["click"]) => void;
-  onDoubleClick: (fn: MouseEvents["doubleclick"]) => void;
-  onMouseDown: (fn: MouseEvents["mousedown"]) => void;
-  onMouseUp: (fn: MouseEvents["mouseup"]) => void;
-  onRightClick: (fn: MouseEvents["rightclick"]) => void;
-  onRightDown: (fn: MouseEvents["rightdown"]) => void;
-  onRightUp: (fn: MouseEvents["rightup"]) => void;
-  onMiddleClick: (fn: MouseEvents["middleclick"]) => void;
-  onMiddleDown: (fn: MouseEvents["middledown"]) => void;
-  onMiddleUp: (fn: MouseEvents["middleup"]) => void;
-  onMouseMove: (fn: MouseEvents["mousemove"]) => void;
-  onMouseEnter: (fn: MouseEvents["mouseenter"]) => void;
-  onMouseLeave: (fn: MouseEvents["mouseleave"]) => void;
+  onDoubleClick: (fn: MouseEvents["doubleClick"]) => void;
+  onMouseDown: (fn: MouseEvents["mouseDown"]) => void;
+  onMouseUp: (fn: MouseEvents["mouseUp"]) => void;
+  onRightClick: (fn: MouseEvents["rightClick"]) => void;
+  onRightDown: (fn: MouseEvents["rightDown"]) => void;
+  onRightUp: (fn: MouseEvents["rightUp"]) => void;
+  onMiddleClick: (fn: MouseEvents["middleClick"]) => void;
+  onMiddleDown: (fn: MouseEvents["middleDown"]) => void;
+  onMiddleUp: (fn: MouseEvents["middleUp"]) => void;
+  onMouseMove: (fn: MouseEvents["mouseMove"]) => void;
+  onMouseEnter: (fn: MouseEvents["mouseEnter"]) => void;
+  onMouseLeave: (fn: MouseEvents["mouseLeave"]) => void;
   onWheel: (fn: MouseEvents["wheel"]) => void;
 };
 
@@ -338,186 +359,6 @@ export type MouseEventCallbacks = { [key in keyof MouseEvents]: MouseEvents[key]
 
 export type TickEvent = (cb: TickEventCallback) => void;
 export type TickEventCallback = (current: Date, clock: { start: Date; stop: Date }) => void;
-
-export type SceneMode = "3d" | "2d" | "columbus";
-export type IndicatorTypes = "default" | "crosshair" | "custom";
-
-export type TerrainProperty = {
-  terrain?: boolean;
-  terrainType?: "cesium" | "arcgis" | "cesiumion"; // default: cesium
-  terrainExaggeration?: number; // default: 1
-  terrainExaggerationRelativeHeight?: number; // default: 0
-  depthTestAgainstTerrain?: boolean;
-  terrainCesiumIonAsset?: string;
-  terrainCesiumIonAccessToken?: string;
-  terrainCesiumIonUrl?: string;
-  terrainUrl?: string;
-  terrainNormal?: boolean;
-  // TODO: Add encode option
-  // Need to specify a tile from `tiles` option with `heatmap` option.
-  heatmapType?: "custom"; // TODO: Support Cesium's terrain heatmap as built-in: https://sandcastle.cesium.com/?src=Globe%20Materials.html
-  heatmapColorLUT?: LUT;
-  heatmapMinHeight?: number;
-  heatmapMaxHeight?: number;
-  heatmapLogarithmic?: boolean;
-};
-
-export type SceneProperty = {
-  main?: {
-    sceneMode?: SceneMode; // default: scene3d
-    ion?: string;
-    vr?: boolean;
-  };
-  tiles?: {
-    id: string;
-    tile_type?: string;
-    tile_url?: string;
-    tile_zoomLevel?: number[];
-    tile_zoomLevelForURL?: number[];
-    tile_opacity?: number;
-    heatmap?: boolean;
-  }[];
-  tileLabels?: {
-    id: string;
-    labelType: "japan_gsi_optimal_bvmap"; // | "other_map"
-    style: Record<string, any>; // Function isn't allowed
-  }[];
-  terrain?: {
-    terrain?: boolean;
-    terrainType?: "cesium" | "arcgis" | "cesiumion"; // default: cesium
-    terrainCesiumIonAsset?: string;
-    terrainCesiumIonAccessToken?: string;
-    terrainCesiumIonUrl?: string;
-    terrainExaggeration?: number; // default: 1
-    terrainExaggerationRelativeHeight?: number; // default: 0
-    depthTestAgainstTerrain?: boolean;
-  };
-  globeLighting?: {
-    globeLighting?: boolean;
-  };
-  globeShadow?: {
-    globeShadow?: boolean;
-  };
-  globeAtmosphere?: {
-    globeAtmosphere?: boolean;
-    globeAtmosphereIntensity?: number; // default: 10
-  };
-  skyBox?: {
-    skyBox?: boolean;
-  };
-  sun?: {
-    sun?: boolean;
-  };
-  moon?: {
-    moon?: boolean;
-  };
-  skyAtmosphere?: {
-    skyAtmosphere?: boolean;
-    skyAtmosphereIntensity?: number; // default: 50
-  };
-  camera?: {
-    camera?: Camera;
-    allowEnterGround?: boolean;
-    fov?: number;
-  };
-  render?: { showWireframe?: boolean };
-} & LegacySceneProperty;
-
-type LegacySceneProperty = {
-  default?: {
-    camera?: Camera;
-    allowEnterGround?: boolean;
-    skybox?: boolean;
-    bgcolor?: string;
-    ion?: string;
-    sceneMode?: SceneMode; // default: scene3d
-    vr?: boolean;
-  } & TerrainProperty; // compat
-  cameraLimiter?: {
-    cameraLimitterEnabled?: boolean;
-    cameraLimitterShowHelper?: boolean;
-    cameraLimitterTargetArea?: Camera;
-    cameraLimitterTargetWidth?: number;
-    cameraLimitterTargetLength?: number;
-  };
-  indicator?: {
-    indicator_type: IndicatorTypes;
-    indicator_image?: string;
-    indicator_image_scale?: number;
-  };
-  tiles?: {
-    id: string;
-    tile_type?: string;
-    tile_url?: string;
-    tile_zoomLevel?: number[];
-    tile_opacity?: number;
-  }[];
-  terrain?: TerrainProperty;
-  atmosphere?: {
-    enable_sun?: boolean;
-    enableMoon?: boolean;
-    enable_lighting?: boolean;
-    ground_atmosphere?: boolean;
-    sky_atmosphere?: boolean;
-    shadows?: boolean;
-    shadowResolution?: 1024 | 2048 | 4096;
-    softShadow?: boolean;
-    shadowDarkness?: number;
-    shadowMaximumDistance?: number;
-    fog?: boolean;
-    fog_density?: number;
-    hue_shift?: number;
-    brightness_shift?: number;
-    surturation_shift?: number;
-    skyboxBrightnessShift?: number;
-    skyboxSurturationShift?: number;
-    globeShadowDarkness?: number;
-    globeImageBasedLighting?: boolean;
-    globeBaseColor?: string;
-  };
-  timeline?: {
-    animation?: boolean;
-    visible?: boolean;
-    current?: string;
-    start?: string;
-    stop?: string;
-    stepType?: "rate" | "fixed";
-    multiplier?: number;
-    step?: number;
-    rangeType?: "unbounded" | "clamped" | "bounced";
-  };
-  googleAnalytics?: {
-    enableGA?: boolean;
-    trackingId?: string;
-  };
-  theme?: {
-    themeType?: "light" | "dark" | "forest" | "custom";
-    themeTextColor?: string;
-    themeSelectColor?: string;
-    themeBackgroundColor?: string;
-  };
-  ambientOcclusion?: {
-    enabled?: boolean;
-    quality?: "low" | "medium" | "high" | "extreme";
-    intensity?: number;
-    ambientOcclusionOnly?: boolean;
-  };
-  light?: {
-    lightType?: "sunLight" | "directionalLight";
-    lightDirectionX?: number;
-    lightDirectionY?: number;
-    lightDirectionZ?: number;
-    lightColor?: string;
-    lightIntensity?: number;
-    specularEnvironmentMaps?: string;
-    sphericalHarmonicCoefficients?: [x: number, y: number, z: number][];
-    imageBasedLightIntensity?: number;
-  };
-  render?: {
-    antialias?: "low" | "medium" | "high" | "extreme";
-    debugFramePerSecond?: boolean;
-  };
-};
 
 export type EngineComponent = ForwardRefExoticComponent<
   PropsWithoutRef<EngineProps> & RefAttributes<EngineRef>
@@ -534,12 +375,25 @@ export type Engine = {
 export type RequestingRenderMode = -1 | 0 | 1; // -1: force render on every postUpdate, 0: no request to render, 1: request one frame
 
 export type SketchRef = {
+  getType: () => SketchType | undefined;
   setType: (type: SketchType | undefined, from?: "editor" | "plugin") => void;
-  setColor: (color: string) => void;
-  setDefaultAppearance: (appearance: SketchAppearance) => void;
-  disableShadow: (disable: boolean) => void;
-  enableRelativeHeight: (enable: boolean) => void;
-  createDataOnly: (dataOnly: boolean) => void;
-  allowRightClickToAbort: (allow: boolean) => void;
-  allowAutoResetInteractionMode: (allow: boolean) => void;
+  getOptions: () => SketchOptions;
+  overrideOptions: (options: SketchOptions) => void;
+  editFeature: (feature: SketchEditingFeature | undefined) => void;
+  cancelEdit: (ignoreAutoReSelect?: boolean) => void;
+  applyEdit: () => void;
+  deleteFeature: (layerId: string, featureId: string) => void;
+  onEditFeatureChange: (cb: SketchEditFeatureChangeCb) => void;
+};
+
+export type CreditItem = {
+  html?: string;
+};
+
+export type Credits = {
+  engine: {
+    cesium?: CreditItem;
+  };
+  lightbox: CreditItem[];
+  screen: CreditItem[];
 };

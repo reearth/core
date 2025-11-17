@@ -35,7 +35,7 @@ WMS.args = {
     tiles: [
       {
         id: "default",
-        tile_type: "default",
+        type: "default",
       },
     ],
   },
@@ -70,7 +70,7 @@ MVT.args = {
     tiles: [
       {
         id: "default",
-        tile_type: "default",
+        type: "default",
       },
     ],
   },

@@ -411,7 +411,16 @@ export const useClippingBox = ({
     eventHandler.setInputAction(handleMouseUp, ScreenSpaceEventType.LEFT_UP);
   }, [eventHandler, handleMouseDown, handleRawMouseMove, handleMouseUp]);
 
-  useEffect(() => () => eventHandler.destroy(), [eventHandler]);
+  useEffect(
+    () => () => {
+      requestAnimationFrame(() => {
+        if (!eventHandler.isDestroyed()) {
+          eventHandler.destroy();
+        }
+      });
+    },
+    [eventHandler],
+  );
 
   const boxProperty = useMemo(
     () => ({ ...boxState, ...dimensions, allowEnterGround }),

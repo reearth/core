@@ -36,6 +36,7 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
     className,
     style,
     property,
+    time,
     camera,
     small,
     ready,
@@ -46,6 +47,7 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
     shouldRender,
     layerSelectionReason,
     meta,
+    displayCredits,
     layersRef,
     featureFlags,
     requestingRenderMode,
@@ -62,52 +64,59 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
     onMount,
     onLayerVisibility,
     onLayerLoad,
+    onCreditsUpdate,
   },
   ref,
 ) => {
   const {
-    backgroundColor,
     cesium,
-    cameraViewBoundaries,
-    cameraViewOuterBoundaries,
-    cameraViewBoundariesMaterial,
     mouseEventHandles,
     cesiumIonAccessToken,
     context,
-    light,
     layerSelectWithRectEventHandlers,
-    handleMount,
-    handleUnmount,
-    handleUpdate,
-    handleClick,
+    sceneLight,
+    sceneBackgroundColor,
+    sceneMsaaSamples,
+    sceneMode,
+    cameraViewBoundaries,
+    cameraViewOuterBoundaries,
+    cameraViewBoundariesMaterial,
     handleCameraChange,
     handleCameraMoveEnd,
+    handleUpdate,
+    handleClick,
+    handleMount,
+    handleUnmount,
+    handleTilesChange,
+    handleTerrainProviderChange,
   } = useHooks({
     ref,
     property,
-    camera,
+    time,
     selectedLayerId,
     selectionReason: layerSelectionReason,
-    isLayerDraggable,
-    isLayerDragging,
     meta,
     layersRef,
     featureFlags,
-    requestingRenderMode,
-    shouldRender,
     timelineManagerRef,
+    isLayerDraggable,
+    isLayerDragging,
+    shouldRender,
+    requestingRenderMode,
+    camera,
     cameraForceHorizontalRoll,
-    onLayerSelect,
-    onCameraChange,
     onLayerDrag,
     onLayerDrop,
+    onLayerSelect,
     onLayerEdit,
     onLayerSelectWithRectStart,
     onLayerSelectWithRectMove,
     onLayerSelectWithRectEnd,
-    onMount,
     onLayerVisibility,
     onLayerLoad,
+    onCameraChange,
+    onMount,
+    onCreditsUpdate,
   });
 
   return (
@@ -129,7 +138,7 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
       navigationHelpButton={false}
       projectionPicker={false}
       sceneModePicker={false}
-      creditContainer={creditContainer}
+      creditContainer={displayCredits ? undefined : creditContainer}
       style={{
         width: small ? "300px" : "auto",
         height: small ? "300px" : "100%",
@@ -137,24 +146,28 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
         cursor: isLayerDragging ? "grab" : undefined,
         ...style,
       }}
-      shadows={!!(property?.atmosphere?.shadows ?? property?.globeShadow?.globeShadow)}
+      shadows={!!property?.scene?.shadow?.enabled}
       onClick={handleClick}
-      onDoubleClick={mouseEventHandles.doubleclick}
-      onMouseDown={mouseEventHandles.mousedown}
-      onMouseUp={mouseEventHandles.mouseup}
-      onRightClick={mouseEventHandles.rightclick}
-      onRightDown={mouseEventHandles.rightdown}
-      onRightUp={mouseEventHandles.rightup}
-      onMiddleClick={mouseEventHandles.middleclick}
-      onMiddleDown={mouseEventHandles.middledown}
-      onMiddleUp={mouseEventHandles.middleup}
-      onMouseMove={mouseEventHandles.mousemove}
-      onMouseEnter={mouseEventHandles.mouseenter}
-      onMouseLeave={mouseEventHandles.mouseleave}
+      onDoubleClick={mouseEventHandles.doubleClick}
+      onMouseDown={mouseEventHandles.mouseDown}
+      onMouseUp={mouseEventHandles.mouseUp}
+      onRightClick={mouseEventHandles.rightClick}
+      onRightDown={mouseEventHandles.rightDown}
+      onRightUp={mouseEventHandles.rightUp}
+      onMiddleClick={mouseEventHandles.middleClick}
+      onMiddleDown={mouseEventHandles.middleDown}
+      onMiddleUp={mouseEventHandles.middleUp}
+      onMouseMove={mouseEventHandles.mouseMove}
+      onMouseEnter={mouseEventHandles.mouseEnter}
+      onMouseLeave={mouseEventHandles.mouseLeave}
       onWheel={mouseEventHandles.wheel}>
       <Event onMount={handleMount} onUnmount={handleUnmount} />
       <Clock timelineManagerRef={timelineManagerRef} />
-      <ImageryLayers tiles={property?.tiles} cesiumIonAccessToken={cesiumIonAccessToken} />
+      <ImageryLayers
+        tiles={property?.tiles}
+        cesiumIonAccessToken={cesiumIonAccessToken}
+        onTilesChange={handleTilesChange}
+      />
       <LabelImageryLayers tileLabels={property?.tileLabels} />
       <Indicator property={property} timelineManagerRef={timelineManagerRef} />
       <ScreenSpaceEventHandler useDefault>
@@ -196,20 +209,18 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
       </ScreenSpaceEventHandler>
       <ScreenSpaceCameraController
         maximumZoomDistance={
-          property?.cameraLimiter?.cameraLimitterEnabled
-            ? property.cameraLimiter?.cameraLimitterTargetArea?.height ?? Number.POSITIVE_INFINITY
+          property?.camera?.limiter?.enabled
+            ? property.camera?.limiter?.targetArea?.height ?? Number.POSITIVE_INFINITY
             : Number.POSITIVE_INFINITY
         }
-        enableCollisionDetection={
-          !(property?.default?.allowEnterGround ?? property?.camera?.allowEnterGround)
-        }
+        enableCollisionDetection={!property?.camera?.allowEnterGround}
       />
       <Camera
-        onChange={handleCameraChange}
         percentageChanged={0.2}
+        onChange={handleCameraChange}
         onMoveEnd={handleCameraMoveEnd}
       />
-      {cameraViewBoundaries && property?.cameraLimiter?.cameraLimitterShowHelper && (
+      {cameraViewBoundaries && property?.camera?.limiter?.showHelper && (
         <Entity>
           <PolylineGraphics
             positions={cameraViewBoundaries}
@@ -219,7 +230,7 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
           />
         </Entity>
       )}
-      {cameraViewOuterBoundaries && property?.cameraLimiter?.cameraLimitterShowHelper && (
+      {cameraViewOuterBoundaries && property?.camera?.limiter?.showHelper && (
         <Entity>
           <PolylineGraphics
             positions={cameraViewOuterBoundaries}
@@ -229,39 +240,39 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
           />
         </Entity>
       )}
-      {/* NOTE: useWebVR={false} will crash Cesium */}
       <Scene
-        backgroundColor={backgroundColor}
-        useWebVR={!!property?.default?.vr || undefined}
-        light={light}
+        backgroundColor={sceneBackgroundColor}
+        light={sceneLight}
+        mode={sceneMode}
+        msaaSamples={sceneMsaaSamples}
         useDepthPicking={false}
-        debugShowFramesPerSecond={!!property?.render?.debugFramePerSecond}
-        verticalExaggerationRelativeHeight={property?.terrain?.terrainExaggerationRelativeHeight}
-        verticalExaggeration={property?.terrain?.terrainExaggeration}
+        useWebVR={!!property?.scene?.vr || undefined} // NOTE: useWebVR={false} will crash Cesium
+        debugShowFramesPerSecond={!!property?.debug?.showFramesPerSecond}
+        verticalExaggerationRelativeHeight={property?.scene?.verticalExaggerationRelativeHeight}
+        verticalExaggeration={property?.scene?.verticalExaggeration}
       />
-      <SkyBox show={property?.default?.skybox ?? property?.skyBox?.skyBox ?? true} />
-      <Fog
-        enabled={property?.atmosphere?.fog ?? true}
-        density={property?.atmosphere?.fog_density}
-      />
-      <Sun show={property?.atmosphere?.enable_sun ?? property?.sun?.sun ?? true} />
-      <Moon show={property?.atmosphere?.enableMoon ?? property?.moon?.moon ?? true} />
+      <SkyBox show={property?.sky?.skyBox?.show ?? true} />
+      <Fog enabled={property?.sky?.fog?.enabled ?? true} density={property?.sky?.fog?.density} />
+      <Sun show={property?.sky?.sun?.show ?? true} />
+      <Moon show={property?.sky?.moon?.show ?? true} />
       <SkyAtmosphere
-        show={
-          property?.atmosphere?.sky_atmosphere ?? property?.skyAtmosphere?.skyAtmosphere ?? true
-        }
-        saturationShift={property?.atmosphere?.skyboxSurturationShift}
-        atmosphereLightIntensity={property?.skyAtmosphere?.skyAtmosphereIntensity}
-        brightnessShift={property?.atmosphere?.skyboxBrightnessShift}
+        show={property?.sky?.skyAtmosphere?.show ?? true}
+        atmosphereLightIntensity={property?.sky?.skyAtmosphere?.lightIntensity}
+        saturationShift={property?.sky?.skyAtmosphere?.saturationShift}
+        brightnessShift={property?.sky?.skyAtmosphere?.brightnessShift}
       />
-      <Globe property={property} cesiumIonAccessToken={cesiumIonAccessToken} />
+      <Globe
+        property={property}
+        cesiumIonAccessToken={cesiumIonAccessToken}
+        onTerrainProviderChange={handleTerrainProviderChange}
+      />
       <featureContext.Provider value={context}>{ready ? children : null}</featureContext.Provider>
       <AmbientOcclusion
-        {...AMBIENT_OCCLUSION_QUALITY[property?.ambientOcclusion?.quality || "low"]}
-        enabled={!!property?.ambientOcclusion?.enabled}
-        intensity={property?.ambientOcclusion?.intensity ?? 100}
+        {...AMBIENT_OCCLUSION_QUALITY[property?.render?.ambientOcclusion?.quality || "low"]}
+        enabled={!!property?.render?.ambientOcclusion?.enabled}
+        intensity={property?.render?.ambientOcclusion?.intensity ?? 100}
         outputType={
-          property?.ambientOcclusion?.ambientOcclusionOnly
+          property?.render?.ambientOcclusion?.ambientOcclusionOnly
             ? AmbientOcclusionOutputType.Occlusion
             : null
         }

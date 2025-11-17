@@ -60,14 +60,14 @@ export type MarkerAppearance = {
   label?: boolean;
   labelText?: string;
   labelPosition?:
-    | "left"
-    | "right"
-    | "top"
-    | "bottom"
-    | "lefttop"
-    | "leftbottom"
-    | "righttop"
-    | "rightbottom";
+  | "left"
+  | "right"
+  | "top"
+  | "bottom"
+  | "lefttop"
+  | "leftbottom"
+  | "righttop"
+  | "rightbottom";
   labelTypography?: Typography;
   labelBackground?: boolean;
   labelBackgroundColor?: string;
@@ -102,6 +102,7 @@ export type PolygonAppearance = {
   stroke?: boolean;
   strokeColor?: string;
   strokeWidth?: number;
+  height?: number;
   heightReference?: "none" | "clamp" | "relative";
   shadows?: "disabled" | "enabled" | "cast_only" | "receive_only";
   lineJoin?: CanvasLineJoin;
@@ -156,6 +157,7 @@ export type ModelAppearance = {
   model?: string; // For compat
   url?: string;
   heightReference?: "none" | "clamp" | "relative";
+  height?: number;
   heading?: number;
   pitch?: number;
   roll?: number;
@@ -191,16 +193,16 @@ export type FrustumAppearance = {
 
 export type Cesium3DTilesAppearance = {
   show?: boolean;
+  height?: number;
   color?: string;
   styleUrl?: string;
   shadows?: "disabled" | "enabled" | "cast_only" | "receive_only";
-  colorBlendMode?: "highlight" | "replace" | "mix" | "default";
+  colorBlendMode?: "highlight" | "replace" | "mix";
   edgeWidth?: number;
   edgeColor?: string;
   selectedFeatureColor?: string; // This doesn't support expression
   disableIndexingFeature?: boolean;
   tileset?: string;
-  apiKey?: string;
   experimental_clipping?: EXPERIMENTAL_clipping;
   pointSize?: number;
   meta?: unknown;

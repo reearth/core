@@ -1,100 +1,91 @@
-import { useCallback, useRef, useState } from "react";
+import { CoreVisualizer } from "@reearth/core";
 
-import { CoreVisualizer, MapRef } from "@reearth/core";
-
-import { SCENE } from "./scene";
-import { TEST_LAYERS } from "./testLayers";
-import { CESIUM_ION_ACCESS_TOKEN } from "./token";
+import ContextConsumer from "./components/ContextConsumer";
+import OptionsPanel from "./components/OptionsPanel";
+import "@/global.css";
+import SelectionPanel from "./components/SelectionPanel";
+import useHooks from "./hooks";
 
 function App() {
-  const ref = useRef<MapRef>(null);
-  const [isReady, setIsReady] = useState(false);
-  const handleMount = useCallback(() => {
-    requestAnimationFrame(() => {
-      setIsReady(true);
-    });
-  }, []);
-
-  // TODO: use onLayerSelect props (core should export a type for selection).
-  const handleSelect = useCallback(() => {
-    console.log("Selected feature: ", ref.current?.layers.selectedFeature());
-  }, []);
+  const {
+    isReady,
+    ref,
+    handleMount,
+    handleAPIReady,
+    handleSelect,
+    meta,
+    currentTile,
+    setCurrentTile,
+    currentCamera,
+    setCurrentCamera,
+    terrainEnabled,
+    setTerrainEnabled,
+    hideUnderground,
+    setHideUnderground,
+    activeLayerIds,
+    setActiveLayerIds,
+    viewerProperty,
+    layers,
+    sketchTool,
+    setSketchTool,
+    selectedLayer,
+    selectedFeature,
+    sketchEditingFeature,
+    sketchFeatureSelected,
+    handleEditSketchFeature,
+    handleCancelEditSketchFeature,
+    handleApplyEditSketchFeature,
+    handleDeleteSketchFeature,
+    handleCreditsUpdate,
+    handleGetCredits,
+    handleSpatialIdPick,
+    spatialIdZoom,
+    handleSpatialIdZoomChange,
+  } = useHooks();
 
   return (
-    <div
-      style={{
-        position: "relative",
-        width: "100vw",
-        height: "100vh",
-      }}>
+    <div className="relative w-screen h-screen overflow-hidden">
+      <OptionsPanel
+        currentTile={currentTile}
+        setCurrentTile={setCurrentTile}
+        terrainEnabled={terrainEnabled}
+        setTerrainEnabled={setTerrainEnabled}
+        hideUnderground={hideUnderground}
+        setHideUnderground={setHideUnderground}
+        activeLayerIds={activeLayerIds}
+        setActiveLayerIds={setActiveLayerIds}
+        sketchTool={sketchTool}
+        setSketchTool={setSketchTool}
+        selectedLayer={selectedLayer}
+        selectedFeature={selectedFeature}
+        sketchEditingFeature={sketchEditingFeature}
+        sketchFeatureSelected={sketchFeatureSelected}
+        handleEditSketchFeature={handleEditSketchFeature}
+        handleCancelEditSketchFeature={handleCancelEditSketchFeature}
+        handleApplyEditSketchFeature={handleApplyEditSketchFeature}
+        handleDeleteSketchFeature={handleDeleteSketchFeature}
+        handleGetCredits={handleGetCredits}
+        handleSpatialIdPick={handleSpatialIdPick}
+        spatialIdZoom={spatialIdZoom}
+        handleSpatialIdZoomChange={handleSpatialIdZoomChange}
+      />
+      <SelectionPanel selectedLayer={selectedLayer} selectedFeature={selectedFeature} />
       <CoreVisualizer
         ref={ref}
         ready={isReady}
         onMount={handleMount}
+        onAPIReady={handleAPIReady}
         onLayerSelect={handleSelect}
         engine="cesium"
-        meta={{
-          cesiumIonAccessToken: CESIUM_ION_ACCESS_TOKEN || undefined,
-        }}
-        // FIXME: Terrain isn't rendered in initial render.
-        sceneProperty={isReady ? SCENE : undefined}
-        layers={[
-          {
-            id: "marker",
-            type: "simple",
-            data: {
-              type: "geojson",
-              value: {
-                type: "FeatureCollection",
-                features: [
-                  {
-                    type: "Feature",
-                    properties: {
-                      index: 1,
-                    },
-                    geometry: {
-                      coordinates: [139.75299772754948, 35.68523972679557],
-                      type: "Point",
-                    },
-                  },
-                  {
-                    type: "Feature",
-                    properties: {
-                      index: 2,
-                    },
-                    geometry: {
-                      coordinates: [139.8327378666679, 35.67919002820361],
-                      type: "Point",
-                    },
-                  },
-                  {
-                    type: "Feature",
-                    properties: {
-                      index: 3,
-                    },
-                    geometry: {
-                      coordinates: [139.69716359812975, 35.70030560455889],
-                      type: "Point",
-                    },
-                  },
-                ],
-              },
-            },
-            marker: {
-              imageColor: {
-                expression: {
-                  conditions: [
-                    ["${index} === 1", "color('#FF0000')"],
-                    ["${index} === 2", "color('#00FF00')"],
-                    ["true", "color('#000000')"],
-                  ],
-                },
-              },
-            },
-          },
-          ...TEST_LAYERS,
-        ]}
-      />
+        meta={meta}
+        viewerProperty={isReady ? viewerProperty : undefined}
+        camera={currentCamera}
+        onCameraChange={setCurrentCamera}
+        onSketchTypeChangeProp={setSketchTool}
+        layers={layers}
+        onCreditsUpdate={handleCreditsUpdate}>
+        <ContextConsumer />
+      </CoreVisualizer>
     </div>
   );
 }

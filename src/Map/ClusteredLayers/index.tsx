@@ -1,7 +1,7 @@
 import { ComponentType, useMemo, useCallback, ReactNode } from "react";
 
 import LayerComponent, { type CommonProps, type Props as LayerProps } from "../Layer";
-import type { Layer, Atom, Typography, DataType } from "../types";
+import type { Layer, Atom, Typography, DataType, ViewerProperty } from "../types";
 
 export type Props = {
   layers?: Layer[];
@@ -14,7 +14,7 @@ export type Props = {
   isHidden?: (id: string) => boolean;
   clusters?: Cluster[];
   delegatedDataTypes?: DataType[];
-  sceneProperty?: any;
+  viewerProperty?: ViewerProperty;
   clusterComponent?: ClusterComponentType;
   Feature?: LayerProps["Feature"];
 } & Omit<CommonProps, "isSelected" | "isHidden" | "selectedFeatureId">;

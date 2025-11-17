@@ -26,7 +26,7 @@ function Tileset({
   property,
   layer,
   feature,
-  sceneProperty,
+  viewerProperty,
   meta,
   evalFeature,
   onComputedFeatureFetch,
@@ -53,7 +53,7 @@ function Tileset({
     layer,
     feature,
     property,
-    sceneProperty,
+    viewerProperty,
     meta,
     evalFeature,
     onComputedFeatureFetch,
@@ -95,7 +95,7 @@ function Tileset({
         <Box
           {...props}
           id={boxId}
-          sceneProperty={sceneProperty}
+          viewerProperty={viewerProperty}
           property={boxProperty as any}
           geometry={builtinBoxProps.geometry}
           feature={feature}
@@ -117,7 +117,7 @@ export default memo(
     prev.isVisible === next.isVisible &&
     prev.property === next.property &&
     prev.layer?.layer === next.layer?.layer &&
-    prev.sceneProperty === next.sceneProperty &&
+    prev.viewerProperty === next.viewerProperty &&
     prev.meta === next.meta &&
     prev.evalFeature === next.evalFeature &&
     prev.onComputedFeatureFetch === next.onComputedFeatureFetch &&

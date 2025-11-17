@@ -35,11 +35,14 @@ import {
   Plane,
   CameraEventType,
   KeyboardEventModifier,
+  CreditDisplay,
+  Credit as CesiumCredit,
 } from "cesium";
-import { useCallback, MutableRefObject } from "react";
+import { MutableRefObject, useMemo } from "react";
 
 import type { Camera, Clock } from "..";
 import { ClassificationType } from "../../mantle";
+import { Credits } from "../../Map";
 import type {
   CameraOptions,
   FlyToDestination,
@@ -48,16 +51,16 @@ import type {
   OverideKeyboardEventModifier,
   ScreenSpaceCameraControllerOptions,
 } from "../../types";
-import { tweenInterval, useCanvas, useImage, LatLngHeight } from "../../utils";
+import { tweenInterval, useImage, LatLngHeight } from "../../utils";
 
 import { DEFAULT_SCREEN_SPACE_CAMERA_ASSIGNMENTS } from "./constants";
 
 export const layerIdField = `__reearth_layer_id`;
 
 const defaultImageSize = 50;
+const emptyCredites: Credits = { engine: {}, lightbox: [], screen: [] };
 
-export const drawIcon = (
-  c: HTMLCanvasElement,
+const drawIcon = (
   image: HTMLImageElement | undefined,
   w: number,
   h: number,
@@ -68,13 +71,14 @@ export const drawIcon = (
   shadowOffsetX = 0,
   shadowOffsetY = 0,
 ) => {
+  const c = document.createElement("canvas");
   const ctx = c.getContext("2d");
   if (!image || !ctx) return;
 
   ctx.save();
 
-  c.width = w + shadowBlur;
-  c.height = h + shadowBlur;
+  c.width = w + shadowBlur * 2;
+  c.height = h + shadowBlur * 2;
   ctx.shadowBlur = shadowBlur;
   ctx.shadowOffsetX = shadowOffsetX;
   ctx.shadowOffsetY = shadowOffsetY;
@@ -85,14 +89,14 @@ export const drawIcon = (
   if (crop === "circle") {
     ctx.fillStyle = "black";
     ctx.globalCompositeOperation = "destination-in";
-    ctx.arc(w / 2, h / 2, Math.min(w, h) / 2, 0, 2 * Math.PI);
+    ctx.arc(c.width / 2, c.height / 2, Math.min(w, h) / 2, 0, 2 * Math.PI);
     ctx.fill();
 
     if (shadow) {
       ctx.shadowColor = shadowColor;
       ctx.globalCompositeOperation = "destination-over";
       ctx.fillStyle = "black";
-      ctx.arc(w / 2, h / 2, Math.min(w, h) / 2, 0, 2 * Math.PI);
+      ctx.arc(c.width / 2, c.height / 2, Math.min(w, h) / 2, 0, 2 * Math.PI);
       ctx.fill();
     }
   } else if (shadow) {
@@ -104,6 +108,7 @@ export const drawIcon = (
   }
 
   ctx.restore();
+  return c.toDataURL();
 };
 
 export const useIcon = ({
@@ -138,13 +143,11 @@ export const useIcon = ({
       ? Math.floor(img.height * imageSize)
       : Math.floor((w / img.width) * img.height);
 
-  const draw = useCallback(
-    (can: HTMLCanvasElement) =>
-      drawIcon(can, img, w, h, crop, shadow, shadowColor, shadowBlur, shadowOffsetX, shadowOffsetY),
+  const canvas = useMemo(
+    () => drawIcon(img, w, h, crop, shadow, shadowColor, shadowBlur, shadowOffsetX, shadowOffsetY),
     [crop, h, img, shadow, shadowBlur, shadowColor, shadowOffsetX, shadowOffsetY, w],
   );
-  const canvas = useCanvas(draw);
-  return [canvas, w, h];
+  return [canvas ?? "", w, h];
 };
 
 export const ho = (o: "left" | "center" | "right" | undefined): HorizontalOrigin | undefined =>
@@ -545,7 +548,7 @@ export const colorBlendMode = (colorBlendMode?: "highlight" | "replace" | "mix" 
   )[colorBlendMode || ""];
 
 export const colorBlendModeFor3DTile = (
-  colorBlendMode?: "highlight" | "replace" | "mix" | "default",
+  colorBlendMode: "highlight" | "replace" | "mix" = "highlight",
 ) =>
   (
     ({
@@ -553,7 +556,7 @@ export const colorBlendModeFor3DTile = (
       replace: Cesium3DTileColorBlendMode.REPLACE,
       mix: Cesium3DTileColorBlendMode.MIX,
     }) as { [key in string]?: Cesium3DTileColorBlendMode }
-  )[colorBlendMode || ""];
+  )[colorBlendMode];
 
 export const heightReference = (
   heightReference?: "none" | "clamp" | "relative",
@@ -852,6 +855,7 @@ export function getExtrudedHeight(
   scene: Scene,
   position: Cartesian3,
   windowPosition: Cartesian2,
+  allowNegative = false,
 ): number | undefined {
   const cartesianScratch = new Cartesian3();
   const normalScratch = new Cartesian3();
@@ -893,9 +897,41 @@ export function getExtrudedHeight(
       scene.globe.ellipsoid,
       cartographicScratch,
     ).height;
-    return Math.max(0, toHeight - fromHeight);
+    return allowNegative ? toHeight - fromHeight : Math.max(0, toHeight - fromHeight);
   } catch (error) {
     console.error(error);
   }
   return;
+}
+
+export function getCredits(viewer: Viewer) {
+  if (!viewer) return emptyCredites;
+  const creditDisplay = viewer.creditDisplay as
+    | (CreditDisplay & {
+        _currentFrameCredits: {
+          lightboxCredits: { _array: { credit?: CesiumCredit }[] };
+          screenCredits: { _array: { credit?: CesiumCredit }[] };
+        };
+        _currentCesiumCredit: CesiumCredit;
+      })
+    | undefined;
+
+  if (!creditDisplay) return emptyCredites;
+
+  const { lightboxCredits, screenCredits } = creditDisplay?._currentFrameCredits || {};
+  const cesiumCredits = creditDisplay._currentCesiumCredit;
+
+  const credits: Credits = {
+    engine: {
+      cesium: cesiumCredits?.html ? { html: cesiumCredits.html } : undefined,
+    },
+    lightbox: Array.from(lightboxCredits?._array ?? []).map(c => ({
+      html: c?.credit?.html,
+    })),
+    screen: Array.from(screenCredits?._array ?? []).map(c => ({
+      html: c?.credit?.html,
+    })),
+  };
+
+  return credits;
 }
