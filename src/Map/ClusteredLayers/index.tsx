@@ -1,4 +1,4 @@
-import { ComponentType, useMemo, useCallback, ReactNode } from "react";
+import { ComponentType, useMemo, useCallback, ReactNode, type JSX } from "react";
 
 import LayerComponent, { type CommonProps, type Props as LayerProps } from "../Layer";
 import type { Layer, Atom, Typography, DataType, ViewerProperty } from "../types";

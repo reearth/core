@@ -21,7 +21,7 @@ export default ({
   cameraForceHorizontalRoll = false,
   onCameraChange,
 }: {
-  cesium: RefObject<CesiumComponentRef<Viewer>>;
+  cesium: RefObject<CesiumComponentRef<Viewer> | null>;
   property?: ViewerProperty;
   engineAPI: EngineRef;
   featureFlags: number;

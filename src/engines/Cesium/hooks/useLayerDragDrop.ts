@@ -14,7 +14,7 @@ export default ({
   onLayerDrag,
   onLayerDrop,
 }: {
-  cesium: RefObject<CesiumComponentRef<Viewer>>;
+  cesium: RefObject<CesiumComponentRef<Viewer> | null>;
   isLayerDraggable?: boolean;
   onLayerDrag?: (layerId: string, featureId: string | undefined, position: LatLng) => void;
   onLayerDrop?: (
@@ -54,7 +54,7 @@ export default ({
     [cesium, onLayerDrop],
   );
 
-  const cesiumDnD = useRef<CesiumDnD>();
+  const cesiumDnD = useRef<CesiumDnD>(undefined);
   useEffect(() => {
     const viewer = cesium.current?.cesiumElement;
     if (!viewer || viewer.isDestroyed()) return;

@@ -17,7 +17,7 @@ export type DropOptions<T extends ItemType = ItemType, E extends HTMLElement = H
   drop?: (item: Item<T>, context: Context) => Dropper | undefined;
   shallow?: boolean;
   disabled?: boolean;
-  wrapperRef?: React.RefObject<E>;
+  wrapperRef?: React.RefObject<E | null>;
 };
 
 export const useDrop = <T extends ItemType = ItemType, E extends HTMLElement = HTMLElement>({

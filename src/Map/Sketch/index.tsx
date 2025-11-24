@@ -26,8 +26,8 @@ export type OnLayerSelectType = (
 ) => void;
 
 export type SketchProps = {
-  layersRef: RefObject<LayersRef>;
-  engineRef: RefObject<EngineRef>;
+  layersRef: RefObject<LayersRef | null>;
+  engineRef: RefObject<EngineRef | null>;
   SketchComponent?: SketchComponentType;
   selectedFeature?: Feature;
   interactionMode?: InteractionModeType;

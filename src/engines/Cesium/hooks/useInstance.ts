@@ -70,7 +70,7 @@ export function useInstance<T, Keys extends unknown[], Owner>(
   descriptor: InstanceDescriptor<T, () => DisallowPromise<T>, Keys, Owner>,
 ): T {
   const [state, setState] = useState<T>();
-  const ref = useRef<T>();
+  const ref = useRef<T>(undefined);
   if (ref.current == null) {
     ref.current = descriptor.create();
   }

@@ -11,7 +11,7 @@ export default ({
   layersRef,
   sketchOptions,
 }: {
-  layersRef: RefObject<LayersRef>;
+  layersRef: RefObject<LayersRef | null>;
   sketchOptions: SketchOptions;
 }) => {
   const pluginSketchLayerCreate = useCallback(

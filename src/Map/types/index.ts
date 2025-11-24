@@ -187,7 +187,7 @@ export type EngineRef = {
   tick: () => Date | void;
   inViewport: (location?: LatLng) => boolean;
   onTick: TickEvent;
-  tickEventCallback?: RefObject<TickEventCallback[]>;
+  tickEventCallback?: RefObject<TickEventCallback[] | null>;
   removeTickEventListener: TickEvent;
   findFeatureById: (layerId: string, featureId: string) => Feature | undefined;
   bringToFront: (layerId: string) => void;
@@ -238,7 +238,7 @@ export type EngineProps = {
   shouldRender?: boolean;
   meta?: Record<string, unknown>;
   displayCredits?: boolean;
-  layersRef?: RefObject<LayersRef>;
+  layersRef?: RefObject<LayersRef | null>;
   requestingRenderMode?: MutableRefObject<RequestingRenderMode>;
   timelineManagerRef?: TimelineManagerRef;
   onLayerSelect?: (

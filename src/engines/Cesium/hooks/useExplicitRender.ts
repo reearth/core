@@ -12,7 +12,7 @@ export default ({
   shouldRender,
   property,
 }: {
-  cesium: RefObject<CesiumComponentRef<Viewer>>;
+  cesium: RefObject<CesiumComponentRef<Viewer> | null>;
   requestingRenderMode?: MutableRefObject<RequestingRenderMode>;
   isLayerDragging?: boolean;
   shouldRender?: boolean;
@@ -28,7 +28,7 @@ export default ({
     }
   }, [cesium, requestingRenderMode]);
 
-  const explicitRenderRef = useRef<() => void>();
+  const explicitRenderRef = useRef<() => void>(undefined);
 
   useEffect(() => {
     explicitRenderRef.current = explicitRender;

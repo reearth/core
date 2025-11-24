@@ -142,7 +142,7 @@ const useTerrainHeatmap = ({
   cesium,
   terrain,
 }: {
-  cesium: RefObject<CesiumComponentRef<Viewer>>;
+  cesium: RefObject<CesiumComponentRef<Viewer> | null>;
   terrain: TerrainProperty | undefined;
 }) => {
   const {
@@ -223,7 +223,7 @@ export const useOverrideGlobeShader = ({
   enableLighting,
   terrain,
 }: {
-  cesium: RefObject<CesiumComponentRef<Viewer>>;
+  cesium: RefObject<CesiumComponentRef<Viewer> | null>;
   sphericalHarmonicCoefficients?: Cartesian3[];
   globeShadowDarkness?: number;
   globeImageBasedLighting?: boolean;

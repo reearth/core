@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 
 export const useImage = (src?: string): HTMLImageElement | undefined => {
-  const imgRef = useRef<HTMLImageElement>();
+  const imgRef = useRef<HTMLImageElement>(undefined);
   const [img, setImg] = useState<HTMLImageElement>();
 
   useEffect(() => {

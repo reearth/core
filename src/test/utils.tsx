@@ -23,7 +23,7 @@ vitest.mock("react-inlinesvg", () => {
 });
 
 const render = (
-  ui: React.ReactElement,
+  ui: React.ReactElement<any>,
   // queryMocks?: readonly MockedResponse<Record<string, any>>[],
   { ...renderOptions } = {},
 ) => {

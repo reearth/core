@@ -44,8 +44,8 @@ export type SketchFeatureCallback = (
 
 type Props = {
   ref: ForwardedRef<SketchRef>;
-  layersRef: RefObject<LayersRef>;
-  engineRef: RefObject<EngineRef>;
+  layersRef: RefObject<LayersRef | null>;
+  engineRef: RefObject<EngineRef | null>;
   interactionMode: InteractionModeType;
   selectedFeature?: Feature;
   overrideInteractionMode?: (mode: InteractionModeType) => void;
@@ -131,7 +131,7 @@ export default function ({
 
   const [selectedControlPointIndex, setSelectedControlPointIndex] = useState<number | undefined>();
   const markerGeometryRef = useRef<GeometryOptionsXYZ | null>(null);
-  const pointerLocationRef = useRef<[lng: number, lat: number, height: number]>();
+  const pointerLocationRef = useRef<[lng: number, lat: number, height: number]>(undefined);
 
   const isEditing = useMemo(() => state.matches("editing"), [state]);
 
@@ -643,7 +643,7 @@ export default function ({
 
 async function getCentroid(
   controlPoints: readonly Position3d[],
-  engineRef: RefObject<EngineRef>,
+  engineRef: RefObject<EngineRef | null>,
 ): Promise<Position3d | undefined> {
   let totalLat = 0;
   let totalLng = 0;

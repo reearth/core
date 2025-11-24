@@ -90,7 +90,7 @@ export default function useHooks({
     });
   }, [layer, set]);
 
-  const intervalId = useRef<number>();
+  const intervalId = useRef<number>(undefined);
   useLayoutEffect(() => {
     const data = layer?.type === "simple" ? layer.data : undefined;
 
@@ -107,7 +107,7 @@ export default function useHooks({
     };
   }, [layer, forceUpdateFeatures]);
 
-  const prevForceUpdatableData = useRef<Pick<Data, "csv" | "jsonProperties" | "value">>();
+  const prevForceUpdatableData = useRef<Pick<Data, "csv" | "jsonProperties" | "value">>(undefined);
   useLayoutEffect(() => {
     const data = layer?.type === "simple" ? layer.data : undefined;
     const forceUpdatableData = pick(data, "csv", "jsonProperties", "value");

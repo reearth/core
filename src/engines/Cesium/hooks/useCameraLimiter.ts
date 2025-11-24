@@ -20,7 +20,7 @@ const targetWidth = 1000000;
 const targetLength = 1000000;
 
 export function useCameraLimiter(
-  cesium: RefObject<CesiumComponentRef<CesiumViewer>>,
+  cesium: RefObject<CesiumComponentRef<CesiumViewer> | null>,
   camera: Camera | undefined,
   property: CameraLimiterProperty | undefined,
 ) {

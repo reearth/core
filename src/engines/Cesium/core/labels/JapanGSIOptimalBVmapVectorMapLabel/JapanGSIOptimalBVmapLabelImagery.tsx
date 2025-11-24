@@ -233,7 +233,7 @@ export const JapanGSIOptimalBVmapLabelImagery: FC<JapanGSIOptimalBVmapLabelImage
       );
     }, [tile, imagery]);
 
-    const labelsRef = useRef<Array<[AnnotationFeature, Label]>>();
+    const labelsRef = useRef<Array<[AnnotationFeature, Label]>>(undefined);
     const scene = cesiumContext?.scene;
 
     const updateVisibility = useCallback(() => {

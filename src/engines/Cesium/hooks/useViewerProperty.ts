@@ -9,7 +9,7 @@ export default ({
   cesium,
   property,
 }: {
-  cesium: RefObject<CesiumComponentRef<Viewer>>;
+  cesium: RefObject<CesiumComponentRef<Viewer> | null>;
   property?: ViewerProperty;
 }) => {
   const sceneLight = useMemo(() => {

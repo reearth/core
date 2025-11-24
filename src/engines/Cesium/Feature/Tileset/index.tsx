@@ -1,4 +1,4 @@
-import { memo, useMemo } from "react";
+import { memo, useMemo, type JSX } from "react";
 import { Cesium3DTileset } from "resium";
 
 import type { Cesium3DTilesAppearance, ComputedLayer } from "../../..";

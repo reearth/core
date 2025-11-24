@@ -1,7 +1,7 @@
 /// <reference types="vite-plugin-svgr/client" />
 import useTransition from "@rot1024/use-transition";
 import { BoundingSphere, Cartesian3, SceneTransforms, Cartesian2, JulianDate } from "cesium";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type JSX } from "react";
 import { useCesium } from "resium";
 
 import type { ViewerProperty } from "../../..";

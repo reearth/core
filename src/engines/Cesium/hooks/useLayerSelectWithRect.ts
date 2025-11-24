@@ -20,7 +20,7 @@ export const useLayerSelectWithRect = ({
   onLayerSelectWithRectMove,
   onLayerSelectWithRectEnd,
 }: {
-  cesium: RefObject<CesiumComponentRef<Viewer>>;
+  cesium: RefObject<CesiumComponentRef<Viewer> | null>;
   engineAPI: EngineRef;
   featureFlags: number;
   onLayerSelectWithRectStart?: (e: LayerSelectWithRectStart) => void;

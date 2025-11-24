@@ -11,7 +11,7 @@ type Props = {
   sketchOptions: SketchOptions;
   from: "editor" | "plugin";
   updateType: Dispatch<SetStateAction<SketchType | undefined>>;
-  layersRef: RefObject<LayersRef>;
+  layersRef: RefObject<LayersRef | null>;
   pluginSketchLayerCreate: (feature: SketchFeature) => {
     layerId: string | undefined;
     featureId: string;

@@ -22,7 +22,7 @@ type ProviderOpts = Pick<TerrainProperty, "normal"> &
 export default function useTerrainProviderPromise(opts: ProviderOpts) {
   // Cache promises so we don’t recreate providers on every toggle
   const cacheRef = useRef(new Map<string, Promise<TerrainProvider>>());
-  const ellipsoidRef = useRef<TerrainProvider>();
+  const ellipsoidRef = useRef<TerrainProvider>(undefined);
 
   return useMemo<Promise<TerrainProvider>>(() => {
     if (!opts.terrain) {

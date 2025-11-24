@@ -155,11 +155,11 @@ export function mapRef({
   geoidRef,
   timelineManagerRef,
 }: {
-  engineRef: RefObject<EngineRef>;
-  layersRef: RefObject<LayersRef>;
-  sketchRef: RefObject<SketchRef>;
-  spatialIdRef: RefObject<SpatialIdRef>;
-  geoidRef: RefObject<GeoidRef>;
+  engineRef: RefObject<EngineRef | null>;
+  layersRef: RefObject<LayersRef | null>;
+  sketchRef: RefObject<SketchRef | null>;
+  spatialIdRef: RefObject<SpatialIdRef | null>;
+  geoidRef: RefObject<GeoidRef | null>;
   timelineManagerRef?: TimelineManagerRef;
 }): MapRef {
   return {
