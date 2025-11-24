@@ -75,7 +75,9 @@ const OptionsPanel: FC<OptionsPanelProps> = ({
         OPTIONS
       </Button>
       <div
-        className={`absolute top-0 right-0 z-20 h-full p-2 flex flex-col transition-all w-96 ${open ? "" : "translate-x-full"}`}>
+        className={`absolute top-0 right-0 z-20 h-full p-2 flex flex-col transition-all w-96 ${
+          open ? "" : "translate-x-full"
+        }`}>
         <div className="flex flex-col flex-1 gap-6 p-4 bg-white rounded-md shadow-md">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold">Options</h3>

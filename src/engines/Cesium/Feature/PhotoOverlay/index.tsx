@@ -120,7 +120,9 @@ export default function PhotoOverlay({
             alignItems: "center",
             transition:
               photoOverlayImageTransiton === "entering" || photoOverlayImageTransiton === "exiting"
-                ? `all ${photoOverlayImageTransiton === "exiting" ? photoExitDuration : photoDuration}s ease`
+                ? `all ${
+                    photoOverlayImageTransiton === "exiting" ? photoExitDuration : photoDuration
+                  }s ease`
                 : undefined,
             opacity:
               photoOverlayImageTransiton === "entering" || photoOverlayImageTransiton === "entered"
