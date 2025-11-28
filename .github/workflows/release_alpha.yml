@@ -2,6 +2,8 @@ name: Alpha Release
 
 on:
   workflow_dispatch:
+    branches:
+      - alpha
     inputs:
       version-type:
         description: 'Version bump type'
@@ -56,8 +58,8 @@ jobs:
 
       - name: Configure git
         run: |
-          git config --global user.name "keiya01"
-          git config --global user.email "34934510+keiya01@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
       - name: Get current version
         id: current-version
