@@ -34,7 +34,7 @@ export default function ({ isSelected, camera }: { isSelected?: boolean; camera?
   cameraRef.current = camera;
   const storytelling = useRef(false);
   storytelling.current = selectionReason?.reason === "storytelling";
-  const prevCamera = useRef<Camera>();
+  const prevCamera = useRef<Camera>(undefined);
 
   // camera flight
   useEffect(() => {

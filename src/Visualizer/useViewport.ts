@@ -10,7 +10,7 @@ export type Viewport = {
 };
 
 type Props = {
-  wrapperRef: RefObject<HTMLDivElement>;
+  wrapperRef: RefObject<HTMLDivElement | null>;
 };
 
 export default ({ wrapperRef }: Props) => {

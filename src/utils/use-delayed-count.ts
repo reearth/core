@@ -9,7 +9,7 @@ export const useDelayedCount = (durations: Durations = []) => {
   const [mode, setMode] = useState(0);
   const prevMode = usePreviousDistinct(mode);
   const exit = useRef(false);
-  const timeout = useRef<number>();
+  const timeout = useRef<number>(undefined);
 
   const advanceMode = useCallback(() => {
     setMode(m => Math.max(0, Math.min(durations.length + 1, m + (exit.current ? -1 : 1))));

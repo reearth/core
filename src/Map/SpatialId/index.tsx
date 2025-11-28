@@ -13,8 +13,8 @@ import useHooks from "./hooks";
 import { SpatialIdRef } from "./types";
 
 type SpatialIdProps = {
-  engineRef: RefObject<EngineRef>;
-  geoidRef: RefObject<GeoidRef>;
+  engineRef: RefObject<EngineRef | null>;
+  geoidRef: RefObject<GeoidRef | null>;
   terrainEnabled?: boolean;
   interactionMode?: InteractionModeType;
   overrideInteractionMode?: (mode: InteractionModeType) => void;

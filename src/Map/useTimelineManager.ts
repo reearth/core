@@ -87,7 +87,7 @@ type Props = {
     multiplier?: number;
     rangeType?: "unbounded" | "clamped" | "bounced";
   };
-  engineRef?: RefObject<EngineRef>;
+  engineRef?: RefObject<EngineRef | null>;
   timelineManagerRef?: TimelineManagerRef;
 };
 

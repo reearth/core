@@ -6,7 +6,7 @@ export function useGet<T>(value: T): () => T {
   return useCallback(() => ref.current, []);
 }
 
-export function wrapRef<T>(ref: RefObject<T>, keys: FunctionKeys<T>): WrappedRef<T> {
+export function wrapRef<T>(ref: RefObject<T | null>, keys: FunctionKeys<T>): WrappedRef<T> {
   return Object.fromEntries(
     (Object.keys(keys) as (keyof T)[]).map(k => {
       return [k, (...args: any[]) => (ref.current?.[k] as any)?.(...args)];

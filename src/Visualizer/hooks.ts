@@ -55,7 +55,7 @@ export default function useHooks(
 ) {
   const mapRef = useRef<MapRef>(null);
 
-  useImperativeHandle(ref, () => mapRef.current, []);
+  useImperativeHandle(ref, () => mapRef.current as MapRef, []);
 
   const wrapperRef = useRef<HTMLDivElement>(null);
 
@@ -119,7 +119,7 @@ export default function useHooks(
     [selectedLayer, onLayerSelect],
   );
 
-  const timelineManagerRef: TimelineManagerRef = useRef();
+  const timelineManagerRef: TimelineManagerRef = useRef(undefined);
 
   // camera
   const [camera, changeCamera] = useValue(initialCamera, onCameraChange);
@@ -145,7 +145,7 @@ export default function useHooks(
   const featureFlags = INTERACTION_MODES[interactionMode ?? "default"];
 
   // layer edit
-  const onLayerEditRef = useRef<(e: LayerEditEvent) => void>();
+  const onLayerEditRef = useRef<(e: LayerEditEvent) => void>(undefined);
   const onLayerEdit = useCallback((cb: (e: LayerEditEvent) => void) => {
     onLayerEditRef.current = cb;
   }, []);
@@ -154,7 +154,7 @@ export default function useHooks(
   }, []);
 
   // layer visiblity
-  const onLayerVisibilityRef = useRef<(e: LayerVisibilityEvent) => void>();
+  const onLayerVisibilityRef = useRef<(e: LayerVisibilityEvent) => void>(undefined);
   const onLayerVisibility = useCallback((cb: (e: LayerVisibilityEvent) => void) => {
     onLayerVisibilityRef.current = cb;
   }, []);
@@ -163,7 +163,7 @@ export default function useHooks(
   }, []);
 
   // layer load
-  const onLayerLoadRef = useRef<(e: LayerLoadEvent) => void>();
+  const onLayerLoadRef = useRef<(e: LayerLoadEvent) => void>(undefined);
   const onLayerLoad = useCallback((cb: (e: LayerLoadEvent) => void) => {
     onLayerLoadRef.current = cb;
   }, []);
@@ -172,21 +172,21 @@ export default function useHooks(
   }, []);
 
   // multiple feature selection
-  const onLayerSelectWithRectStartRef = useRef<(e: LayerSelectWithRectStart) => void>();
+  const onLayerSelectWithRectStartRef = useRef<(e: LayerSelectWithRectStart) => void>(undefined);
   const onLayerSelectWithRectStart = useCallback((cb: (e: LayerSelectWithRectStart) => void) => {
     onLayerSelectWithRectStartRef.current = cb;
   }, []);
   const handleLayerSelectWithRectStart = useCallback((e: LayerSelectWithRectStart) => {
     onLayerSelectWithRectStartRef.current?.(e);
   }, []);
-  const onLayerSelectWithRectMoveRef = useRef<(e: LayerSelectWithRectMove) => void>();
+  const onLayerSelectWithRectMoveRef = useRef<(e: LayerSelectWithRectMove) => void>(undefined);
   const onLayerSelectWithRectMove = useCallback((cb: (e: LayerSelectWithRectMove) => void) => {
     onLayerSelectWithRectMoveRef.current = cb;
   }, []);
   const handleLayerSelectWithRectMove = useCallback((e: LayerSelectWithRectMove) => {
     onLayerSelectWithRectMoveRef.current?.(e);
   }, []);
-  const onLayerSelectWithRectEndRef = useRef<(e: LayerSelectWithRectEnd) => void>();
+  const onLayerSelectWithRectEndRef = useRef<(e: LayerSelectWithRectEnd) => void>(undefined);
   const onLayerSelectWithRectEnd = useCallback((cb: (e: LayerSelectWithRectEnd) => void) => {
     onLayerSelectWithRectEndRef.current = cb;
   }, []);

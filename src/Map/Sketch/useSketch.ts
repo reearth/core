@@ -19,7 +19,7 @@ import {
 type Props = {
   state: sketchState;
   send: SketchInterpreter["send"];
-  engineRef: RefObject<EngineRef>;
+  engineRef: RefObject<EngineRef | null>;
   disableInteraction: boolean;
   type: SketchType | undefined;
   updateType: Dispatch<SetStateAction<SketchType | undefined>>;

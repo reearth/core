@@ -127,7 +127,7 @@ export const useHooks = ({
   );
 
   // ScalePoint event handlers
-  const currentPointIndex = useRef<number>();
+  const currentPointIndex = useRef<number>(undefined);
   const handlePointMouseDown: PointEventCallback = useCallback(
     (_, { index }) => {
       if (!viewer) {
@@ -138,7 +138,7 @@ export const useHooks = ({
     },
     [viewer],
   );
-  const prevMousePosition2dForPoint = useRef<Cartesian2>();
+  const prevMousePosition2dForPoint = useRef<Cartesian2>(undefined);
   const handlePointMouseMove: PointEventCallback = useCallback(
     (e, { position, oppositePosition, pointLocal, index, layerId }) => {
       if (
@@ -282,7 +282,7 @@ export const useHooks = ({
   }, [viewer]);
 
   // Edge event handlers
-  const currentEdgeIndex = useRef<number>();
+  const currentEdgeIndex = useRef<number>(undefined);
   const handleEdgeMouseDown: EdgeEventCallback = useCallback(
     (_, { index }) => {
       if (!viewer) {
@@ -293,7 +293,7 @@ export const useHooks = ({
     },
     [viewer],
   );
-  const prevMouseXAxisForEdge = useRef<number>();
+  const prevMouseXAxisForEdge = useRef<number>(undefined);
   const handleEdgeMouseMove: EdgeEventCallback = useCallback(
     (e, { index, layerId }) => {
       if (currentEdgeIndex.current !== index) {

@@ -105,7 +105,7 @@ export const useClippingBox = ({
 
   const isBoxClicked = useRef(false);
   const isTopBottomSidePlaneClicked = useRef(false);
-  const currentCameraPosition = useRef<Camera | undefined>();
+  const currentCameraPosition = useRef<Camera | undefined>(undefined);
 
   // Coordinates
   const [coords, setCoords] = useState(coordinates);
@@ -349,7 +349,7 @@ export const useClippingBox = ({
     [boxId, boxState.isEdgeClicked, boxState.isScalePointClicked, handleUpdateBoxState],
   );
 
-  const hovered = useRef<any>();
+  const hovered = useRef<any>(undefined);
   const handleRawMouseMove = useCallback(
     (e: any) => {
       const picked = viewer?.scene.pick(e.endPosition);

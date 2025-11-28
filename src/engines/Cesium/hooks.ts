@@ -99,7 +99,7 @@ export default ({
     layerId?: string;
     featureId?: string;
   };
-  layersRef?: RefObject<LayersRef>;
+  layersRef?: RefObject<LayersRef | null>;
   selectionReason?: LayerSelectionReason;
   meta?: Record<string, unknown>;
   featureFlags: number;
@@ -240,8 +240,8 @@ export default ({
     | Primitive
     | GroundPrimitive
     | ImageryLayer
-  >();
-  const prevSelectedImageryFeatureId = useRef<string | undefined>();
+  >(undefined);
+  const prevSelectedImageryFeatureId = useRef<string | undefined>(undefined);
 
   // manage layer selection
   useEffect(() => {
@@ -796,9 +796,10 @@ function tileProperties(
 ): { key: string; value: any }[] {
   return t
     .getPropertyIds()
-    .reduce<
-      { key: string; value: any }[]
-    >((a, b) => [...a, { key: b, value: t.getProperty(b) }], []);
+    .reduce<{ key: string; value: any }[]>(
+      (a, b) => [...a, { key: b, value: t.getProperty(b) }],
+      [],
+    );
 }
 
 function getLayerId(target: RootEventTarget): string | undefined {

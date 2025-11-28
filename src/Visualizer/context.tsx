@@ -2,11 +2,11 @@ import { FC, PropsWithChildren, RefObject, createContext, useContext, useMemo } 
 
 import { MapRef } from "../Map";
 
-const context = createContext<RefObject<MapRef> | undefined>(undefined);
+const context = createContext<RefObject<MapRef | null> | undefined>(undefined);
 
-export type Context = RefObject<MapRef>;
+export type Context = RefObject<MapRef | null>;
 
-export const useVisualizer = (): RefObject<MapRef> => {
+export const useVisualizer = (): RefObject<MapRef | null> => {
   const value = useContext(context);
   if (!value) {
     throw new Error("Visualizer is not declared. You have to use this hook inside of Visualizer");
@@ -14,11 +14,11 @@ export const useVisualizer = (): RefObject<MapRef> => {
   return value;
 };
 
-const filterMapRefToContext = (mapRef: RefObject<MapRef>): Context => {
+const filterMapRefToContext = (mapRef: RefObject<MapRef | null>): Context => {
   return mapRef as Context;
 };
 
-export const VisualizerProvider: FC<PropsWithChildren<{ mapRef: RefObject<MapRef> }>> = ({
+export const VisualizerProvider: FC<PropsWithChildren<{ mapRef: RefObject<MapRef | null> }>> = ({
   mapRef,
   children,
 }) => {

@@ -1,4 +1,4 @@
-import { forwardRef, useMemo, type Ref } from "react";
+import { forwardRef, useMemo, type Ref, type JSX } from "react";
 
 import { INTERACTION_MODES } from "../Visualizer/interactionMode";
 

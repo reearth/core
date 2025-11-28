@@ -29,8 +29,8 @@ import { createSpatialIdSpace, getSpaceData, getVerticalLimits } from "./utils";
 
 type Props = {
   ref: ForwardedRef<SpatialIdRef>;
-  engineRef: RefObject<EngineRef>;
-  geoidRef: RefObject<GeoidRef>;
+  engineRef: RefObject<EngineRef | null>;
+  geoidRef: RefObject<GeoidRef | null>;
   terrainEnabled?: boolean;
   interactionMode?: InteractionModeType;
   overrideInteractionMode?: (mode: InteractionModeType) => void;

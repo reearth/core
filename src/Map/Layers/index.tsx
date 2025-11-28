@@ -38,7 +38,7 @@ export type Props = Omit<ClusteredLayerProps, "atomMap" | "isHidden" | "selected
   hiddenLayers?: string[];
   viewerProperty?: ViewerProperty;
   requestingRenderMode?: MutableRefObject<RequestingRenderMode>;
-  engineRef?: RefObject<EngineRef>;
+  engineRef?: RefObject<EngineRef | null>;
   onLayerSelect?: (
     layerId: string | undefined,
     featureId: string | undefined,

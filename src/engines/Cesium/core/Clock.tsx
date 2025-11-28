@@ -1,5 +1,5 @@
 import { Clock as CesiumClock, ClockRange, ClockStep, JulianDate } from "cesium";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, type JSX } from "react";
 import { Clock } from "resium";
 
 import { TimelineManagerRef } from "../../../Map/useTimelineManager";

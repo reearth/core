@@ -369,7 +369,7 @@ const useFeature = ({
 
   // If styles are updated while features are calculating,
   // we stop calculating features, and reassign styles.
-  const skippedComputingAt = useRef<number | null>();
+  const skippedComputingAt = useRef<number | null>(undefined);
   useEffect(() => {
     skippedComputingAt.current = Date.now();
   }, [pickedAppearance, updateStyle]);
@@ -456,7 +456,7 @@ export const useHooks = ({
   onLayerFetch?: (value: Partial<Pick<LayerSimple, "properties">>) => void;
 }) => {
   const { viewer } = useCesium();
-  const tilesetRef = useRef<Cesium3DTilesetType>();
+  const tilesetRef = useRef<Cesium3DTilesetType>(undefined);
   const { onLayerLoad, updateCredits } = useContext();
   const layerIdRef = useRef(layer?.id);
   layerIdRef.current = layer?.id;

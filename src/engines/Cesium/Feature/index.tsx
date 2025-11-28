@@ -1,5 +1,5 @@
 import LRUCache from "lru-cache";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, type JSX } from "react";
 
 import type { AppearanceTypes, FeatureComponentProps, ComputedLayer } from "../..";
 import { ComputedFeature, DataType, guessType } from "../../../mantle";

@@ -16,7 +16,9 @@ export const ContextConsumer = () => {
         Core Context
       </Button>
       <div
-        className={`absolute bottom-0 left-0 z-20 p-2 transition-all w-96 ${open ? "" : "-translate-x-full"}`}>
+        className={`absolute bottom-0 left-0 z-20 p-2 transition-all w-96 ${
+          open ? "" : "-translate-x-full"
+        }`}>
         <div className="flex flex-col gap-6 p-4 bg-white rounded-md shadow-md">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold">Core Context</h3>

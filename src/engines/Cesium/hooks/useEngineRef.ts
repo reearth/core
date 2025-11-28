@@ -50,9 +50,9 @@ import {
 
 export default function useEngineRef(
   ref: Ref<EngineRef>,
-  cesium: RefObject<CesiumComponentRef<Cesium.Viewer>>,
+  cesium: RefObject<CesiumComponentRef<Cesium.Viewer> | null>,
 ): EngineRef {
-  const cancelCameraFlight = useRef<() => void>();
+  const cancelCameraFlight = useRef<() => void>(undefined);
   const mouseEventCallbacks = useRef<MouseEventCallbacks>({
     click: [],
     doubleClick: [],

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, type JSX } from "react";
 import { Globe as CesiumGlobe } from "resium";
 
 import type { ViewerProperty } from "../../..";

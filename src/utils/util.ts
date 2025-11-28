@@ -73,7 +73,7 @@ export const isEmptyString = function (text: string): boolean {
 };
 
 export function useConstant<T>(callback: () => T): T {
-  const ref = useRef<{ value: T }>();
+  const ref = useRef<{ value: T }>(undefined);
   if (ref.current == null) {
     ref.current = { value: callback() };
   }

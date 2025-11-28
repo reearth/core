@@ -139,7 +139,7 @@ export default function useHooks({
     reason: LayerSelectionReason | undefined,
     info: SelectedFeatureInfo | undefined,
   ) => void;
-  engineRef?: RefObject<EngineRef>;
+  engineRef?: RefObject<EngineRef | null>;
   onMount?: () => void;
 }) {
   const layerMap = useMemo(() => new Map<string, Layer>(), []);
@@ -751,7 +751,7 @@ function useSelection({
     reason: LayerSelectionReason | undefined,
     info: SelectedFeatureInfo | undefined,
   ) => void;
-  engineRef?: RefObject<EngineRef>;
+  engineRef?: RefObject<EngineRef | null>;
   updateStyle: (layerId: string) => void;
 }) {
   const [selectedLayer, selectedComputedFeature]: SelectedLayer = useMemo(
