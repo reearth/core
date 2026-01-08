@@ -286,8 +286,6 @@ const creditContainer = document.createElement("div");
 
 const Component = forwardRef(Cesium);
 
-console.log("hello");
-
 export default Component;
 
 export const engine: Engine = {
