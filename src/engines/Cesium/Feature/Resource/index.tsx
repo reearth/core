@@ -111,11 +111,6 @@ export default function Resource({
     [layer, viewer, onComputedFeatureFetch, type, requestRender],
   );
 
-  const initialClock = useRef({
-    start: timelineManagerRef?.current?.timeline?.start,
-    stop: timelineManagerRef?.current?.timeline?.stop,
-    current: timelineManagerRef?.current?.timeline?.current,
-  });
   const handleLoad = useCallback(
     (ds: DataSource) => {
       ds.entities.values.forEach(e =>
@@ -128,28 +123,7 @@ export default function Resource({
           });
         }),
       );
-      if (!updateClock) {
-        if (
-          initialClock.current.current &&
-          initialClock.current.start &&
-          initialClock.current.stop
-        ) {
-          timelineManagerRef?.current?.commit({
-            cmd: "SET_TIME",
-            payload: {
-              start: initialClock.current.start,
-              stop: initialClock.current.stop,
-              current: initialClock.current.current,
-            },
-            committer: {
-              source: "featureResource",
-              id: layer?.id,
-            },
-          });
-        }
-        return;
-      }
-      if (ds.clock) {
+      if (updateClock && ds.clock) {
         timelineManagerRef?.current?.commit({
           cmd: "SET_TIME",
           payload: {
