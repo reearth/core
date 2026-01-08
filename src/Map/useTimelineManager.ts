@@ -61,13 +61,7 @@ export type TimelineCommit = (PlayCommand | PauseCommand | SetTimeCommand | SetO
 };
 
 export type TimelineCommitter = {
-  source:
-    | "widgetContext"
-    | "pluginAPI"
-    | "featureResource"
-    | "storyTimelineBlock"
-    | "storyPage"
-    | "initialize";
+  source: string;
   id?: string;
 };
 
