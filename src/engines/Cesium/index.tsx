@@ -160,7 +160,8 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
       onMouseMove={mouseEventHandles.mouseMove}
       onMouseEnter={mouseEventHandles.mouseEnter}
       onMouseLeave={mouseEventHandles.mouseLeave}
-      onWheel={mouseEventHandles.wheel}>
+      onWheel={mouseEventHandles.wheel}
+      automaticallyTrackDataSourceClocks={false}>
       <Event onMount={handleMount} onUnmount={handleUnmount} />
       <Clock timelineManagerRef={timelineManagerRef} />
       <ImageryLayers
