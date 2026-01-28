@@ -83,7 +83,11 @@ export const AmbientOcclusionStage = ({
 
   usePreRender(() => {
     const frustum = scene?.camera.frustum;
-    if (frustum instanceof PerspectiveFrustum) {
+    if (
+      frustum instanceof PerspectiveFrustum &&
+      frustum.fovy !== undefined &&
+      frustum.aspectRatio !== undefined
+    ) {
       const cotFovy = 1 / Math.tan(frustum.fovy / 2);
       stage.uniforms.focalLength.x = cotFovy * frustum.aspectRatio;
       stage.uniforms.focalLength.y = cotFovy;
@@ -111,7 +115,7 @@ export const AmbientOcclusion: FC<AmbientOcclusionProps> = props => {
     // Screen-space camera controller should detect collision
     const cameraHeight = scene.camera.positionCartographic.height - globeHeight;
     const frustum = scene?.camera.frustum;
-    if (frustum instanceof PerspectiveFrustum) {
+    if (frustum instanceof PerspectiveFrustum && frustum.fov !== undefined) {
       scene.camera.frustum.near =
         CesiumMath.clamp(cameraHeight - 1, 1, 5) / Math.tan(frustum.fov / 2);
     }

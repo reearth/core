@@ -16,7 +16,7 @@ import {
   Primitive,
   GroundPrimitive,
 } from "cesium";
-import md5 from "js-md5";
+import { md5 } from "js-md5";
 import { cloneDeep, pick } from "lodash-es";
 import {
   ComponentProps,
@@ -285,10 +285,7 @@ export const toDistanceDisplayCondition = (
 };
 
 export const generateIDWithMD5 = (id: string) => {
-  const hash = md5.create();
-  hash.update(id);
-
-  return hash.hex();
+  return md5(id);
 };
 
 export const usePick = <T extends object, U extends keyof T>(

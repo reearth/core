@@ -27,7 +27,7 @@ export class StringMatcher {
       : new RegExp(escapeStringRegexp(search), "g");
 
     const matches = [...source.matchAll(pattern)].filter(
-      (match): match is RegExpMatchArray & { index: number } => match.index != null,
+      (match): match is RegExpExecArray & { index: number } => match.index != null,
     );
     if (matches == null || matches.length === 0) {
       throw new Error(`No matching codes found for: "${search}"`);

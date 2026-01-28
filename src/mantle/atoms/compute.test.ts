@@ -1,4 +1,5 @@
-import { renderHook, act, waitFor } from "@testing-library/react";
+import { renderHook, waitFor } from "@testing-library/react";
+import { act } from "react";
 import { useAtom } from "jotai";
 import { useMemo } from "react";
 import { test, expect, vi, beforeEach } from "vitest";

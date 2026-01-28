@@ -109,7 +109,8 @@ export default function useEngineRef(
           if (
             calcViewSize &&
             cartesian &&
-            viewer.scene.camera.frustum instanceof Cesium.PerspectiveFrustum
+            viewer.scene.camera.frustum instanceof Cesium.PerspectiveFrustum &&
+            viewer.scene.camera.frustum.fov !== undefined
           ) {
             const distance = Cesium.Cartesian3.distance(viewer.scene.camera.positionWC, cartesian);
             viewSize = distance * Math.tan(viewer.scene.camera.frustum.fov / 2);
@@ -171,10 +172,11 @@ export default function useEngineRef(
       toWindowPosition: (position: [x: number, y: number, z: number]) => {
         const viewer = cesium.current?.cesiumElement;
         if (!viewer || viewer.isDestroyed()) return;
-        const result = Cesium.SceneTransforms.wgs84ToWindowCoordinates(
+        const result = Cesium.SceneTransforms.worldToWindowCoordinates(
           viewer.scene,
           Cesium.Cartesian3.fromElements(...position),
         );
+        if (!result) return;
         return [result.x, result.y];
       },
       // Calculate next positino from screen(window) offset.

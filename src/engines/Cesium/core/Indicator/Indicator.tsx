@@ -74,7 +74,7 @@ export default function Indicator({
       }
 
       if (position) {
-        const pos = SceneTransforms.wgs84ToWindowCoordinates(viewer.scene, position);
+        const pos = SceneTransforms.worldToWindowCoordinates(viewer.scene, position);
         setPos(pos);
         setIsVisible(true);
       } else {
