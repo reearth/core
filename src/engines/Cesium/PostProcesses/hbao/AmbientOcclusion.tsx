@@ -12,8 +12,7 @@ import {
 } from "./createAmbientOcclusionStage";
 
 export interface AmbientOcclusionProps
-  extends Omit<AmbientOcclusionStageOptions, "prefix">,
-    Partial<AmbientOcclusionStageUniforms> {
+  extends Omit<AmbientOcclusionStageOptions, "prefix">, Partial<AmbientOcclusionStageUniforms> {
   enabled?: boolean;
 }
 

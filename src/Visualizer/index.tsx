@@ -15,20 +15,20 @@ import {
   type Credits,
 } from "../Map";
 import { SketchFeature, SketchType } from "../Map/Sketch/types";
+import type { InteractionModeType } from "../shared/interactionMode";
 
 import { VisualizerProvider } from "./context";
 import { coreContext } from "./coreContext";
 import { engines, type EngineType } from "./engines";
 import Err from "./Error";
 import useHooks from "./hooks";
-import type { InteractionModeType } from "./interactionMode";
 
 export { useVisualizer, type Context as VisualizerContext } from "./context";
 export * from "./engines";
 export * from "./useViewport";
 export * from "./coreContext";
-export * from "./featureFlags";
-export * from "./interactionMode";
+export * from "../shared/featureFlags";
+export * from "../shared/interactionMode";
 
 export type CoreVisualizerProps = {
   engine?: EngineType;

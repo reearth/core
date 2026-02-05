@@ -45,7 +45,13 @@ declare module "@reearth/cesium-mvt-imagery-provider" {
     readonly hasAlphaChannel: boolean;
     getTileCredits(x: number, y: number, level: number): any[];
     requestImage(x: number, y: number, level: number, request?: any): Promise<any> | undefined;
-    pickFeatures(x: number, y: number, level: number, longitude: number, latitude: number): Promise<any[]> | undefined;
+    pickFeatures(
+      x: number,
+      y: number,
+      level: number,
+      longitude: number,
+      latitude: number,
+    ): Promise<any[]> | undefined;
   }
 }
 

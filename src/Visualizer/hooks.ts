@@ -16,9 +16,9 @@ import type {
 } from "../Map";
 import { SketchEventCallback, SketchEventProps, SketchType } from "../Map/Sketch/types";
 import { TimelineManagerRef } from "../Map/useTimelineManager";
+import type { InteractionModeType } from "../shared/interactionMode";
+import { INTERACTION_MODES } from "../shared/interactionMode";
 
-import type { InteractionModeType } from "./interactionMode";
-import { INTERACTION_MODES } from "./interactionMode";
 import useCoreAPI from "./useCoreAPI";
 import useViewport from "./useViewport";
 
@@ -95,10 +95,10 @@ export default function useHooks(
       const computedLayer = await layer?.();
       const computedFeature =
         layerId && featureId
-          ? (isSketchLayer
+          ? ((isSketchLayer
               ? computedLayer?.features?.find(f => f.id === featureId)
               : mapRef.current?.engine.findComputedFeatureById?.(layerId, featureId)) ??
-            info?.feature
+            info?.feature)
           : undefined;
 
       selectFeature(

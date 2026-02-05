@@ -357,7 +357,7 @@ export const getEntityContent = (
     },
   };
 
-  return defaultContent ? content[defaultContent] : content.attributes ?? content.description;
+  return defaultContent ? content[defaultContent] : (content.attributes ?? content.description);
 };
 
 function propertiesToTableContent(properties: Record<string, any>): { key: string; value: any }[] {

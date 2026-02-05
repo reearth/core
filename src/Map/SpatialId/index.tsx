@@ -5,7 +5,7 @@ import {
   SpatialIdSpace,
   VerticalSpaceIndicator,
 } from "../../engines/Cesium/SpatialId";
-import { InteractionModeType } from "../../Visualizer";
+import { InteractionModeType } from "../../shared/interactionMode";
 import { GeoidRef } from "../Geoid/types";
 import { EngineRef } from "../types";
 

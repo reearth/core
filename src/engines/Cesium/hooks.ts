@@ -36,7 +36,7 @@ import {
   RequestingRenderMode,
 } from "../../Map";
 import { TimelineManagerRef } from "../../Map/useTimelineManager";
-import { FEATURE_FLAGS } from "../../Visualizer/featureFlags";
+import { FEATURE_FLAGS } from "../../shared/featureFlags";
 
 import { getCredits, isSelectable } from "./common";
 import { getTag, type Context as FeatureContext } from "./Feature";
@@ -337,8 +337,8 @@ export default ({
 
     if (entity) {
       const layer = tag?.layerId
-        ? layersRef?.current?.overriddenLayers().find(l => l.id === tag.layerId) ??
-          layersRef?.current?.findById(tag.layerId)
+        ? (layersRef?.current?.overriddenLayers().find(l => l.id === tag.layerId) ??
+          layersRef?.current?.findById(tag.layerId))
         : undefined;
       // Sometimes only featureId is specified, so we need to sync entity tag.
       onLayerSelect?.(
@@ -465,8 +465,8 @@ export default ({
       if (target && "id" in target && target.id instanceof Entity && isSelectable(target.id)) {
         const tag = getTag(target.id);
         const layer = tag?.layerId
-          ? layersRef?.current?.overriddenLayers().find(l => l.id === tag.layerId) ??
-            layersRef?.current?.findById(tag.layerId)
+          ? (layersRef?.current?.overriddenLayers().find(l => l.id === tag.layerId) ??
+            layersRef?.current?.findById(tag.layerId))
           : undefined;
         onLayerSelect?.(
           tag?.layerId,
@@ -587,8 +587,8 @@ export default ({
             }
 
             const layer = tag?.layerId
-              ? layersRef?.current?.overriddenLayers().find(l => l.id === tag.layerId) ??
-                layersRef?.current?.findById(tag.layerId)
+              ? (layersRef?.current?.overriddenLayers().find(l => l.id === tag.layerId) ??
+                layersRef?.current?.findById(tag.layerId))
               : undefined;
             const content = getEntityContent(
               f.data.feature ?? f,
@@ -796,10 +796,9 @@ function tileProperties(
 ): { key: string; value: any }[] {
   return t
     .getPropertyIds()
-    .reduce<{ key: string; value: any }[]>(
-      (a, b) => [...a, { key: b, value: t.getProperty(b) }],
-      [],
-    );
+    .reduce<
+      { key: string; value: any }[]
+    >((a, b) => [...a, { key: b, value: t.getProperty(b) }], []);
 }
 
 function getLayerId(target: RootEventTarget): string | undefined {

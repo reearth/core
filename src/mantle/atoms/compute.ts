@@ -51,9 +51,8 @@ export function computeAtom(cache?: typeof globalDataFeaturesCache) {
   );
 
   const computedResult = atom<EvalResult | undefined>(undefined);
-  const finalFeatures = atom(
-    get =>
-      get(computedResult)?.features?.map((f): ComputedFeature => merge({ ...f }, get(overrides))),
+  const finalFeatures = atom(get =>
+    get(computedResult)?.features?.map((f): ComputedFeature => merge({ ...f }, get(overrides))),
   );
   const layerStatus = atom<ComputedLayerStatus>("fetching");
   const dataAtoms = dataAtom(cache);
@@ -69,7 +68,7 @@ export function computeAtom(cache?: typeof globalDataFeaturesCache) {
       features: get(finalFeatures) ?? [],
       originalFeatures:
         currentLayer.type === "simple" && currentLayer.data
-          ? get(dataAtoms.getAll)(currentLayer.id, currentLayer.data)?.flat() ?? []
+          ? (get(dataAtoms.getAll)(currentLayer.id, currentLayer.data)?.flat() ?? [])
           : [],
       properties: currentLayer.type === "simple" ? currentLayer.properties : undefined,
       ...get(computedResult)?.layer,

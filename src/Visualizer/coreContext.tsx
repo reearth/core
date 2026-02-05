@@ -9,8 +9,8 @@ import {
   LayerSelectWithRectStart,
 } from "../Map";
 import { SketchEventCallback, SketchType } from "../Map/Sketch/types";
+import { InteractionModeType } from "../shared/interactionMode";
 
-import { InteractionModeType } from "./interactionMode";
 import { Viewport } from "./useViewport";
 
 type CoreContext = {

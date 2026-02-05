@@ -10,8 +10,8 @@ import {
 } from "react";
 import { v4 as uuid } from "uuid";
 
+import { InteractionModeType } from "../../shared/interactionMode";
 import { useWindowEvent } from "../../utils/use-window-event";
-import { InteractionModeType } from "../../Visualizer";
 import { GeoidRef } from "../Geoid/types";
 import { EngineRef, MouseEventProps } from "../types";
 
@@ -128,7 +128,7 @@ export default ({
     overrideInteractionMode?.(
       interactionModeRef.current === "spatialId"
         ? "default"
-        : interactionModeRef.current ?? "default",
+        : (interactionModeRef.current ?? "default"),
     );
     engineRef.current?.setCursor("default");
     engineRef.current?.requestRender();
@@ -197,7 +197,7 @@ export default ({
         setBaseCoordinateGeoid([
           props.lng,
           props.lat,
-          (terrainEnabled ? props.height ?? 0 : 0) - appliedGeoidHeight,
+          (terrainEnabled ? (props.height ?? 0) : 0) - appliedGeoidHeight,
         ]);
 
         setBasePosition(engineRef.current?.toXYZ(props.lng, props.lat, props.height ?? 0) ?? null);
@@ -205,7 +205,7 @@ export default ({
         const initialSpaceSelectorSpace = createSpatialIdSpace(
           props.lng,
           props.lat,
-          (terrainEnabled ? props.height ?? 0 : 0) - appliedGeoidHeight,
+          (terrainEnabled ? (props.height ?? 0) : 0) - appliedGeoidHeight,
           pickOptions.zoom,
           appliedCenterGeoidHeight,
         );

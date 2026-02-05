@@ -3,7 +3,7 @@
 import { ForwardRefRenderFunction, RefObject, forwardRef } from "react";
 
 import { ComputedLayer, SelectedFeatureInfo } from "../../mantle";
-import { InteractionModeType } from "../../Visualizer/interactionMode";
+import { InteractionModeType } from "../../shared/interactionMode";
 import { EngineRef, Feature, LayerSelectionReason, LayersRef, SketchRef } from "../types";
 
 import useHooks from "./hooks";

@@ -10,7 +10,7 @@ export const makeMouseEventProps = (viewer: Viewer, e: CesiumMovementEvent) => {
   const props: MouseEventProps = {
     x: position?.x,
     y: position?.y,
-    ...(position ? getLocationFromScreen(viewer.scene, position.x, position.y, true) ?? {} : {}),
+    ...(position ? (getLocationFromScreen(viewer.scene, position.x, position.y, true) ?? {}) : {}),
   };
   return props;
 };

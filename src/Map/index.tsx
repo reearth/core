@@ -1,6 +1,6 @@
 import { forwardRef, useMemo, type Ref, type JSX } from "react";
 
-import { INTERACTION_MODES } from "../Visualizer/interactionMode";
+import { INTERACTION_MODES } from "../shared/interactionMode";
 
 import Geoid from "./Geoid";
 import useHooks, { MapRef } from "./hooks";

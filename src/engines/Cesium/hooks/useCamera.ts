@@ -7,7 +7,7 @@ import { useCustomCompareCallback } from "use-custom-compare";
 
 import { EngineRef, ViewerProperty } from "../..";
 import { Camera } from "../../../mantle";
-import { FEATURE_FLAGS } from "../../../Visualizer";
+import { FEATURE_FLAGS } from "../../../shared/featureFlags";
 import { getCamera } from "../common";
 
 import { useCameraLimiter } from "./useCameraLimiter";
