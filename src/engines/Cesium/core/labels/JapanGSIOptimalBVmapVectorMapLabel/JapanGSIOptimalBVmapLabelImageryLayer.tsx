@@ -11,7 +11,8 @@ import {
 import { ImageryLayerProps } from "./types";
 
 export interface LabelImageryLayerProps
-  extends Omit<ImageryLayerProps, "imageryProvider">,
+  extends
+    Omit<ImageryLayerProps, "imageryProvider">,
     JapanGSIOptimalBVmapLabelImageryProviderOptions {
   minimumLevel?: number;
   maximumLevel?: number;

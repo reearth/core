@@ -93,8 +93,7 @@ export abstract class JapanGSIOptimalBVmapImageryProviderBase implements Imagery
   }
 }
 
-export interface JapanGSIOptimalBVmapLabelImageryProviderOptions
-  extends JapanGSIOptimalBVmapImageryProviderBaseOptions {
+export interface JapanGSIOptimalBVmapLabelImageryProviderOptions extends JapanGSIOptimalBVmapImageryProviderBaseOptions {
   url: string;
   minimumDataLevel: number;
   maximumDataLevel: number;

@@ -9,7 +9,7 @@ import {
   LayerSelectWithRectMove,
   LayerSelectWithRectStart,
 } from "../../../Map";
-import { INTERACTION_MODES } from "../../../Visualizer/interactionMode";
+import { INTERACTION_MODES } from "../../../shared/interactionMode";
 import { makeMouseEventProps } from "../utils/mouse";
 
 export const useLayerSelectWithRect = ({

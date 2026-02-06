@@ -1,6 +1,6 @@
-import { renderHook, act, waitFor } from "@testing-library/react";
+import { renderHook, waitFor } from "@testing-library/react";
 import { useAtom } from "jotai";
-import { useMemo } from "react";
+import { act, useMemo } from "react";
 import { test, expect, vi, beforeEach } from "vitest";
 
 import * as DataCache from "../data";
@@ -79,7 +79,7 @@ test("computeAtom", async () => {
     result.current.set({ type: "setLayer", layer });
   });
 
-  expect(result.current.result).toEqual({
+  (expect(result.current.result).toEqual({
     id: "xxx",
     layer,
     status: "ready",
@@ -94,7 +94,7 @@ test("computeAtom", async () => {
         features: [],
         originalFeatures: [],
       }),
-    );
+    ));
 
   // delete delegatedDataTypes
   act(() => {

@@ -758,7 +758,7 @@ export const useHooks = ({
     const loadTileset = async () => {
       try {
         if (googleMapApiKey) {
-          const tileset = await createGooglePhotorealistic3DTileset(googleMapApiKey);
+          const tileset = await createGooglePhotorealistic3DTileset({ key: googleMapApiKey });
           return tileset.resource;
         } else {
           const resource = IonResource.fromAssetId(2275207, {
@@ -783,7 +783,7 @@ export const useHooks = ({
       : googleMapPhotorealisticResource && isVisible
         ? googleMapPhotorealisticResource
         : type === "3dtiles" && isVisible
-          ? url ?? tileset
+          ? (url ?? tileset)
           : null;
   }, [type, isVisible, meta?.cesiumIonAccessToken, googleMapPhotorealisticResource, url, tileset]);
 

@@ -152,6 +152,8 @@ function getPickCullingVolume(
   const camera = scene.camera;
   const frustum = camera.frustum;
   invariant(frustum instanceof PerspectiveFrustum);
+  invariant(frustum.fovy !== undefined);
+  invariant(frustum.aspectRatio !== undefined);
 
   const near = frustum.near;
   const tanPhi = Math.tan(frustum.fovy / 2);

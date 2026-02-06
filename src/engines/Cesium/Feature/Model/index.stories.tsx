@@ -5,7 +5,6 @@ import { Map, Props } from "../../../../Map";
 
 export default {
   component: Map,
-  parameters: { actions: { argTypesRegex: "^on.*" } },
 } as Meta;
 
 const Template: StoryFn<Props> = args => <Map {...args} />;
@@ -32,7 +31,7 @@ Default.args = {
         },
       },
       model: {
-        url: "/BoxAnimated.glb",
+        url: "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Box/glTF-Binary/Box.glb",
         scale: 1000000,
       },
     },

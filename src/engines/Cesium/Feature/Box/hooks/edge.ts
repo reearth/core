@@ -59,7 +59,7 @@ export const useHooks = ({
     () =>
       new ColorMaterialProperty(
         new CallbackProperty(
-          () => (isEdgeHovered.current ? hoverColor ?? fillColor : fillColor),
+          () => (isEdgeHovered.current ? (hoverColor ?? fillColor) : fillColor),
           false,
         ),
       ),

@@ -1,5 +1,5 @@
 import { Cartesian3, Entity, Viewer } from "cesium";
-import CesiumDnD, { Context } from "cesium-dnd";
+import CesiumDnD, { type Context } from "cesium-dnd";
 import { RefObject, useCallback, useEffect, useRef } from "react";
 import { CesiumComponentRef } from "resium";
 
@@ -54,7 +54,7 @@ export default ({
     [cesium, onLayerDrop],
   );
 
-  const cesiumDnD = useRef<CesiumDnD>(undefined);
+  const cesiumDnD = useRef<Context>(undefined);
   useEffect(() => {
     const viewer = cesium.current?.cesiumElement;
     if (!viewer || viewer.isDestroyed()) return;

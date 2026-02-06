@@ -1,4 +1,4 @@
-import { FEATURE_FLAGS } from "./featureFlags";
+import { FEATURE_FLAGS } from "../shared/featureFlags";
 
 export type InteractionModeType = "default" | "move" | "selection" | "sketch" | "spatialId";
 

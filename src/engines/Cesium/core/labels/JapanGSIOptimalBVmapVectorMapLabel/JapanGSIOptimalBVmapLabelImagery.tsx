@@ -216,7 +216,7 @@ export const JapanGSIOptimalBVmapLabelImagery: FC<JapanGSIOptimalBVmapLabelImage
         return [];
       }
       return features.filter(
-        (feature): feature is AnnotationFeature =>
+        (feature: Feature): feature is AnnotationFeature =>
           typeof feature.props.vt_code === "number" &&
           // Look for annotations with 3-digits code only.
           // https://maps.gsi.go.jp/help/pdf/vector/optbv_featurecodes.pdf
@@ -271,7 +271,7 @@ export const JapanGSIOptimalBVmapLabelImagery: FC<JapanGSIOptimalBVmapLabelImage
       }
       const texts: string[] = [];
       const labels = annotations
-        .map((feature): [AnnotationFeature, Label] | undefined => {
+        .map((feature: AnnotationFeature): [AnnotationFeature, Label] | undefined => {
           const styleOptions = resolveStyle(feature.props.vt_code, style);
           if (styleOptions == null) {
             return undefined;
@@ -301,7 +301,7 @@ export const JapanGSIOptimalBVmapLabelImagery: FC<JapanGSIOptimalBVmapLabelImage
 
       const removeLabels = (): void => {
         if (!labelCollection.isDestroyed()) {
-          labels.forEach(([, label]) => {
+          labels.forEach(([, label]: [AnnotationFeature, Label]) => {
             labelCollection.remove(label);
           });
         }

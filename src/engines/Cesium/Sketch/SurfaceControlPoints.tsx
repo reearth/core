@@ -103,7 +103,8 @@ const SurfaceControlPoints: FC<SurfaceControlPointsProps> = memo(
         }
       } else {
         switch (type) {
-          case "rectangle" || "extrudedRectangle":
+          case "rectangle":
+          case "extrudedRectangle":
             if (controlPoints.length === 2) {
               measurements.push({
                 points: controlPoints as [Cartesian3, Cartesian3],

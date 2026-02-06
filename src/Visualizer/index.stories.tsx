@@ -1,5 +1,6 @@
 import { Meta, StoryObj } from "@storybook/react";
 import { ComponentProps, FC, useEffect, useState } from "react";
+import { fn } from "storybook/test";
 
 import { useVisualizer } from "./context";
 
@@ -7,6 +8,20 @@ import { CoreVisualizer } from ".";
 
 export default {
   component: CoreVisualizer,
+  args: {
+    // Explicit action handlers for callback props
+    onMount: fn(),
+    onLayerSelect: fn(),
+    onCameraChange: fn(),
+    onLayerDrag: fn(),
+    onLayerDrop: fn(),
+    onLayerEdit: fn(),
+    onLayerSelectWithRectStart: fn(),
+    onLayerSelectWithRectMove: fn(),
+    onLayerSelectWithRectEnd: fn(),
+    onLayerVisibility: fn(),
+    onLayerLoad: fn(),
+  },
 } as Meta;
 
 type Story = StoryObj<typeof CoreVisualizer>;

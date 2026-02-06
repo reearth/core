@@ -68,11 +68,17 @@ function screenProjectVector(
   ray.origin = position;
   ray.direction = direction;
   const nearPoint2d = scene.cartesianToCanvasCoordinates(Ray.getPoint(ray, 0), new Cartesian2());
+  if (!nearPoint2d) {
+    return result;
+  }
 
   const farPoint2d = scene.cartesianToCanvasCoordinates(
     Ray.getPoint(ray, length),
     new Cartesian2(),
   );
+  if (!farPoint2d) {
+    return result;
+  }
   const screenVector2d = Cartesian2.subtract(farPoint2d, nearPoint2d, result);
   return screenVector2d;
 }

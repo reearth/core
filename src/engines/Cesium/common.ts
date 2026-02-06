@@ -512,8 +512,9 @@ export const getCamera = (viewer: Viewer | CesiumWidget | undefined): Camera | u
   const lat = CesiumMath.toDegrees(latitude);
   const lng = CesiumMath.toDegrees(longitude);
   const { heading, pitch, roll } = camera;
-  const fov = camera.frustum instanceof PerspectiveFrustum ? camera.frustum.fov : 1;
-  const aspectRatio = camera.frustum instanceof PerspectiveFrustum ? camera.frustum.aspectRatio : 1;
+  const fov = camera.frustum instanceof PerspectiveFrustum ? (camera.frustum.fov ?? 1) : 1;
+  const aspectRatio =
+    camera.frustum instanceof PerspectiveFrustum ? (camera.frustum.aspectRatio ?? 1) : 1;
   return { lng, lat, height, heading, pitch, roll, fov, aspectRatio };
 };
 

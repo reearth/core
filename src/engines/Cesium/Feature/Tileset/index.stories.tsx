@@ -5,7 +5,6 @@ import { Map, Props } from "../../../../Map";
 
 export default {
   component: Map,
-  parameters: { actions: { argTypesRegex: "^on.*" } },
 } as Meta;
 
 const Template: StoryFn<Props> = args => <Map {...args} />;
