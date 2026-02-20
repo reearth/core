@@ -94,11 +94,11 @@ export type Ref = {
 export type DefaultInfobox = {
   title?: string;
   content:
-    | {
-        type: "table";
-        value: { key: string; value: string }[];
-      }
-    | { type: "html"; value: string };
+  | {
+    type: "table";
+    value: { key: string; value: string }[];
+  }
+  | { type: "html"; value: string };
 };
 
 export type OverriddenLayer = Omit<Layer, "type" | "children">;
@@ -153,11 +153,21 @@ export default function useHooks({
     [hiddenLayerIds, hiddenLayers],
   );
 
-  const layersRef = useGet(layers);
+  const derivedLayers = useMemo(() => {
+    return layers?.map(l => {
+      const hidden = isHidden?.(l.id);
+      return {
+        ...l,
+        visible: hidden ? !hidden : l.visible,
+      };
+    });
+  }, [isHidden, layers]);
+
+  const layersRef = useGet(derivedLayers);
   const [tempLayers, setTempLayers] = useState<Layer[]>([]);
   const tempLayersRef = useRef<Layer[]>([]);
   const flattenedLayers = useMemo((): Layer[] => {
-    const newLayers = [...flattenLayers(layers ?? []), ...flattenLayers(tempLayers)];
+    const newLayers = [...flattenLayers(derivedLayers ?? []), ...flattenLayers(tempLayers)];
     // apply overrides
     return newLayers.map(l => {
       const ol: any = overriddenLayers.find(ll => ll.id === l.id);
@@ -179,7 +189,7 @@ export default function useHooks({
 
       return res;
     });
-  }, [tempLayers, layers, overriddenLayers]);
+  }, [derivedLayers, tempLayers, overriddenLayers]);
 
   const getComputedLayer = useAtomValue(
     useMemo(
@@ -353,15 +363,15 @@ export default function useHooks({
       const rawLayer = compat({
         ...(originalLayer.compat && property
           ? {
-              type: originalLayer.type === "group" ? "group" : "item",
-              extensionId: originalLayer.compat.extensionId,
-              property: {
-                default: {
-                  ...(originalLayer.compat.property?.default || {}),
-                  ...(property.default || {}),
-                },
+            type: originalLayer.type === "group" ? "group" : "item",
+            extensionId: originalLayer.compat.extensionId,
+            property: {
+              default: {
+                ...(originalLayer.compat.property?.default || {}),
+                ...(property.default || {}),
               },
-            }
+            },
+          }
           : {}),
         ...(!originalLayer.compat && property ? { property } : {}),
         ...res,
@@ -390,10 +400,10 @@ export default function useHooks({
         i < 0
           ? [...currentOverriddenlayers, layer2]
           : [
-              ...currentOverriddenlayers.slice(0, i),
-              layer2,
-              ...currentOverriddenlayers.slice(i + 1),
-            ];
+            ...currentOverriddenlayers.slice(0, i),
+            layer2,
+            ...currentOverriddenlayers.slice(i + 1),
+          ];
       overriddenLayersRef.current = updated;
       setOverridenLayers(updated);
     },
@@ -623,7 +633,7 @@ export default function useHooks({
   useLayoutEffect(() => {
     const ids = new Set<string>();
 
-    walkLayers(layers ?? [], l => {
+    walkLayers(derivedLayers ?? [], l => {
       ids.add(l.id);
       if (!atomMap.has(l.id)) {
         atomMap.set(l.id, computeAtom());
@@ -643,8 +653,8 @@ export default function useHooks({
     overriddenLayersRef.current = updated;
     setOverridenLayers(updated);
 
-    prevLayers.current = layers;
-  }, [atomMap, layers, layerMap, lazyLayerMap, setOverridenLayers, showLayer]);
+    prevLayers.current = derivedLayers;
+  }, [atomMap, layerMap, lazyLayerMap, setOverridenLayers, showLayer, derivedLayers]);
 
   useEffect(() => {
     if (!requestingRenderMode || requestingRenderMode.current === FORCE_REQUEST_RENDER) return;
@@ -758,16 +768,16 @@ function useSelection({
     () => [
       initialSelectedLayer
         ? {
-            layerId: initialSelectedLayer?.layerId,
-            featureId: initialSelectedLayer?.featureId,
-            reason: initialSelectedLayer?.reason,
-          }
+          layerId: initialSelectedLayer?.layerId,
+          featureId: initialSelectedLayer?.featureId,
+          reason: initialSelectedLayer?.reason,
+        }
         : undefined,
       initialSelectedLayer?.layerId && initialSelectedLayer.featureId
         ? engineRef?.current?.findComputedFeatureById(
-            initialSelectedLayer.layerId,
-            initialSelectedLayer.featureId,
-          )
+          initialSelectedLayer.layerId,
+          initialSelectedLayer.featureId,
+        )
         : undefined,
     ],
     [initialSelectedLayer, engineRef],
@@ -791,12 +801,12 @@ function useSelection({
           undefined,
           layerId
             ? () =>
-                new Promise(resolve => {
-                  // Wait until computed feature is ready
-                  queueMicrotask(() => {
-                    resolve(getLazyLayer(layerId)?.computed);
-                  });
-                })
+              new Promise(resolve => {
+                // Wait until computed feature is ready
+                queueMicrotask(() => {
+                  resolve(getLazyLayer(layerId)?.computed);
+                });
+              })
             : undefined,
           options,
           info,
@@ -842,12 +852,12 @@ function useSelection({
             featureId?.[0],
             layerId
               ? () =>
-                  new Promise(resolve => {
-                    // Wait until computed feature is ready
-                    queueMicrotask(() => {
-                      resolve(getLazyLayer(layerId)?.computed);
-                    });
-                  })
+                new Promise(resolve => {
+                  // Wait until computed feature is ready
+                  queueMicrotask(() => {
+                    resolve(getLazyLayer(layerId)?.computed);
+                  });
+                })
               : undefined,
             options,
             info,
@@ -858,12 +868,12 @@ function useSelection({
             selectedLayer?.featureId,
             layerId
               ? () =>
-                  new Promise(resolve => {
-                    // Wait until computed feature is ready
-                    queueMicrotask(() => {
-                      resolve(getLazyLayer(layerId)?.computed);
-                    });
-                  })
+                new Promise(resolve => {
+                  // Wait until computed feature is ready
+                  queueMicrotask(() => {
+                    resolve(getLazyLayer(layerId)?.computed);
+                  });
+                })
               : undefined,
             options,
             info,
@@ -958,12 +968,12 @@ function useSelection({
         featureId,
         layerId
           ? () =>
-              new Promise(resolve => {
-                // Wait until computed feature is ready
-                queueMicrotask(() => {
-                  resolve(getLazyLayer(layerId)?.computed);
-                });
-              })
+            new Promise(resolve => {
+              // Wait until computed feature is ready
+              queueMicrotask(() => {
+                resolve(getLazyLayer(layerId)?.computed);
+              });
+            })
           : undefined,
         options,
         info,
