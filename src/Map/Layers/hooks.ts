@@ -153,11 +153,21 @@ export default function useHooks({
     [hiddenLayerIds, hiddenLayers],
   );
 
-  const layersRef = useGet(layers);
+  const derivedLayers = useMemo(() => {
+    return layers?.map(l => {
+      const hidden = isHidden?.(l.id);
+      return {
+        ...l,
+        visible: hidden ? !hidden : l.visible,
+      };
+    });
+  }, [isHidden, layers]);
+
+  const layersRef = useGet(derivedLayers);
   const [tempLayers, setTempLayers] = useState<Layer[]>([]);
   const tempLayersRef = useRef<Layer[]>([]);
   const flattenedLayers = useMemo((): Layer[] => {
-    const newLayers = [...flattenLayers(layers ?? []), ...flattenLayers(tempLayers)];
+    const newLayers = [...flattenLayers(derivedLayers ?? []), ...flattenLayers(tempLayers)];
     // apply overrides
     return newLayers.map(l => {
       const ol: any = overriddenLayers.find(ll => ll.id === l.id);
@@ -179,7 +189,7 @@ export default function useHooks({
 
       return res;
     });
-  }, [tempLayers, layers, overriddenLayers]);
+  }, [derivedLayers, tempLayers, overriddenLayers]);
 
   const getComputedLayer = useAtomValue(
     useMemo(
@@ -623,7 +633,7 @@ export default function useHooks({
   useLayoutEffect(() => {
     const ids = new Set<string>();
 
-    walkLayers(layers ?? [], l => {
+    walkLayers(derivedLayers ?? [], l => {
       ids.add(l.id);
       if (!atomMap.has(l.id)) {
         atomMap.set(l.id, computeAtom());
@@ -643,8 +653,8 @@ export default function useHooks({
     overriddenLayersRef.current = updated;
     setOverridenLayers(updated);
 
-    prevLayers.current = layers;
-  }, [atomMap, layers, layerMap, lazyLayerMap, setOverridenLayers, showLayer]);
+    prevLayers.current = derivedLayers;
+  }, [atomMap, layerMap, lazyLayerMap, setOverridenLayers, showLayer, derivedLayers]);
 
   useEffect(() => {
     if (!requestingRenderMode || requestingRenderMode.current === FORCE_REQUEST_RENDER) return;
