@@ -133,6 +133,7 @@ export function createSketchMachine() {
           },
         },
         drawing: {
+          initial: "marker",
           states: {
             marker: {
               initial: "vertex",
@@ -279,6 +280,7 @@ export function createSketchMachine() {
           },
         },
         editing: {
+          initial: "marker",
           states: {
             marker: {
               initial: "waiting",
