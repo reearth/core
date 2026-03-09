@@ -14,7 +14,7 @@ import {
 } from "@cesium/engine";
 import { DistanceDisplayCondition } from "cesium";
 import { merge, omit } from "lodash-es";
-import { type Feature } from "protomaps";
+import { type Feature } from "protomaps-leaflet";
 import { memo, useCallback, useEffect, useMemo, useRef, type FC } from "react";
 import { useCesium } from "resium";
 import { suspend } from "suspend-react";

@@ -1,9 +1,6 @@
 /** @type {import('tailwindcss').Config} */
-import tailwindcssAnimate from "tailwindcss-animate";
 
 export const darkMode = ["class"];
-export const content = ["./example/**/*.{ts,tsx}", "./example/*.{ts,tsx}"];
-export const prefix = "";
 export const theme = {
   container: {
     center: true,
@@ -69,5 +66,3 @@ export const theme = {
     },
   },
 };
-
-export const plugins = [tailwindcssAnimate];

@@ -1,6 +1,6 @@
 // TODO: Refactor: move cesium related code to engine.
 import invariant from "tiny-invariant";
-import { createMachine, type StateFrom } from "xstate";
+import { createMachine, assign, type StateFrom } from "xstate";
 
 import { type SketchType } from "./types";
 
@@ -147,7 +147,7 @@ export function createSketchMachine() {
                   on: {
                     NEXT: {
                       target: "vertex",
-                      internal: true,
+                      reenter: false,
                       actions: ["pushPosition"],
                     },
                   },
@@ -175,7 +175,7 @@ export function createSketchMachine() {
                     NEXT: [
                       {
                         target: "vertex",
-                        internal: true,
+                        reenter: false,
                         actions: ["pushPosition"],
                       },
                     ],
@@ -191,12 +191,12 @@ export function createSketchMachine() {
                     NEXT: [
                       {
                         target: "#sketch.extruding",
-                        cond: "willRectangleComplete",
+                        guard: "willRectangleComplete",
                         actions: ["pushPosition", "recordOriginalControlPoint"],
                       },
                       {
                         target: "vertex",
-                        internal: true,
+                        reenter: false,
                         actions: ["pushPosition"],
                       },
                     ],
@@ -211,7 +211,7 @@ export function createSketchMachine() {
                   on: {
                     NEXT: {
                       target: "vertex",
-                      internal: true,
+                      reenter: false,
                       actions: ["pushPosition"],
                     },
                   },
@@ -225,7 +225,7 @@ export function createSketchMachine() {
                   on: {
                     NEXT: {
                       target: "vertex",
-                      internal: true,
+                      reenter: false,
                       actions: ["pushPosition"],
                     },
                     EXTRUDE: {
@@ -244,7 +244,7 @@ export function createSketchMachine() {
             CANCEL: [
               {
                 target: ".history",
-                cond: "canPopPosition",
+                guard: "canPopPosition",
                 actions: ["popPosition"],
               },
               {
@@ -287,7 +287,7 @@ export function createSketchMachine() {
                   on: {
                     CATCH: {
                       target: "moving",
-                      internal: true,
+                      reenter: false,
                       actions: ["catchControlPoint"],
                     },
                   },
@@ -296,7 +296,7 @@ export function createSketchMachine() {
                   on: {
                     MOVE: {
                       target: "moving",
-                      internal: true,
+                      reenter: false,
                       actions: ["moveControlPoint"],
                     },
                     RELEASE: {
@@ -314,12 +314,12 @@ export function createSketchMachine() {
                   on: {
                     CATCH: {
                       target: "moving",
-                      internal: true,
+                      reenter: false,
                       actions: ["catchControlPoint"],
                     },
                     UPDATE: {
                       target: "waiting",
-                      internal: true,
+                      reenter: false,
                       actions: ["updateControlPoints"],
                     },
                   },
@@ -328,7 +328,7 @@ export function createSketchMachine() {
                   on: {
                     MOVE: {
                       target: "moving",
-                      internal: true,
+                      reenter: false,
                       actions: ["moveControlPoint"],
                     },
                     RELEASE: {
@@ -346,7 +346,7 @@ export function createSketchMachine() {
                   on: {
                     CATCH: {
                       target: "moving",
-                      internal: true,
+                      reenter: false,
                       actions: ["catchControlPoint"],
                     },
                   },
@@ -355,7 +355,7 @@ export function createSketchMachine() {
                   on: {
                     MOVE: {
                       target: "moving",
-                      internal: true,
+                      reenter: false,
                       actions: ["moveControlPoint"],
                     },
                     RELEASE: {
@@ -373,7 +373,7 @@ export function createSketchMachine() {
                   on: {
                     CATCH: {
                       target: "moving",
-                      internal: true,
+                      reenter: false,
                       actions: ["catchControlPoint"],
                     },
                   },
@@ -382,7 +382,7 @@ export function createSketchMachine() {
                   on: {
                     MOVE: {
                       target: "moving",
-                      internal: true,
+                      reenter: false,
                       actions: ["moveControlPoint"],
                     },
                     RELEASE: {
@@ -400,12 +400,12 @@ export function createSketchMachine() {
                   on: {
                     CATCH: {
                       target: "moving",
-                      internal: true,
+                      reenter: false,
                       actions: ["catchControlPoint"],
                     },
                     UPDATE: {
                       target: "waiting",
-                      internal: true,
+                      reenter: false,
                       actions: ["updateControlPoints"],
                     },
                   },
@@ -414,7 +414,7 @@ export function createSketchMachine() {
                   on: {
                     MOVE: {
                       target: "moving",
-                      internal: true,
+                      reenter: false,
                       actions: ["moveControlPoint"],
                     },
                     RELEASE: {
@@ -432,7 +432,7 @@ export function createSketchMachine() {
                   on: {
                     CATCH: {
                       target: "moving",
-                      internal: true,
+                      reenter: false,
                       actions: ["catchControlPoint"],
                     },
                   },
@@ -441,7 +441,7 @@ export function createSketchMachine() {
                   on: {
                     MOVE: {
                       target: "moving",
-                      internal: true,
+                      reenter: false,
                       actions: ["moveControlPoint"],
                     },
                     RELEASE: {
@@ -459,7 +459,7 @@ export function createSketchMachine() {
                   on: {
                     CATCH: {
                       target: "moving",
-                      internal: true,
+                      reenter: false,
                       actions: ["catchControlPoint"],
                     },
                   },
@@ -468,7 +468,7 @@ export function createSketchMachine() {
                   on: {
                     MOVE: {
                       target: "moving",
-                      internal: true,
+                      reenter: false,
                       actions: ["moveControlPoint"],
                     },
                     RELEASE: {
@@ -486,12 +486,12 @@ export function createSketchMachine() {
                   on: {
                     CATCH: {
                       target: "moving",
-                      internal: true,
+                      reenter: false,
                       actions: ["catchControlPoint"],
                     },
                     UPDATE: {
                       target: "waiting",
-                      internal: true,
+                      reenter: false,
                       actions: ["updateControlPoints"],
                     },
                   },
@@ -500,7 +500,7 @@ export function createSketchMachine() {
                   on: {
                     MOVE: {
                       target: "moving",
-                      internal: true,
+                      reenter: false,
                       actions: ["moveControlPoint"],
                     },
                     RELEASE: {
@@ -520,158 +520,126 @@ export function createSketchMachine() {
           },
         },
       },
-      schema: {
-        events: {} as unknown as EventObject,
-      },
-      predictableActionArguments: true,
-      preserveActionOrder: true,
-      tsTypes: {} as import("./sketchMachine.typegen").Typegen0,
     },
-    {
-      guards: {
-        canPopPosition: context => {
-          return context.controlPoints != null && context.controlPoints.length > 1;
-        },
-        willRectangleComplete: context => {
-          return context.controlPoints != null && context.controlPoints.length === 2;
-        },
-      },
-      actions: {
-        createMarker: (context, event) => {
-          context.lastPointerPosition = [...event.pointerPosition];
-          const controlPoint = [...event.controlPoint] as Position3d;
-          context.lastControlPoint = controlPoint;
-          context.type = "marker";
-          context.controlPoints = [controlPoint];
-        },
-        editMarker: (context, event) => {
-          context.lastControlPoint = undefined;
-          context.type = "marker";
-          context.controlPoints = event.controlPoints;
-        },
-        createPolyline: (context, event) => {
-          context.lastPointerPosition = [...event.pointerPosition];
-          const controlPoint = [...event.controlPoint] as Position3d;
-          context.lastControlPoint = controlPoint;
-          context.type = "polyline";
-          context.controlPoints = [controlPoint];
-        },
-        editPolyline: (context, event) => {
-          context.lastControlPoint = undefined;
-          context.type = "polyline";
-          context.controlPoints = event.controlPoints;
-        },
-        createCircle: (context, event) => {
-          context.lastPointerPosition = [...event.pointerPosition];
-          const controlPoint = [...event.controlPoint] as Position3d;
-          context.lastControlPoint = controlPoint;
-          context.type = "circle";
-          context.controlPoints = [controlPoint];
-        },
-        editCircle: (context, event) => {
-          context.lastControlPoint = undefined;
-          context.type = "circle";
-          context.controlPoints = event.controlPoints;
-        },
-        createRectangle: (context, event) => {
-          context.lastPointerPosition = [...event.pointerPosition];
-          const controlPoint = [...event.controlPoint] as Position3d;
-          context.lastControlPoint = controlPoint;
-          context.type = "rectangle";
-          context.controlPoints = [controlPoint];
-        },
-        editRectangle: (context, event) => {
-          context.lastControlPoint = undefined;
-          context.type = "rectangle";
-          context.controlPoints = event.controlPoints;
-        },
-        createPolygon: (context, event) => {
-          context.lastPointerPosition = [...event.pointerPosition];
-          const controlPoint = [...event.controlPoint] as Position3d;
-          context.lastControlPoint = controlPoint;
-          context.type = "polygon";
-          context.controlPoints = [controlPoint];
-        },
-        editPolygon: (context, event) => {
-          context.lastControlPoint = undefined;
-          context.type = "polygon";
-          context.controlPoints = event.controlPoints;
-        },
-        createExtrudedCircle: (context, event) => {
-          context.lastPointerPosition = [...event.pointerPosition];
-          const controlPoint = [...event.controlPoint] as Position3d;
-          context.lastControlPoint = controlPoint;
-          context.type = "extrudedCircle";
-          context.controlPoints = [controlPoint];
-        },
-        editExtrudedCircle: (context, event) => {
-          context.lastControlPoint = undefined;
-          context.type = "extrudedCircle";
-          context.controlPoints = event.controlPoints;
-        },
-        createExtrudedRectangle: (context, event) => {
-          context.lastPointerPosition = [...event.pointerPosition];
-          const controlPoint = [...event.controlPoint] as Position3d;
-          context.lastControlPoint = controlPoint;
-          context.type = "extrudedRectangle";
-          context.controlPoints = [controlPoint];
-        },
-        editExtrudedRectangle: (context, event) => {
-          context.lastControlPoint = undefined;
-          context.type = "extrudedRectangle";
-          context.controlPoints = event.controlPoints;
-        },
-        createExtrudedPolygon: (context, event) => {
-          context.lastPointerPosition = [...event.pointerPosition];
-          const controlPoint = [...event.controlPoint] as Position3d;
-          context.lastControlPoint = controlPoint;
-          context.type = "extrudedPolygon";
-          context.controlPoints = [controlPoint];
-        },
-        editExtrudedPolygon: (context, event) => {
-          context.lastControlPoint = undefined;
-          context.type = "extrudedPolygon";
-          context.controlPoints = event.controlPoints;
-        },
-        pushPosition: (context, event) => {
-          context.lastPointerPosition = [...event.pointerPosition];
-          const controlPoint = [...event.controlPoint] as Position3d;
-          context.lastControlPoint = controlPoint;
-          context.controlPoints?.push(controlPoint);
-        },
-        popPosition: context => {
-          invariant(context.controlPoints != null);
-          invariant(context.controlPoints.length > 1);
-          context.controlPoints.pop();
-        },
-        clearDrawing: context => {
-          delete context.lastControlPoint;
-          delete context.type;
-          delete context.controlPoints;
-          delete context.catchedControlPointIndex;
-          delete context.catchedExtrudedPoint;
-          delete context.originalControlPoint;
-        },
-        catchControlPoint: (context, event) => {
-          context.catchedControlPointIndex = event.catchedControlPointIndex;
-          context.catchedExtrudedPoint = event.catchedExtrudedPoint;
-        },
-        moveControlPoint: (context, event) => {
-          context.controlPoints = event.controlPoints;
-        },
-        releaseControlPoint: context => {
-          delete context.catchedControlPointIndex;
-          delete context.catchedExtrudedPoint;
-        },
-        updateControlPoints: (context, event) => {
-          context.controlPoints = event.controlPoints;
-        },
-        recordOriginalControlPoint: (context, event) => {
-          context.originalControlPoint = [...event.controlPoint] as Position3d;
-        },
-      },
+  ).provide({
+    guards: {
+      canPopPosition: ({ context }) => context.controlPoints != null && context.controlPoints.length > 1,
+      willRectangleComplete: ({ context }) => context.controlPoints != null && context.controlPoints.length === 2,
     },
-  );
+    actions: {
+      createMarker: assign(({ event }) => {
+        const e = event as Extract<EventObject, { type: "MARKER" }>;
+        const controlPoint = [...e.controlPoint] as Position3d;
+        return { lastPointerPosition: [...e.pointerPosition] as Position2d, lastControlPoint: controlPoint, type: "marker" as SketchType, controlPoints: [controlPoint] };
+      }),
+      editMarker: assign(({ event }) => {
+        const e = event as Extract<EventObject, { type: "EDIT_MARKER" }>;
+        return { lastControlPoint: undefined, type: "marker" as SketchType, controlPoints: e.controlPoints };
+      }),
+      createPolyline: assign(({ event }) => {
+        const e = event as Extract<EventObject, { type: "POLYLINE" }>;
+        const controlPoint = [...e.controlPoint] as Position3d;
+        return { lastPointerPosition: [...e.pointerPosition] as Position2d, lastControlPoint: controlPoint, type: "polyline" as SketchType, controlPoints: [controlPoint] };
+      }),
+      editPolyline: assign(({ event }) => {
+        const e = event as Extract<EventObject, { type: "EDIT_POLYLINE" }>;
+        return { lastControlPoint: undefined, type: "polyline" as SketchType, controlPoints: e.controlPoints };
+      }),
+      createCircle: assign(({ event }) => {
+        const e = event as Extract<EventObject, { type: "CIRCLE" }>;
+        const controlPoint = [...e.controlPoint] as Position3d;
+        return { lastPointerPosition: [...e.pointerPosition] as Position2d, lastControlPoint: controlPoint, type: "circle" as SketchType, controlPoints: [controlPoint] };
+      }),
+      editCircle: assign(({ event }) => {
+        const e = event as Extract<EventObject, { type: "EDIT_CIRCLE" }>;
+        return { lastControlPoint: undefined, type: "circle" as SketchType, controlPoints: e.controlPoints };
+      }),
+      createRectangle: assign(({ event }) => {
+        const e = event as Extract<EventObject, { type: "RECTANGLE" }>;
+        const controlPoint = [...e.controlPoint] as Position3d;
+        return { lastPointerPosition: [...e.pointerPosition] as Position2d, lastControlPoint: controlPoint, type: "rectangle" as SketchType, controlPoints: [controlPoint] };
+      }),
+      editRectangle: assign(({ event }) => {
+        const e = event as Extract<EventObject, { type: "EDIT_RECTANGLE" }>;
+        return { lastControlPoint: undefined, type: "rectangle" as SketchType, controlPoints: e.controlPoints };
+      }),
+      createPolygon: assign(({ event }) => {
+        const e = event as Extract<EventObject, { type: "POLYGON" }>;
+        const controlPoint = [...e.controlPoint] as Position3d;
+        return { lastPointerPosition: [...e.pointerPosition] as Position2d, lastControlPoint: controlPoint, type: "polygon" as SketchType, controlPoints: [controlPoint] };
+      }),
+      editPolygon: assign(({ event }) => {
+        const e = event as Extract<EventObject, { type: "EDIT_POLYGON" }>;
+        return { lastControlPoint: undefined, type: "polygon" as SketchType, controlPoints: e.controlPoints };
+      }),
+      createExtrudedCircle: assign(({ event }) => {
+        const e = event as Extract<EventObject, { type: "EXTRUDED_CIRCLE" }>;
+        const controlPoint = [...e.controlPoint] as Position3d;
+        return { lastPointerPosition: [...e.pointerPosition] as Position2d, lastControlPoint: controlPoint, type: "extrudedCircle" as SketchType, controlPoints: [controlPoint] };
+      }),
+      editExtrudedCircle: assign(({ event }) => {
+        const e = event as Extract<EventObject, { type: "EDIT_EXTRUDED_CIRCLE" }>;
+        return { lastControlPoint: undefined, type: "extrudedCircle" as SketchType, controlPoints: e.controlPoints };
+      }),
+      createExtrudedRectangle: assign(({ event }) => {
+        const e = event as Extract<EventObject, { type: "EXTRUDED_RECTANGLE" }>;
+        const controlPoint = [...e.controlPoint] as Position3d;
+        return { lastPointerPosition: [...e.pointerPosition] as Position2d, lastControlPoint: controlPoint, type: "extrudedRectangle" as SketchType, controlPoints: [controlPoint] };
+      }),
+      editExtrudedRectangle: assign(({ event }) => {
+        const e = event as Extract<EventObject, { type: "EDIT_EXTRUDED_RECTANGLE" }>;
+        return { lastControlPoint: undefined, type: "extrudedRectangle" as SketchType, controlPoints: e.controlPoints };
+      }),
+      createExtrudedPolygon: assign(({ event }) => {
+        const e = event as Extract<EventObject, { type: "EXTRUDED_POLYGON" }>;
+        const controlPoint = [...e.controlPoint] as Position3d;
+        return { lastPointerPosition: [...e.pointerPosition] as Position2d, lastControlPoint: controlPoint, type: "extrudedPolygon" as SketchType, controlPoints: [controlPoint] };
+      }),
+      editExtrudedPolygon: assign(({ event }) => {
+        const e = event as Extract<EventObject, { type: "EDIT_EXTRUDED_POLYGON" }>;
+        return { lastControlPoint: undefined, type: "extrudedPolygon" as SketchType, controlPoints: e.controlPoints };
+      }),
+      pushPosition: assign(({ context, event }) => {
+        const e = event as Extract<EventObject, { type: "NEXT" | "EXTRUDE" }>;
+        const controlPoint = [...e.controlPoint] as Position3d;
+        return {
+          lastPointerPosition: [...e.pointerPosition] as Position2d,
+          lastControlPoint: controlPoint,
+          controlPoints: [...(context.controlPoints ?? []), controlPoint],
+        };
+      }),
+      popPosition: assign(({ context }) => {
+        invariant(context.controlPoints != null);
+        invariant(context.controlPoints.length > 1);
+        return { controlPoints: context.controlPoints.slice(0, -1) };
+      }),
+      clearDrawing: assign(() => ({
+        lastControlPoint: undefined,
+        type: undefined,
+        controlPoints: undefined,
+        catchedControlPointIndex: undefined,
+        catchedExtrudedPoint: undefined,
+        originalControlPoint: undefined,
+      })),
+      catchControlPoint: assign(({ event }) => {
+        const e = event as Extract<EventObject, { type: "CATCH" }>;
+        return { catchedControlPointIndex: e.catchedControlPointIndex, catchedExtrudedPoint: e.catchedExtrudedPoint };
+      }),
+      moveControlPoint: assign(({ event }) => {
+        const e = event as Extract<EventObject, { type: "MOVE" }>;
+        return { controlPoints: e.controlPoints };
+      }),
+      releaseControlPoint: assign(() => ({ catchedControlPointIndex: undefined, catchedExtrudedPoint: undefined })),
+      updateControlPoints: assign(({ event }) => {
+        const e = event as Extract<EventObject, { type: "UPDATE" }>;
+        return { controlPoints: e.controlPoints };
+      }),
+      recordOriginalControlPoint: assign(({ event }) => {
+        const e = event as Extract<EventObject, { type: "NEXT" }>;
+        return { originalControlPoint: [...e.controlPoint] as Position3d };
+      }),
+    },
+  });
 }
 
 export type SketchMachine = ReturnType<typeof createSketchMachine>;
