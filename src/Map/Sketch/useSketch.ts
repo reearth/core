@@ -7,7 +7,6 @@ import { Position3d } from "../../types";
 import { EngineRef, MouseEventCallback, MouseEventProps } from "../types";
 
 import { SketchInterpreter, sketchState } from "./hooks";
-import { Typegen0 } from "./sketchMachine.typegen";
 import {
   GeometryOptionsXYZ,
   SketchEditingFeature,
@@ -50,7 +49,7 @@ type Props = {
   sketchOptions: SketchOptions;
 };
 
-const movingStatus: Typegen0["matchesStates"][] = [
+const movingStatus: string[] = [
   "editing.marker.moving",
   "editing.polyline.moving",
   "editing.polygon.moving",
@@ -205,7 +204,7 @@ export default ({
             setExtrudedPoint(extrudePoint);
           }
         }
-      } else if (movingStatus.some(state.matches)) {
+      } else if (movingStatus.some(s => state.matches(s))) {
         if (state.context.catchedExtrudedPoint) {
           invariant(geometryOptions?.controlPoints != null);
           const extrudedHeight = engineRef.current?.getExtrudedHeight(
@@ -313,7 +312,7 @@ export default ({
         return;
       }
 
-      if (movingStatus.some(state.matches)) {
+      if (movingStatus.some(s => state.matches(s))) {
         send({
           type: "RELEASE",
           controlPoints: state.context.controlPoints ?? [],

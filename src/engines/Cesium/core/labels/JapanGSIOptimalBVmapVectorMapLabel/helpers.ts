@@ -1,4 +1,4 @@
-import { type Zxy } from "protomaps";
+import { type Zxy } from "protomaps-leaflet";
 
 import { type ImageryCoords } from "./types";
 

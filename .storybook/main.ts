@@ -32,13 +32,15 @@ const config: StorybookConfig = {
     return {
       ...config,
       plugins: [
-        ...(config.plugins || []),
+        ...(config.plugins || []).filter((p: any) => p?.name !== "vite:dts"),
         cesium({ cesiumBaseUrl: `cesium-${cesiumPackageJson.version}/` }),
       ],
       resolve: {
         ...config.resolve,
         alias: {
           ...config.resolve?.alias,
+          // csv-parse main entry uses Node.js streams; use browser ESM build instead
+          'csv-parse': 'csv-parse/browser/esm',
           // Alias nosleep.js to its dist file which has proper exports
           'nosleep.js': resolve(__dirname, '..', 'node_modules', 'nosleep.js', 'dist', 'NoSleep.js'),
         },

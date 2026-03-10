@@ -11,7 +11,7 @@ import {
   type TileDiscardPolicy,
   type TilingScheme,
 } from "@cesium/engine";
-import { TileCache, ZxySource } from "protomaps";
+import { TileCache, ZxySource } from "protomaps-leaflet";
 
 import { getTileCoords, makeKey } from "./helpers";
 
@@ -114,7 +114,7 @@ export class JapanGSIOptimalBVmapLabelImageryProvider extends JapanGSIOptimalBVm
     this.maximumDataLevel = options.maximumDataLevel;
 
     const source = new ZxySource(options.url, false);
-    this.tileCache = new TileCache(source, 1024);
+    this.tileCache = new TileCache(source, 256);
 
     this.image = document.createElement("canvas");
     this.image.width = 1;

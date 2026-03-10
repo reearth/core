@@ -13,7 +13,7 @@ import {
   useState,
 } from "react";
 import { v4 as uuidv4 } from "uuid";
-import { InterpreterFrom, StateFrom } from "xstate";
+import { ActorRefFrom, StateFrom } from "xstate";
 
 import { ControlPointMouseEventHandler } from "../../engines/Cesium/Sketch";
 import { InteractionModeType } from "../../shared/interactionMode";
@@ -65,7 +65,7 @@ type Props = {
 const sketchMachine = createSketchMachine();
 
 export type sketchState = StateFrom<typeof sketchMachine>;
-export type SketchInterpreter = InterpreterFrom<typeof sketchMachine>;
+export type SketchInterpreter = ActorRefFrom<typeof sketchMachine>;
 
 export default function ({
   ref,
