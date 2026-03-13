@@ -246,7 +246,7 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
         light={sceneLight}
         mode={sceneMode}
         msaaSamples={sceneMsaaSamples}
-        useDepthPicking={false}
+        useDepthPicking={true}
         useWebVR={!!property?.scene?.vr || undefined} // NOTE: useWebVR={false} will crash Cesium
         debugShowFramesPerSecond={!!property?.debug?.showFramesPerSecond}
         verticalExaggerationRelativeHeight={property?.scene?.verticalExaggerationRelativeHeight}
