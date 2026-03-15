@@ -245,7 +245,6 @@ export default function Marker({ property, id, isVisible, geometry, layer, featu
             outlineWidth={pointOutlineWidth}
             heightReference={heightReference(hr)}
             distanceDisplayCondition={distanceDisplayCondition}
-            disableDepthTestDistance={Number.POSITIVE_INFINITY}
           />
         ) : (
           <BillboardGraphics
@@ -258,7 +257,6 @@ export default function Marker({ property, id, isVisible, geometry, layer, featu
             sizeInMeters={imageSizeInMeters}
             pixelOffset={cartPixelOffset}
             eyeOffset={cartEyeOffset}
-            disableDepthTestDistance={Number.POSITIVE_INFINITY}
           />
         )}
         {label && (
@@ -286,7 +284,6 @@ export default function Marker({ property, id, isVisible, geometry, layer, featu
             backgroundPadding={labelBackgroundPadding}
             heightReference={heightReference(hr)}
             distanceDisplayCondition={distanceDisplayCondition}
-            disableDepthTestDistance={Number.POSITIVE_INFINITY}
           />
         )}
       </EntityExt>
