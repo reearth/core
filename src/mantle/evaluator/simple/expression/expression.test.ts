@@ -110,6 +110,71 @@ describe("Expression evaluation", () => {
       expression.evaluate();
     }).toThrow('Unexpected function call "czm_住所"');
   });
+
+  test("should evaluate expression with quoted property names containing spaces", () => {
+    const expressionString = '${"user name"}';
+    const feature = {
+      properties: {
+        "user name": "Alice",
+        "user age": 25,
+      },
+    } as Feature;
+
+    const expression = new Expression(expressionString, feature);
+    const result = expression.evaluate();
+
+    expect(result).toBe("Alice");
+  });
+
+  test("should evaluate conditional expression with quoted property names", () => {
+    const expressionString = '${"user score"} > 50 ? "Pass" : "Fail"';
+    const feature1 = {
+      properties: {
+        "user score": 75,
+      },
+    } as Feature;
+    const feature2 = {
+      properties: {
+        "user score": 30,
+      },
+    } as Feature;
+
+    const expression1 = new Expression(expressionString, feature1);
+    const expression2 = new Expression(expressionString, feature2);
+
+    expect(expression1.evaluate()).toBe("Pass");
+    expect(expression2.evaluate()).toBe("Fail");
+  });
+
+  test("should evaluate arithmetic expression with quoted property names", () => {
+    const expressionString = '${"item price"} * ${"item quantity"}';
+    const feature = {
+      properties: {
+        "item price": 10.5,
+        "item quantity": 3,
+      },
+    } as Feature;
+
+    const expression = new Expression(expressionString, feature);
+    const result = expression.evaluate();
+
+    expect(result).toBe(31.5);
+  });
+
+  test("should handle quoted property names with special characters", () => {
+    const expressionString = '${"user-info:name"} === "Bob Smith"';
+    const feature = {
+      properties: {
+        "user-info:name": "Bob Smith",
+        "email@address": "bob@example.com",
+      },
+    } as Feature;
+
+    const expression = new Expression(expressionString, feature);
+    const result = expression.evaluate();
+
+    expect(result).toBe(true);
+  });
 });
 
 describe("expression caches", () => {
