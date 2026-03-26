@@ -160,27 +160,27 @@ describe("replaceVariables", () => {
   });
 
   test("should reject mismatched quote types (double to single)", () => {
-    const [result, res] = replaceVariables('${"user info\'}', {
+    const [result, res] = replaceVariables("${\"user info'}", {
       "user info": "John Doe",
     });
     // Should not match the quoted pattern, should fall back to variable name
-    expect(result).toContain('czm_');
+    expect(result).toContain("czm_");
     expect(res).toHaveLength(0);
   });
 
   test("should reject mismatched quote types (single to double)", () => {
-    const [result, res] = replaceVariables("${\'user info\"}", {
+    const [result, res] = replaceVariables("${'user info\"}", {
       "user info": "Jane Doe",
     });
     // Should not match the quoted pattern, should fall back to variable name
-    expect(result).toContain('czm_');
+    expect(result).toContain("czm_");
     expect(res).toHaveLength(0);
   });
 
   test("should correctly handle consecutive properties with different quote types", () => {
-    const [result, res] = replaceVariables('${"prop1"} + ${\'prop2\'}', {
-      "prop1": "value1",
-      "prop2": "value2",
+    const [result, res] = replaceVariables("${\"prop1\"} + ${'prop2'}", {
+      prop1: "value1",
+      prop2: "value2",
     });
     expect(res).toHaveLength(2);
     expect(res[0].literalValue).toBe("value1");
@@ -192,7 +192,7 @@ describe("replaceVariables", () => {
 
   test("should return empty string when quoted property is missing (consistent with regular variables)", () => {
     const [result, res] = replaceVariables('${"missing"}', {
-      "existing": "value",
+      existing: "value",
     });
     // Returns empty string for missing quoted property (consistent with regular variables)
     expect(res).toHaveLength(1);
@@ -201,7 +201,7 @@ describe("replaceVariables", () => {
   });
 
   test("should pass through regular variable name when property might be missing", () => {
-    const [result, res] = replaceVariables('${missing}');
+    const [result, res] = replaceVariables("${missing}");
     // Regular variables are passed through as czm_variableName
     // They will be evaluated later by Node._evaluateVariable
     expect(result).toBe("czm_missing");
@@ -209,8 +209,8 @@ describe("replaceVariables", () => {
   });
 
   test("should return empty string for missing JSONPath properties (consistent with regular variables)", () => {
-    const [result, res] = replaceVariables('${$.missingPath}', {
-      "existing": "value",
+    const [result, res] = replaceVariables("${$.missingPath}", {
+      existing: "value",
     });
     // Returns empty string for missing JSONPath property
     expect(res).toHaveLength(1);
@@ -220,7 +220,7 @@ describe("replaceVariables", () => {
 
   test("should handle mixed existing and missing properties consistently", () => {
     const [result, res] = replaceVariables('${"existing"} - ${"missing"}', {
-      "existing": "value",
+      existing: "value",
     });
     expect(res).toHaveLength(2);
     expect(res[0].literalValue).toBe("value");
