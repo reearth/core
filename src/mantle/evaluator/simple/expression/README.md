@@ -241,6 +241,8 @@ Within string literals, you can interpolate property values:
 "Height: ${height}m"
 ```
 
+**Note:** String interpolation only supports simple property names (without spaces). For properties with spaces or special characters, use concatenation instead (see below).
+
 **Example:**
 ```typescript
 const feature = {
@@ -252,6 +254,20 @@ const feature = {
 
 const expr = new Expression('"Building: ${name}, Height: ${height}m"', feature);
 expr.evaluate(); // "Building: Building A, Height: 100m"
+```
+
+**For properties with spaces, use concatenation:**
+```typescript
+const feature = {
+  properties: {
+    "building name": "Tower A",
+    floors: 30,
+  },
+};
+
+// Use concatenation with + operator
+const expr = new Expression('${"building name"} + " has " + ${floors} + " floors"', feature);
+expr.evaluate(); // "Tower A has 30 floors"
 ```
 
 ### Array Comparisons
@@ -337,9 +353,9 @@ const expr2 = new Expression(
 );
 console.log(expr2.evaluate()); // #ff0000 (red)
 
-// String interpolation
+// String concatenation (for properties with spaces)
 const expr3 = new Expression(
-  '"${"building name"} has ${floors} floors"',
+  '${"building name"} + " has " + ${floors} + " floors"',
   feature
 );
 console.log(expr3.evaluate()); // "Tower A has 30 floors"
