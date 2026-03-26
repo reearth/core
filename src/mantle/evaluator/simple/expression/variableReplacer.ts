@@ -33,16 +33,13 @@ export function replaceVariables(expression: string, feature?: any): [string, JP
         }
         const propertyName = quotedMatch[2];
         const propertyValue = feature[propertyName];
-        if (typeof propertyValue !== "undefined") {
-          const placeholderLiteral = generateRandomString(10);
-          literalJP.push({
-            literalName: placeholderLiteral,
-            literalValue: propertyValue,
-          });
-          result += placeholderLiteral;
-        } else {
-          return ["false", []];
-        }
+        // Return empty string for missing properties to match regular variable behavior
+        const placeholderLiteral = generateRandomString(10);
+        literalJP.push({
+          literalName: placeholderLiteral,
+          literalValue: typeof propertyValue !== "undefined" ? propertyValue : "",
+        });
+        result += placeholderLiteral;
       } else if (varExpRegex.test(varExp)) {
         if (!featureDefined) {
           return [result, []];
@@ -56,16 +53,13 @@ export function replaceVariables(expression: string, feature?: any): [string, JP
             return [result, []];
           }
         }
-        if (res.length !== 0) {
-          const placeholderLiteral = generateRandomString(10);
-          literalJP.push({
-            literalName: placeholderLiteral,
-            literalValue: res[0],
-          });
-          result += placeholderLiteral;
-        } else {
-          return ["false", []];
-        }
+        // Return empty string for missing properties to match regular variable behavior
+        const placeholderLiteral = generateRandomString(10);
+        literalJP.push({
+          literalName: placeholderLiteral,
+          literalValue: res.length !== 0 ? res[0] : "",
+        });
+        result += placeholderLiteral;
       } else {
         const replacedVarExp = replaceReservedWord(varExp);
         result += `${VARIABLE_PREFIX}${replacedVarExp}`;
