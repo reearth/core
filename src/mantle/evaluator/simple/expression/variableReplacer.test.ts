@@ -158,4 +158,35 @@ describe("replaceVariables", () => {
     expect(res[0].literalValue).toBe("Jane Smith");
     expect(result).toBe(res[0].literalName);
   });
+
+  test("should reject mismatched quote types (double to single)", () => {
+    const [result, res] = replaceVariables('${"user info\'}', {
+      "user info": "John Doe",
+    });
+    // Should not match the quoted pattern, should fall back to variable name
+    expect(result).toContain('czm_');
+    expect(res).toHaveLength(0);
+  });
+
+  test("should reject mismatched quote types (single to double)", () => {
+    const [result, res] = replaceVariables("${\'user info\"}", {
+      "user info": "Jane Doe",
+    });
+    // Should not match the quoted pattern, should fall back to variable name
+    expect(result).toContain('czm_');
+    expect(res).toHaveLength(0);
+  });
+
+  test("should correctly handle consecutive properties with different quote types", () => {
+    const [result, res] = replaceVariables('${"prop1"} + ${\'prop2\'}', {
+      "prop1": "value1",
+      "prop2": "value2",
+    });
+    expect(res).toHaveLength(2);
+    expect(res[0].literalValue).toBe("value1");
+    expect(res[1].literalValue).toBe("value2");
+    expect(result).toContain(res[0].literalName);
+    expect(result).toContain("+");
+    expect(result).toContain(res[1].literalName);
+  });
 });

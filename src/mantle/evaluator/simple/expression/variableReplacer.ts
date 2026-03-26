@@ -14,7 +14,7 @@ export function replaceVariables(expression: string, feature?: any): [string, JP
   const featureDefined = typeof feature !== "undefined";
   const jsonPathCache: Record<string, any[]> = {};
   const varExpRegex = /^\$./;
-  const quotedStringRegex = /^["'](.+)["']$/;
+  const quotedStringRegex = /^(["'])(.+)\1$/;
   while (i >= 0) {
     if (isInsideQuotes(exp, i)) {
       const closeQuote = findCloseQuote(exp, i);
@@ -31,7 +31,7 @@ export function replaceVariables(expression: string, feature?: any): [string, JP
         if (!featureDefined) {
           return [result, []];
         }
-        const propertyName = quotedMatch[1];
+        const propertyName = quotedMatch[2];
         const propertyValue = feature[propertyName];
         if (typeof propertyValue !== "undefined") {
           const placeholderLiteral = generateRandomString(10);
