@@ -62,6 +62,7 @@ export default () => {
       ? DEFAULT_VIEWER_PROPERTY.tiles?.[0]?.type
       : undefined,
   );
+  const [cesiumIonAssetId, setCesiumIonAssetId] = useState<number | undefined>(undefined);
   const [currentCamera, setCurrentCamera] = useState(DEFAULT_CAMERA);
   const [terrainEnabled, setTerrainEnabled] = useState(true);
   const [hideUnderground, setHideUnderground] = useState(false);
@@ -76,6 +77,7 @@ export default () => {
             {
               id: "default",
               type: currentTile,
+              ionAssetId: currentTile === "cesium_ion" ? cesiumIonAssetId : undefined,
               opacity: 1,
             },
           ]
@@ -89,7 +91,7 @@ export default () => {
         depthTestAgainstTerrain: hideUnderground,
       },
     }),
-    [currentTile, terrainEnabled, hideUnderground],
+    [currentTile, cesiumIonAssetId, terrainEnabled, hideUnderground],
   );
 
   const layers = useMemo(
@@ -181,6 +183,8 @@ export default () => {
     meta,
     currentTile,
     setCurrentTile,
+    cesiumIonAssetId,
+    setCesiumIonAssetId,
     currentCamera,
     setCurrentCamera,
     terrainEnabled,

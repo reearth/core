@@ -18,6 +18,9 @@ import {
 } from "./tileProviderResolver";
 
 const PRESET_TILE_TYPES = [
+  // Dynamic Cesium Ion asset — asset ID supplied per-tile via ionAssetId field
+  "cesium_ion",
+
   // Terravista presets — require TileProviderConfig; no Ion fallback
   "terravista_google_satellite",
   "terravista_google_roadmap",
@@ -44,6 +47,7 @@ export const isValidPresetTileType = (type: string | undefined): type is PresetT
 export type TileOptions = {
   url?: string;
   cesiumIonAccessToken?: string;
+  ionAssetId?: number;
   heatmap?: boolean;
   tile_zoomLevel?: number[];
   tileProvider?: TileProviderConfig;
@@ -68,6 +72,18 @@ function createPresetImageryProvider(
 }
 
 export const tiles = {
+  // --- Dynamic Cesium Ion asset ---
+  // Uses per-tile ionAssetId; requires cesiumIonAccessToken.
+  cesium_ion: (opts?: TileOptions) => {
+    if (!opts?.ionAssetId) return null;
+    return IonImageryProvider.fromAssetId(opts.ionAssetId, {
+      accessToken: opts?.cesiumIonAccessToken,
+    }).catch(err => {
+      console.error(err);
+      return undefined as unknown as ImageryProvider;
+    });
+  },
+
   // --- Terravista presets ---
   // Each resolves by its own name as the override ID in TileProviderConfig.
   // Returns null when TileProviderConfig is not configured.

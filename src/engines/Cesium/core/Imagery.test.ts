@@ -31,27 +31,27 @@ test("useImageryProviders", () => {
     cesiumIonAccessToken?: string;
   }) => void;
 
-  expect(result.current.providers).toEqual({ "1": ["cesium_ion_default", undefined, { hoge: undefined }] });
+  expect(result.current.providers).toEqual({ "1": ["cesium_ion_default", undefined, undefined, { hoge: undefined }] });
   expect(result.current.updated).toBe(true);
   expect(provider).toBeCalledTimes(1);
-  const prevImageryProvider = result.current.providers["1"][2];
+  const prevImageryProvider = result.current.providers["1"][3];
 
   // re-render with same tiles
   typedRerender({ tiles: [{ id: "1", type: "cesium_ion_default" }] });
 
-  expect(result.current.providers).toEqual({ "1": ["cesium_ion_default", undefined, { hoge: undefined }] });
-  expect(result.current.providers["1"][2]).toBe(prevImageryProvider); // 1's provider should be reused
+  expect(result.current.providers).toEqual({ "1": ["cesium_ion_default", undefined, undefined, { hoge: undefined }] });
+  expect(result.current.providers["1"][3]).toBe(prevImageryProvider); // 1's provider should be reused
   expect(provider).toBeCalledTimes(1);
 
   // update a tile URL
   typedRerender({ tiles: [{ id: "1", type: "cesium_ion_default", url: "a" }] });
 
-  expect(result.current.providers).toEqual({ "1": ["cesium_ion_default", "a", { hoge: "a" }] });
-  expect(result.current.providers["1"][2]).not.toBe(prevImageryProvider);
+  expect(result.current.providers).toEqual({ "1": ["cesium_ion_default", "a", undefined, { hoge: "a" }] });
+  expect(result.current.providers["1"][3]).not.toBe(prevImageryProvider);
   expect(result.current.updated).toBe(true);
   expect(provider).toBeCalledTimes(2);
   expect(provider).toBeCalledWith({ url: "a" });
-  const prevImageryProvider2 = result.current.providers["1"][2];
+  const prevImageryProvider2 = result.current.providers["1"][3];
 
   // add a tile with URL
   typedRerender({
@@ -62,11 +62,11 @@ test("useImageryProviders", () => {
   });
 
   expect(result.current.providers).toEqual({
-    "2": ["cesium_ion_default", undefined, { hoge: undefined }],
-    "1": ["cesium_ion_default", "a", { hoge: "a" }],
+    "2": ["cesium_ion_default", undefined, undefined, { hoge: undefined }],
+    "1": ["cesium_ion_default", "a", undefined, { hoge: "a" }],
   });
   expect(result.current.updated).toBe(true);
-  expect(result.current.providers["1"][2]).toBe(prevImageryProvider2); // 1's provider should be reused
+  expect(result.current.providers["1"][3]).toBe(prevImageryProvider2); // 1's provider should be reused
   expect(provider).toBeCalledTimes(3);
 
   // sort tiles
@@ -78,11 +78,11 @@ test("useImageryProviders", () => {
   });
 
   expect(result.current.providers).toEqual({
-    "1": ["cesium_ion_default", "a", { hoge: "a" }],
-    "2": ["cesium_ion_default", undefined, { hoge: undefined }],
+    "1": ["cesium_ion_default", "a", undefined, { hoge: "a" }],
+    "2": ["cesium_ion_default", undefined, undefined, { hoge: undefined }],
   });
   expect(result.current.updated).toBe(true);
-  expect(result.current.providers["1"][2]).toBe(prevImageryProvider2); // 1's provider should be reused
+  expect(result.current.providers["1"][3]).toBe(prevImageryProvider2); // 1's provider should be reused
   expect(provider).toBeCalledTimes(3);
 
   // Ion token update triggers provider recreation for cesium_ion_* types
@@ -92,10 +92,10 @@ test("useImageryProviders", () => {
   });
 
   expect(result.current.providers).toEqual({
-    "1": ["cesium_ion_default", "a", { hoge: "a" }],
+    "1": ["cesium_ion_default", "a", undefined, { hoge: "a" }],
   });
   expect(result.current.updated).toBe(true);
-  expect(result.current.providers["1"][2]).not.toBe(prevImageryProvider2);
+  expect(result.current.providers["1"][3]).not.toBe(prevImageryProvider2);
   expect(provider).toBeCalledTimes(4);
 
   // unknown type: falls back to terravista_google_satellite (returns null) then open_street_map
@@ -104,7 +104,7 @@ test("useImageryProviders", () => {
   });
 
   expect(result.current.providers).toEqual({
-    "1": ["unexpected_type", "u", { osm: true }],
+    "1": ["unexpected_type", "u", undefined, { osm: true }],
   });
   expect(result.current.updated).toBe(true);
   expect(provider).toBeCalledTimes(4); // cesium_ion_default provider not called again

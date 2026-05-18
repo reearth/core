@@ -25,6 +25,7 @@ export type Tile = {
   id: string;
   url?: string;
   type?: string;
+  ionAssetId?: number;
   opacity?: number;
   zoomLevel?: number[];
   zoomLevelForURL?: number[];
@@ -65,7 +66,7 @@ export default function ImageryLayers({
     const addedLayers: CesiumImageryLayer[] = [];
 
     tiles?.forEach(({ id, zoomLevel, opacity, heatmap }, i) => {
-      const providerOrPromise = providers[id]?.[2];
+      const providerOrPromise = providers[id]?.[3];
       if (!providerOrPromise) return;
 
       const doAdd = (provider: ImageryProvider) => {
@@ -107,7 +108,7 @@ export default function ImageryLayers({
   return null;
 }
 
-type Providers = { [id: string]: [string | undefined, string | undefined, ImageryProvider] };
+type Providers = { [id: string]: [string | undefined, string | undefined, number | undefined, ImageryProvider] };
 
 export function useImageryProviders({
   tiles = [],
@@ -133,6 +134,7 @@ export function useImageryProviders({
       const opts = {
         url: t.url,
         cesiumIonAccessToken: ciat,
+        ionAssetId: t.ionAssetId,
         heatmap: t.heatmap,
         zoomLevel: t.zoomLevelForURL,
         tileProvider: tp,
@@ -177,7 +179,8 @@ export function useImageryProviders({
       added: added.includes(k),
       prevType: v?.[0],
       prevUrl: v?.[1],
-      prevProvider: v?.[2],
+      prevIonAssetId: v?.[2],
+      prevProvider: v?.[3],
       tile: tiles.find(t => t.id === k),
     }));
 
@@ -189,6 +192,7 @@ export function useImageryProviders({
             added,
             prevType,
             prevUrl,
+            prevIonAssetId,
             prevProvider,
             tile,
           }):
@@ -197,6 +201,7 @@ export function useImageryProviders({
                 [
                   string | undefined,
                   string | undefined,
+                  number | undefined,
                   Promise<ImageryProvider> | ImageryProvider | null | undefined,
                 ],
               ]
@@ -208,15 +213,16 @@ export function useImageryProviders({
                   added ||
                   prevType !== tile.type ||
                   prevUrl !== tile.url ||
+                  prevIonAssetId !== tile.ionAssetId ||
                   isTileProviderUpdated ||
-                  (isCesiumAccessTokenUpdated && tile.type?.startsWith("cesium_ion_"))
-                    ? [tile.type, tile.url, newTile(tile, cesiumIonAccessToken, tileProvider)]
-                    : [prevType, prevUrl, prevProvider],
+                  (isCesiumAccessTokenUpdated && tile.type?.startsWith("cesium_ion"))
+                    ? [tile.type, tile.url, tile.ionAssetId, newTile(tile, cesiumIonAccessToken, tileProvider)]
+                    : [prevType, prevUrl, prevIonAssetId, prevProvider],
                 ],
         )
         .filter(
-          (e): e is [string, [string | undefined, string | undefined, ImageryProvider]] =>
-            !!e?.[1][2],
+          (e): e is [string, [string | undefined, string | undefined, number | undefined, ImageryProvider]] =>
+            !!e?.[1][3],
         ),
     );
 
@@ -226,7 +232,9 @@ export function useImageryProviders({
       !!isTileProviderUpdated ||
       !isEqual(prevTileKeys.current, tileKeys) ||
       !isEqual(prevZoomLevels.current, zoomLevels) ||
-      rawProviders.some(p => p.tile && (p.prevType !== p.tile.type || p.prevUrl !== p.tile.url));
+      rawProviders.some(
+        p => p.tile && (p.prevType !== p.tile.type || p.prevUrl !== p.tile.url || p.prevIonAssetId !== p.tile.ionAssetId),
+      );
 
     prevTileKeys.current = tileKeys;
     prevZoomLevels.current = zoomLevels;

@@ -16,6 +16,8 @@ function App() {
     meta,
     currentTile,
     setCurrentTile,
+    cesiumIonAssetId,
+    setCesiumIonAssetId,
     currentCamera,
     setCurrentCamera,
     terrainEnabled,
@@ -48,6 +50,8 @@ function App() {
       <OptionsPanel
         currentTile={currentTile}
         setCurrentTile={setCurrentTile}
+        cesiumIonAssetId={cesiumIonAssetId}
+        setCesiumIonAssetId={setCesiumIonAssetId}
         terrainEnabled={terrainEnabled}
         setTerrainEnabled={setTerrainEnabled}
         hideUnderground={hideUnderground}

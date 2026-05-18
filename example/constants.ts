@@ -20,7 +20,9 @@ export const TILES = [
   // Public (always available)
   "open_street_map",
   "japan_gsi_standard",
-  // Cesium Ion (requires user-provided Ion token in scene settings)
+  // Cesium Ion — custom asset ID (enter asset ID in the input below)
+  "cesium_ion",
+  // Cesium Ion — preset assets (requires user-provided Ion token in scene settings)
   "cesium_ion_default",
   "cesium_ion_labelled",
   "cesium_ion_road",
