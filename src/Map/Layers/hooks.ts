@@ -204,6 +204,12 @@ export default function useHooks({
     ),
   );
 
+  // Store getComputedLayer in a ref to avoid recreating prototypes on every change
+  const getComputedLayerRef = useRef(getComputedLayer);
+  useEffect(() => {
+    getComputedLayerRef.current = getComputedLayer;
+  }, [getComputedLayer]);
+
   const lazyComputedLayerPrototype = useMemo<object>(() => {
     return objectFromGetter(
       // id and layer should not be accessible
@@ -212,12 +218,12 @@ export default function useHooks({
         const id: string | undefined = (this as any).id;
         if (!id || typeof id !== "string") throw new Error("layer ID is not specified");
 
-        const layer = getComputedLayer(id);
+        const layer = getComputedLayerRef.current(id);
         if (!layer) return undefined;
         return (layer as any)[key];
       },
     );
-  }, [getComputedLayer]);
+  }, []);
 
   const lazyLayerPrototype = useMemo<object>(() => {
     return objectFromGetter(layerKeys, function (key) {
@@ -237,7 +243,7 @@ export default function useHooks({
       else if (key === "isVisible") return layer.visible;
       // computed
       else if (key === "computed") {
-        const computedLayer = getComputedLayer(layer.id);
+        const computedLayer = getComputedLayerRef.current(layer.id);
         if (!computedLayer) return undefined;
         const computed = Object.create(lazyComputedLayerPrototype);
         computed.id = id;
@@ -246,7 +252,7 @@ export default function useHooks({
 
       return (layer as any)[key];
     });
-  }, [getComputedLayer, layerMap, lazyComputedLayerPrototype]);
+  }, [layerMap, lazyComputedLayerPrototype]);
 
   const findById = useCallback(
     (layerId: string): LazyLayer | undefined => {
