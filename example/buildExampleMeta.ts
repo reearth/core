@@ -30,34 +30,38 @@ export function buildExampleTileProvider(): TileProviderConfig {
       baseUrl: import.meta.env.EXAMPLE_TERRAVISTA_BASE_URL || undefined,
       imageryTileOverrides: [
         {
-          id: "default",
+          id: "terravista_google_satellite",
           url: `${import.meta.env.EXAMPLE_TERRAVISTA_IMAGERY_DEFAULT_URL}${t}`,
-          credit:
-            import.meta.env.EXAMPLE_TERRAVISTA_IMAGERY_DEFAULT_CREDIT ||
-            "© Google",
+          credit: import.meta.env.EXAMPLE_TERRAVISTA_IMAGERY_DEFAULT_CREDIT || "© Google",
         },
         {
-          id: "default_road",
+          id: "terravista_google_roadmap",
           url: `${import.meta.env.EXAMPLE_TERRAVISTA_IMAGERY_ROAD_URL}${t}`,
-          credit:
-            import.meta.env.EXAMPLE_TERRAVISTA_IMAGERY_ROAD_CREDIT ||
-            "© Google",
+          credit: import.meta.env.EXAMPLE_TERRAVISTA_IMAGERY_ROAD_CREDIT || "© Google",
         },
         {
-          id: "black_marble",
+          id: "terravista_black_marble",
           url: `${import.meta.env.EXAMPLE_TERRAVISTA_IMAGERY_BLACK_MARBLE_URL}${t}`,
-          credit:
-            import.meta.env.EXAMPLE_TERRAVISTA_IMAGERY_BLACK_MARBLE_CREDIT ||
-            "NASA GIBS VIIRS",
+          credit: import.meta.env.EXAMPLE_TERRAVISTA_IMAGERY_BLACK_MARBLE_CREDIT || "NASA GIBS VIIRS",
           maxZoomLevel: 8,
         },
       ],
-      terrainOverrides: [
-        {
-          id: "default",
-          url: toTerrainUrl(import.meta.env.EXAMPLE_REEARTH_TERRAIN_URL),
-        },
-      ],
+      terrainOverrides: (() => {
+        const terrainUrl = toTerrainUrl(
+          import.meta.env.EXAMPLE_REEARTH_TERRAIN_URL ||
+            "https://terrain.reearth.land/cesium-mesh/ellipsoid",
+        );
+        return terrainUrl
+          ? [
+              {
+                id: "default",
+                url: terrainUrl,
+                credit:
+                  import.meta.env.EXAMPLE_REEARTH_TERRAIN_CREDIT || "Re:Earth Terrain, Mapterhorn",
+              },
+            ]
+          : [];
+      })(),
       layerSourceOverrides: [
         {
           id: "googlePhotorealistic",
@@ -67,16 +71,16 @@ export function buildExampleTileProvider(): TileProviderConfig {
     });
   }
 
-  // No token — fall back to public OSM tiles.
+  // No token — map terravista preset IDs to public OSM so unknown-type fallback still shows tiles.
   return createCustomConfig({
     imageryTileOverrides: [
       {
-        id: "default",
+        id: "terravista_google_satellite",
         url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
         credit: "© OpenStreetMap contributors",
       },
       {
-        id: "default_road",
+        id: "terravista_google_roadmap",
         url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
         credit: "© OpenStreetMap contributors",
       },

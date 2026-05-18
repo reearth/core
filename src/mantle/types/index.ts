@@ -107,6 +107,7 @@ export type DataType =
   | "geojson"
   | "3dtiles"
   | "osm-buildings"
+  | "reearth-buildings"
   | "google-photorealistic"
   | "czml"
   | "csv"

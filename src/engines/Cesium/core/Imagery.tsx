@@ -130,13 +130,19 @@ export function useImageryProviders({
 }): { providers: Providers; updated: boolean } {
   const newTile = useCallback(
     (t: Tile, ciat?: string, tp?: TileProviderConfig) => {
-      return presets[isValidPresetTileType(t.type) ? t.type : "default"]({
+      const opts = {
         url: t.url,
         cesiumIonAccessToken: ciat,
         heatmap: t.heatmap,
         zoomLevel: t.zoomLevelForURL,
         tileProvider: tp,
-      });
+      };
+      if (isValidPresetTileType(t.type)) {
+        return presets[t.type](opts);
+      }
+      // Unknown type: try terravista_google_satellite first (returns null if no TileProviderConfig),
+      // then fall back to open_street_map which is always available.
+      return presets["terravista_google_satellite"](opts) ?? presets["open_street_map"](opts);
     },
     [presets],
   );
@@ -203,7 +209,7 @@ export function useImageryProviders({
                   prevType !== tile.type ||
                   prevUrl !== tile.url ||
                   isTileProviderUpdated ||
-                  (isCesiumAccessTokenUpdated && (!tile.type || tile.type === "default"))
+                  (isCesiumAccessTokenUpdated && tile.type?.startsWith("cesium_ion_"))
                     ? [tile.type, tile.url, newTile(tile, cesiumIonAccessToken, tileProvider)]
                     : [prevType, prevUrl, prevProvider],
                 ],

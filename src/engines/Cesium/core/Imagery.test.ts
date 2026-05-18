@@ -5,7 +5,17 @@ import { type Tile, useImageryProviders } from "./Imagery";
 
 test("useImageryProviders", () => {
   const provider = vi.fn(({ url }: { url?: string } = {}): any => ({ hoge: url }));
-  const presets = { default: provider };
+  const osmProvider = vi.fn((): any => ({ osm: true }));
+  const terravistaProvider = vi.fn((): null => null); // returns null when no TileProviderConfig
+
+  // cesium_ion_default is the primary tile type used in this test (was "default").
+  // terravista_google_satellite and open_street_map are needed for the unknown-type fallback path.
+  const presets = {
+    cesium_ion_default: provider,
+    terravista_google_satellite: terravistaProvider,
+    open_street_map: osmProvider,
+  } as any;
+
   const { result, rerender } = renderHook(
     ({ tiles, cesiumIonAccessToken }: { tiles: Tile[]; cesiumIonAccessToken?: string }) =>
       useImageryProviders({
@@ -13,7 +23,7 @@ test("useImageryProviders", () => {
         presets,
         cesiumIonAccessToken,
       }),
-    { initialProps: { tiles: [{ id: "1", type: "default" }], cesiumIonAccessToken: undefined } },
+    { initialProps: { tiles: [{ id: "1", type: "cesium_ion_default" }], cesiumIonAccessToken: undefined } },
   );
 
   const typedRerender = rerender as (props: {
@@ -21,22 +31,22 @@ test("useImageryProviders", () => {
     cesiumIonAccessToken?: string;
   }) => void;
 
-  expect(result.current.providers).toEqual({ "1": ["default", undefined, { hoge: undefined }] });
+  expect(result.current.providers).toEqual({ "1": ["cesium_ion_default", undefined, { hoge: undefined }] });
   expect(result.current.updated).toBe(true);
   expect(provider).toBeCalledTimes(1);
   const prevImageryProvider = result.current.providers["1"][2];
 
   // re-render with same tiles
-  typedRerender({ tiles: [{ id: "1", type: "default" }] });
+  typedRerender({ tiles: [{ id: "1", type: "cesium_ion_default" }] });
 
-  expect(result.current.providers).toEqual({ "1": ["default", undefined, { hoge: undefined }] });
+  expect(result.current.providers).toEqual({ "1": ["cesium_ion_default", undefined, { hoge: undefined }] });
   expect(result.current.providers["1"][2]).toBe(prevImageryProvider); // 1's provider should be reused
   expect(provider).toBeCalledTimes(1);
 
   // update a tile URL
-  typedRerender({ tiles: [{ id: "1", type: "default", url: "a" }] });
+  typedRerender({ tiles: [{ id: "1", type: "cesium_ion_default", url: "a" }] });
 
-  expect(result.current.providers).toEqual({ "1": ["default", "a", { hoge: "a" }] });
+  expect(result.current.providers).toEqual({ "1": ["cesium_ion_default", "a", { hoge: "a" }] });
   expect(result.current.providers["1"][2]).not.toBe(prevImageryProvider);
   expect(result.current.updated).toBe(true);
   expect(provider).toBeCalledTimes(2);
@@ -46,14 +56,14 @@ test("useImageryProviders", () => {
   // add a tile with URL
   typedRerender({
     tiles: [
-      { id: "2", type: "default" },
-      { id: "1", type: "default", url: "a" },
+      { id: "2", type: "cesium_ion_default" },
+      { id: "1", type: "cesium_ion_default", url: "a" },
     ],
   });
 
   expect(result.current.providers).toEqual({
-    "2": ["default", undefined, { hoge: undefined }],
-    "1": ["default", "a", { hoge: "a" }],
+    "2": ["cesium_ion_default", undefined, { hoge: undefined }],
+    "1": ["cesium_ion_default", "a", { hoge: "a" }],
   });
   expect(result.current.updated).toBe(true);
   expect(result.current.providers["1"][2]).toBe(prevImageryProvider2); // 1's provider should be reused
@@ -62,43 +72,44 @@ test("useImageryProviders", () => {
   // sort tiles
   typedRerender({
     tiles: [
-      { id: "1", type: "default", url: "a" },
-      { id: "2", type: "default" },
+      { id: "1", type: "cesium_ion_default", url: "a" },
+      { id: "2", type: "cesium_ion_default" },
     ],
   });
 
   expect(result.current.providers).toEqual({
-    "1": ["default", "a", { hoge: "a" }],
-    "2": ["default", undefined, { hoge: undefined }],
+    "1": ["cesium_ion_default", "a", { hoge: "a" }],
+    "2": ["cesium_ion_default", undefined, { hoge: undefined }],
   });
   expect(result.current.updated).toBe(true);
   expect(result.current.providers["1"][2]).toBe(prevImageryProvider2); // 1's provider should be reused
   expect(provider).toBeCalledTimes(3);
 
-  // delete a tile
+  // Ion token update triggers provider recreation for cesium_ion_* types
   typedRerender({
-    tiles: [{ id: "1", type: "default", url: "a" }],
+    tiles: [{ id: "1", type: "cesium_ion_default", url: "a" }],
     cesiumIonAccessToken: "a",
   });
 
   expect(result.current.providers).toEqual({
-    "1": ["default", "a", { hoge: "a" }],
+    "1": ["cesium_ion_default", "a", { hoge: "a" }],
   });
   expect(result.current.updated).toBe(true);
   expect(result.current.providers["1"][2]).not.toBe(prevImageryProvider2);
   expect(provider).toBeCalledTimes(4);
 
-  // update a tile type to unexpected type
+  // unknown type: falls back to terravista_google_satellite (returns null) then open_street_map
   typedRerender({
     tiles: [{ id: "1", type: "unexpected_type", url: "u" }],
   });
 
   expect(result.current.providers).toEqual({
-    // unexpected type is treated as "default"
-    "1": ["unexpected_type", "u", { hoge: "u" }],
+    "1": ["unexpected_type", "u", { osm: true }],
   });
   expect(result.current.updated).toBe(true);
-  expect(provider).toBeCalledTimes(5);
+  expect(provider).toBeCalledTimes(4); // cesium_ion_default provider not called again
+  expect(terravistaProvider).toBeCalledTimes(1); // tried first
+  expect(osmProvider).toBeCalledTimes(1); // used as fallback
 
   typedRerender({ tiles: [] });
   expect(result.current.providers).toEqual({});

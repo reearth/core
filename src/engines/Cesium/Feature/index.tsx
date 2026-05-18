@@ -65,6 +65,7 @@ const displayConfig: Record<DataType, (keyof typeof components)[] | "auto"> = {
   tms: ["raster"],
   "3dtiles": ["3dtiles"],
   "osm-buildings": ["3dtiles"],
+  "reearth-buildings": ["3dtiles"],
   "google-photorealistic": ["3dtiles"],
   gpx: "auto",
   shapefile: "auto",

@@ -13,11 +13,18 @@ export const DEFAULT_CAMERA = {
 };
 
 export const TILES = [
-  "default",
-  "default_road",
+  // Terravista (requires TileProviderConfig)
+  "terravista_google_satellite",
+  "terravista_google_roadmap",
+  "terravista_black_marble",
+  // Public (always available)
   "open_street_map",
-  "black_marble",
   "japan_gsi_standard",
+  // Cesium Ion (requires user-provided Ion token in scene settings)
+  "cesium_ion_default",
+  "cesium_ion_labelled",
+  "cesium_ion_road",
+  "cesium_ion_earth_at_night",
 ];
 
 export const SKETCH_TOOLS: SketchType[] = [

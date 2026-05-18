@@ -51,7 +51,10 @@ export default () => {
 
   const meta = useMemo(() => {
     const tileProvider = buildExampleTileProvider();
-    return { tileProvider };
+    return {
+      tileProvider,
+      cesiumIonAccessToken: import.meta.env.EXAMPLE_CESIUM_ION_ACCESS_TOKEN || undefined,
+    };
   }, []);
 
   const [currentTile, setCurrentTile] = useState(

@@ -18,13 +18,21 @@ import {
 } from "./tileProviderResolver";
 
 const PRESET_TILE_TYPES = [
-  "default",
-  "default_road",
-  "default_label",
+  // Terravista presets — require TileProviderConfig; no Ion fallback
+  "terravista_google_satellite",
+  "terravista_google_roadmap",
+  "terravista_black_marble",
+
+  // Public presets — always available, no auth required
   "open_street_map",
-  "black_marble",
   "japan_gsi_standard",
   "url",
+
+  // Cesium Ion presets — require user-provided Ion token (scene.default.ion)
+  "cesium_ion_default",
+  "cesium_ion_labelled",
+  "cesium_ion_road",
+  "cesium_ion_earth_at_night",
 ];
 
 export type PresetTileType = (typeof PRESET_TILE_TYPES)[number];
@@ -42,79 +50,42 @@ export type TileOptions = {
 };
 
 /**
- * Create imagery provider from TileProviderConfig URL (terravista or custom).
- * Returns null if no URL is configured — callers fall back to legacy Ion path.
+ * Create imagery provider from TileProviderConfig override array.
+ * Returns null if no matching override is configured.
  */
 function createPresetImageryProvider(
   presetName: string,
   opts?: TileOptions,
 ): Promise<ImageryProvider> | ImageryProvider | null {
-  const { tileProvider } = opts ?? {};
-
-  const url = resolveImageryUrl(tileProvider, presetName);
+  const url = resolveImageryUrl(opts?.tileProvider, presetName);
   if (!url) return null;
 
   return new UrlTemplateImageryProvider({
     url,
-    credit: resolveImageryCredit(tileProvider, presetName),
-    maximumLevel: resolveImageryMaxZoom(tileProvider, presetName),
+    credit: resolveImageryCredit(opts?.tileProvider, presetName),
+    maximumLevel: resolveImageryMaxZoom(opts?.tileProvider, presetName),
   });
 }
 
 export const tiles = {
-  // Standard presets - now support TileProviderConfig
-  default: (opts?: TileOptions) => {
-    const result = createPresetImageryProvider("default", opts);
-    if (result) return result;
+  // --- Terravista presets ---
+  // Each resolves by its own name as the override ID in TileProviderConfig.
+  // Returns null when TileProviderConfig is not configured.
+  terravista_google_satellite: (opts?: TileOptions) =>
+    createPresetImageryProvider("terravista_google_satellite", opts),
 
-    // Legacy fallback
-    return IonImageryProvider.fromAssetId(IonWorldImageryStyle.AERIAL, {
-      accessToken: opts?.cesiumIonAccessToken,
-    }).catch(err => {
-      console.error(err);
-      return undefined as unknown as ImageryProvider;
-    });
-  },
+  terravista_google_roadmap: (opts?: TileOptions) =>
+    createPresetImageryProvider("terravista_google_roadmap", opts),
 
-  default_road: (opts?: TileOptions) => {
-    const result = createPresetImageryProvider("default_road", opts);
-    if (result) return result;
+  terravista_black_marble: (opts?: TileOptions) =>
+    createPresetImageryProvider("terravista_black_marble", opts),
 
-    // Legacy fallback
-    return IonImageryProvider.fromAssetId(IonWorldImageryStyle.ROAD, {
-      accessToken: opts?.cesiumIonAccessToken,
-    }).catch(err => {
-      console.error(err);
-      return undefined as unknown as ImageryProvider;
-    });
-  },
-
-  default_label: ({ cesiumIonAccessToken } = {}) =>
-    IonImageryProvider.fromAssetId(IonWorldImageryStyle.AERIAL_WITH_LABELS, {
-      accessToken: cesiumIonAccessToken,
-    }).catch(err => {
-      console.error(err);
-      return undefined as unknown as ImageryProvider;
-    }),
-
+  // --- Public presets ---
   open_street_map: () =>
     new OpenStreetMapImageryProvider({
       url: "https://tile.openstreetmap.org",
       credit: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     }),
-
-  black_marble: (opts?: TileOptions) => {
-    const result = createPresetImageryProvider("black_marble", opts);
-    if (result) return result;
-
-    // Legacy fallback
-    return IonImageryProvider.fromAssetId(3812, {
-      accessToken: opts?.cesiumIonAccessToken,
-    }).catch(err => {
-      console.error(err);
-      return undefined as unknown as ImageryProvider;
-    });
-  },
 
   japan_gsi_standard: () =>
     new OpenStreetMapImageryProvider({
@@ -132,6 +103,40 @@ export const tiles = {
           maximumLevel: tile_zoomLevel?.[1],
         })
       : null,
+
+  // --- Cesium Ion presets ---
+  // Require the user to configure a Cesium Ion access token in their scene (scene.default.ion).
+  cesium_ion_default: (opts?: TileOptions) =>
+    IonImageryProvider.fromAssetId(IonWorldImageryStyle.AERIAL, {
+      accessToken: opts?.cesiumIonAccessToken,
+    }).catch(err => {
+      console.error(err);
+      return undefined as unknown as ImageryProvider;
+    }),
+
+  cesium_ion_labelled: (opts?: TileOptions) =>
+    IonImageryProvider.fromAssetId(IonWorldImageryStyle.AERIAL_WITH_LABELS, {
+      accessToken: opts?.cesiumIonAccessToken,
+    }).catch(err => {
+      console.error(err);
+      return undefined as unknown as ImageryProvider;
+    }),
+
+  cesium_ion_road: (opts?: TileOptions) =>
+    IonImageryProvider.fromAssetId(IonWorldImageryStyle.ROAD, {
+      accessToken: opts?.cesiumIonAccessToken,
+    }).catch(err => {
+      console.error(err);
+      return undefined as unknown as ImageryProvider;
+    }),
+
+  cesium_ion_earth_at_night: (opts?: TileOptions) =>
+    IonImageryProvider.fromAssetId(3812, {
+      accessToken: opts?.cesiumIonAccessToken,
+    }).catch(err => {
+      console.error(err);
+      return undefined as unknown as ImageryProvider;
+    }),
 } as {
   [K in PresetTileType]: (opts?: TileOptions) => Promise<ImageryProvider> | ImageryProvider | null;
 };

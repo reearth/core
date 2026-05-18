@@ -754,10 +754,10 @@ export const useHooks = ({
     }
   }, [style, isTilesetReady]);
 
+  const tileProvider = meta?.tileProvider as TileProviderConfig | undefined;
+
   const googleMapPhotorealisticResource = useMemo((): string | Promise<Resource> | null => {
     if (type !== "google-photorealistic" || !isVisible) return null;
-
-    const tileProvider = meta?.tileProvider as TileProviderConfig | undefined;
 
     // First, try to use TileProviderConfig for Terravista URL (returns string directly)
     const terravistaUrl = resolveTilesetUrl(tileProvider, "googlePhotorealistic");
@@ -787,7 +787,7 @@ export const useHooks = ({
     };
 
     return loadTileset();
-  }, [type, isVisible, googleMapApiKey, meta?.cesiumIonAccessToken, meta?.tileProvider]);
+  }, [type, isVisible, googleMapApiKey, meta?.cesiumIonAccessToken, tileProvider]);
 
   const tilesetUrl = useMemo((): string | Resource | Promise<Resource> | null => {
     if (!isVisible) return null;
@@ -795,6 +795,14 @@ export const useHooks = ({
     // Google Photorealistic 3D Tiles
     if (googleMapPhotorealisticResource) {
       return googleMapPhotorealisticResource;
+    }
+
+    // Re:Earth Buildings — public service; overridable via TileProviderConfig for self-hosted mirrors
+    if (type === "reearth-buildings") {
+      return (
+        resolveTilesetUrl(tileProvider, "reearthBuildings") ??
+        "https://buildings.reearth.land/tileset.json"
+      );
     }
 
     // OSM Buildings — only available via Cesium Ion (Terravista does not host this dataset).
@@ -810,7 +818,15 @@ export const useHooks = ({
     }
 
     return null;
-  }, [type, isVisible, googleMapPhotorealisticResource, url, tileset, meta?.cesiumIonAccessToken]);
+  }, [
+    type,
+    isVisible,
+    googleMapPhotorealisticResource,
+    url,
+    tileset,
+    meta?.cesiumIonAccessToken,
+    tileProvider,
+  ]);
 
   const imageBasedLighting = useMemo(() => {
     if (
