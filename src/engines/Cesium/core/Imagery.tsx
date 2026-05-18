@@ -1,12 +1,15 @@
 import {
   Color,
+  ImageryLayer as CesiumImageryLayer,
   ImageryProvider,
   TextureMagnificationFilter,
   TextureMinificationFilter,
 } from "cesium";
 import { isEqual } from "lodash-es";
-import { useCallback, useMemo, useRef, useLayoutEffect, useState, useEffect } from "react";
-import { ImageryLayer } from "resium";
+import { useCallback, useMemo, useRef, useEffect } from "react";
+import { useCesium } from "resium";
+
+import type { TileProviderConfig } from "../../../Map/types/tileProvider";
 
 import { isValidPresetTileType, PresetTileType, tiles as tilePresets } from "./presets";
 
@@ -31,53 +34,77 @@ export type Tile = {
 export type Props = {
   tiles?: Tile[];
   cesiumIonAccessToken?: string;
+  tileProvider?: TileProviderConfig;
   onTilesChange?: () => void;
 };
 
-export default function ImageryLayers({ tiles, cesiumIonAccessToken, onTilesChange }: Props) {
-  const { providers, updated } = useImageryProviders({
+// NOTE: This component intentionally bypasses Resium's declarative <ImageryLayer />.
+// Resium wraps provider creation in queueMicrotask; under React 18 Strict Mode the effect
+// cleanup runs before that microtask resolves, so the layer reference is undefined at cleanup
+// time and old layers are never removed — they accumulate silently behind new ones.
+// Direct imageryLayerCollection management with a `cancelled` flag is the only safe fix.
+export default function ImageryLayers({
+  tiles,
+  cesiumIonAccessToken,
+  tileProvider,
+  onTilesChange,
+}: Props) {
+  const { imageryLayerCollection, scene } = useCesium();
+
+  const { providers } = useImageryProviders({
     tiles,
     cesiumIonAccessToken,
+    tileProvider,
     presets: tilePresets,
   });
 
-  // force rerendering all layers when any provider is updated
-  // since Resium does not sort layers according to ImageryLayer component order
-  const [counter, setCounter] = useState(0);
-  useLayoutEffect(() => {
-    if (updated) setCounter(c => c + 1);
-  }, [providers, updated]);
-
   useEffect(() => {
-    onTilesChange?.();
-  }, [tiles, counter, onTilesChange]);
+    if (!imageryLayerCollection || !scene) return;
 
-  return (
-    <>
-      {tiles
-        ?.map(({ id, ...tile }) => ({
-          ...tile,
-          id,
-          provider: providers[id]?.[2],
-        }))
-        .map(({ id, opacity, zoomLevel, provider, heatmap }, i) =>
-          provider ? (
-            <ImageryLayer
-              key={`${id}_${i}_${counter}`}
-              imageryProvider={provider}
-              minimumTerrainLevel={zoomLevel?.[0]}
-              maximumTerrainLevel={zoomLevel?.[1]}
-              alpha={opacity}
-              index={i}
-              colorToAlpha={heatmap ? Color.WHITE : undefined}
-              colorToAlphaThreshold={heatmap ? 1 : undefined}
-              magnificationFilter={heatmap ? TextureMagnificationFilter.LINEAR : undefined}
-              minificationFilter={heatmap ? TextureMinificationFilter.NEAREST : undefined}
-            />
-          ) : null,
-        )}
-    </>
-  );
+    let cancelled = false;
+    const addedLayers: CesiumImageryLayer[] = [];
+
+    tiles?.forEach(({ id, zoomLevel, opacity, heatmap }, i) => {
+      const providerOrPromise = providers[id]?.[2];
+      if (!providerOrPromise) return;
+
+      const doAdd = (provider: ImageryProvider) => {
+        if (cancelled || scene.isDestroyed()) return;
+        const layer = new CesiumImageryLayer(provider, {
+          minimumTerrainLevel: zoomLevel?.[0],
+          maximumTerrainLevel: zoomLevel?.[1],
+          alpha: opacity,
+          colorToAlpha: heatmap ? Color.WHITE : undefined,
+          colorToAlphaThreshold: heatmap ? 1 : undefined,
+          magnificationFilter: heatmap ? TextureMagnificationFilter.LINEAR : undefined,
+          minificationFilter: heatmap ? TextureMinificationFilter.NEAREST : undefined,
+        });
+        imageryLayerCollection.add(layer, i);
+        addedLayers.push(layer);
+        scene.requestRender();
+      };
+
+      if (providerOrPromise instanceof Promise) {
+        providerOrPromise.then(doAdd);
+      } else {
+        doAdd(providerOrPromise as ImageryProvider);
+      }
+    });
+
+    scene.requestRender();
+    onTilesChange?.();
+
+    return () => {
+      cancelled = true;
+      for (const layer of addedLayers) {
+        if (!scene.isDestroyed() && imageryLayerCollection.contains(layer)) {
+          imageryLayerCollection.remove(layer);
+        }
+      }
+    };
+  }, [providers, tiles, imageryLayerCollection, scene, onTilesChange]);
+
+  return null;
 }
 
 type Providers = { [id: string]: [string | undefined, string | undefined, ImageryProvider] };
@@ -85,31 +112,37 @@ type Providers = { [id: string]: [string | undefined, string | undefined, Imager
 export function useImageryProviders({
   tiles = [],
   cesiumIonAccessToken,
+  tileProvider,
   presets,
 }: {
   tiles?: Tile[];
   cesiumIonAccessToken?: string;
+  tileProvider?: TileProviderConfig;
   presets: {
     [K in PresetTileType]: (opts?: {
       url?: string;
       cesiumIonAccessToken?: string;
       heatmap?: boolean;
       zoomLevel?: number[];
+      tileProvider?: TileProviderConfig;
     }) => Promise<ImageryProvider> | ImageryProvider | null;
   };
 }): { providers: Providers; updated: boolean } {
   const newTile = useCallback(
-    (t: Tile, ciat?: string) =>
-      presets[isValidPresetTileType(t.type) ? t.type : "default"]({
+    (t: Tile, ciat?: string, tp?: TileProviderConfig) => {
+      return presets[isValidPresetTileType(t.type) ? t.type : "default"]({
         url: t.url,
         cesiumIonAccessToken: ciat,
         heatmap: t.heatmap,
         zoomLevel: t.zoomLevelForURL,
-      }),
+        tileProvider: tp,
+      });
+    },
     [presets],
   );
 
   const prevCesiumIonAccessToken = useRef(cesiumIonAccessToken);
+  const prevTileProvider = useRef(tileProvider);
   const tileKeys = tiles.map(t => t.id).join(",");
   const prevTileKeys = useRef(tileKeys);
   const prevProviders = useRef<Providers>({});
@@ -126,6 +159,7 @@ export function useImageryProviders({
   // Manage TileProviders so that TileProvider does not need to be recreated each time tiles are updated.
   const { providers, updated } = useMemo(() => {
     const isCesiumAccessTokenUpdated = prevCesiumIonAccessToken.current !== cesiumIonAccessToken;
+    const isTileProviderUpdated = prevTileProvider.current !== tileProvider;
     const prevProvidersKeys = Object.keys(prevProviders.current);
     const added = tiles.map(t => t.id).filter(t => t && !prevProvidersKeys.includes(t));
 
@@ -168,8 +202,9 @@ export function useImageryProviders({
                   added ||
                   prevType !== tile.type ||
                   prevUrl !== tile.url ||
+                  isTileProviderUpdated ||
                   (isCesiumAccessTokenUpdated && (!tile.type || tile.type === "default"))
-                    ? [tile.type, tile.url, newTile(tile, cesiumIonAccessToken)]
+                    ? [tile.type, tile.url, newTile(tile, cesiumIonAccessToken, tileProvider)]
                     : [prevType, prevUrl, prevProvider],
                 ],
         )
@@ -182,6 +217,7 @@ export function useImageryProviders({
     const updated =
       !!added.length ||
       !!isCesiumAccessTokenUpdated ||
+      !!isTileProviderUpdated ||
       !isEqual(prevTileKeys.current, tileKeys) ||
       !isEqual(prevZoomLevels.current, zoomLevels) ||
       rawProviders.some(p => p.tile && (p.prevType !== p.tile.type || p.prevUrl !== p.tile.url));
@@ -189,9 +225,10 @@ export function useImageryProviders({
     prevTileKeys.current = tileKeys;
     prevZoomLevels.current = zoomLevels;
     prevCesiumIonAccessToken.current = cesiumIonAccessToken;
+    prevTileProvider.current = tileProvider;
 
     return { providers, updated };
-  }, [cesiumIonAccessToken, tiles, tileKeys, newTile, zoomLevels]);
+  }, [cesiumIonAccessToken, tileProvider, tiles, tileKeys, newTile, zoomLevels]);
 
   prevProviders.current = providers;
   return { providers, updated };

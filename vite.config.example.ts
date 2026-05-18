@@ -23,4 +23,15 @@ export default defineConfig({
     },
   },
   envPrefix: "EXAMPLE_",
+  server: {
+    proxy: {
+      // Proxy terrain requests to avoid CORS in dev — terrain.reearth.land
+      // does not send Access-Control-Allow-Origin headers.
+      "/terrain-proxy": {
+        target: "https://terrain.reearth.land",
+        changeOrigin: true,
+        rewrite: path => path.replace(/^\/terrain-proxy/, ""),
+      },
+    },
+  },
 });

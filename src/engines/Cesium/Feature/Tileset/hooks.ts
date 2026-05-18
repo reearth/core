@@ -2,6 +2,7 @@ import {
   Cesium3DTileset as Cesium3DTilesetType,
   Cesium3DTileStyle,
   IonResource,
+  Resource,
   ClippingPlane,
   ClippingPlaneCollection as CesiumClippingPlaneCollection,
   Cartesian3,
@@ -34,8 +35,9 @@ import type {
   Cesium3DTilesAppearance,
 } from "../../..";
 import { useRefValue } from "../../../../hooks";
-import { LayerSimple } from "../../../../Map";
+import { LayerSimple, TileProviderConfig } from "../../../../Map";
 import { layerIdField, sampleTerrainHeightFromCartesian } from "../../common";
+import { resolveTilesetUrl } from "../../core/tileProviderResolver";
 import { arrayToCartecian3 } from "../../helpers/sphericalHaromic";
 import type { InternalCesium3DTileFeature } from "../../types";
 import {
@@ -752,20 +754,32 @@ export const useHooks = ({
     }
   }, [style, isTilesetReady]);
 
-  const googleMapPhotorealisticResource = useMemo(() => {
+  const googleMapPhotorealisticResource = useMemo((): string | Promise<Resource> | null => {
     if (type !== "google-photorealistic" || !isVisible) return null;
 
-    const loadTileset = async () => {
+    const tileProvider = meta?.tileProvider as TileProviderConfig | undefined;
+
+    // First, try to use TileProviderConfig for Terravista URL (returns string directly)
+    const terravistaUrl = resolveTilesetUrl(tileProvider, "googlePhotorealistic");
+    if (terravistaUrl) {
+      // Terravista or custom URL - Sentinel will inject auth header
+      // Return string directly (not wrapped in Promise)
+      return terravistaUrl;
+    }
+
+    // For async resource loading (Google API or Cesium Ion), return Promise<Resource>
+    const loadTileset = async (): Promise<Resource> => {
       try {
         if (googleMapApiKey) {
           const tileset = await createGooglePhotorealistic3DTileset({ key: googleMapApiKey });
           return tileset.resource;
-        } else {
-          const resource = IonResource.fromAssetId(2275207, {
-            accessToken: meta?.cesiumIonAccessToken as string | undefined,
-          });
-          return resource;
         }
+
+        // Fallback: use user-configured Cesium Ion token
+        const resource = await IonResource.fromAssetId(2275207, {
+          accessToken: meta?.cesiumIonAccessToken as string | undefined,
+        });
+        return resource;
       } catch (error) {
         console.error(`Error loading Photorealistic 3D Tiles tileset: ${error}`);
         throw error;
@@ -773,19 +787,30 @@ export const useHooks = ({
     };
 
     return loadTileset();
-  }, [type, isVisible, googleMapApiKey, meta?.cesiumIonAccessToken]);
+  }, [type, isVisible, googleMapApiKey, meta?.cesiumIonAccessToken, meta?.tileProvider]);
 
-  const tilesetUrl = useMemo(() => {
-    return type === "osm-buildings" && isVisible
-      ? IonResource.fromAssetId(96188, {
-          accessToken: meta?.cesiumIonAccessToken as string | undefined,
-        }) // https://github.com/CesiumGS/cesium/blob/main/packages/engine/Source/Scene/createOsmBuildings.js#L53
-      : googleMapPhotorealisticResource && isVisible
-        ? googleMapPhotorealisticResource
-        : type === "3dtiles" && isVisible
-          ? (url ?? tileset)
-          : null;
-  }, [type, isVisible, meta?.cesiumIonAccessToken, googleMapPhotorealisticResource, url, tileset]);
+  const tilesetUrl = useMemo((): string | Resource | Promise<Resource> | null => {
+    if (!isVisible) return null;
+
+    // Google Photorealistic 3D Tiles
+    if (googleMapPhotorealisticResource) {
+      return googleMapPhotorealisticResource;
+    }
+
+    // OSM Buildings — only available via Cesium Ion (Terravista does not host this dataset).
+    if (type === "osm-buildings") {
+      return IonResource.fromAssetId(96188, {
+        accessToken: meta?.cesiumIonAccessToken as string | undefined,
+      }); // https://github.com/CesiumGS/cesium/blob/main/packages/engine/Source/Scene/createOsmBuildings.js#L53
+    }
+
+    // Standard 3D Tiles with explicit URL
+    if (type === "3dtiles") {
+      return url ?? tileset ?? null;
+    }
+
+    return null;
+  }, [type, isVisible, googleMapPhotorealisticResource, url, tileset, meta?.cesiumIonAccessToken]);
 
   const imageBasedLighting = useMemo(() => {
     if (

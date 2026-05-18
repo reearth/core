@@ -12,6 +12,7 @@ import {
   ViewerProperty,
 } from "@reearth/core";
 
+import { buildExampleTileProvider } from "./buildExampleMeta";
 import { DEFAULT_CAMERA, DEFAULT_LAYERS, TILES } from "./constants";
 import { DEFAULT_VIEWER_PROPERTY } from "./scene";
 import { TEST_LAYERS } from "./testLayers";
@@ -34,7 +35,9 @@ export default () => {
 
   // TODO: use onLayerSelect props (core should export a type for selection).
   const [selectedLayer, setSelectedLayer] = useState<LazyLayer | undefined>();
-  const [selectedFeature, setSelectedFeature] = useState<ComputedFeature | undefined>();
+  const [selectedFeature, setSelectedFeature] = useState<
+    ComputedFeature | undefined
+  >();
   const handleSelect: (
     layerId: string | undefined,
     layer: (() => Promise<ComputedLayer | undefined>) | undefined,
@@ -46,12 +49,10 @@ export default () => {
     setSelectedFeature(ref.current?.layers.selectedFeature() ?? feature);
   }, []);
 
-  const meta = useMemo(
-    () => ({
-      cesiumIonAccessToken: import.meta.env.EXAMPLE_CESIUM_ION_ACCESS_TOKEN || undefined,
-    }),
-    [],
-  );
+  const meta = useMemo(() => {
+    const tileProvider = buildExampleTileProvider();
+    return { tileProvider };
+  }, []);
 
   const [currentTile, setCurrentTile] = useState(
     TILES.includes(DEFAULT_VIEWER_PROPERTY.tiles?.[0]?.type ?? "")
@@ -61,7 +62,8 @@ export default () => {
   const [currentCamera, setCurrentCamera] = useState(DEFAULT_CAMERA);
   const [terrainEnabled, setTerrainEnabled] = useState(true);
   const [hideUnderground, setHideUnderground] = useState(false);
-  const [activeLayerIds, setActiveLayerIds] = useState<string[]>(DEFAULT_LAYERS);
+  const [activeLayerIds, setActiveLayerIds] =
+    useState<string[]>(DEFAULT_LAYERS);
 
   const viewerProperty: ViewerProperty = useMemo(
     () => ({
@@ -88,11 +90,13 @@ export default () => {
   );
 
   const layers = useMemo(
-    () => TEST_LAYERS.filter(layer => activeLayerIds.includes(layer.id)),
+    () => TEST_LAYERS.filter((layer) => activeLayerIds.includes(layer.id)),
     [activeLayerIds],
   );
 
-  const [sketchTool, setSketchTool] = useState<SketchType | undefined>(undefined);
+  const [sketchTool, setSketchTool] = useState<SketchType | undefined>(
+    undefined,
+  );
   useEffect(() => {
     ref.current?.sketch?.setType(sketchTool);
   }, [ref, sketchTool]);
@@ -113,12 +117,17 @@ export default () => {
 
   const handleEditSketchFeature = useCallback(() => {
     if (
-      !(selectedLayer?.type === "simple" && selectedLayer.data?.isSketchLayer) ||
+      !(
+        selectedLayer?.type === "simple" && selectedLayer.data?.isSketchLayer
+      ) ||
       !selectedLayer.id ||
       !selectedFeature?.id
     )
       return;
-    ref.current?.sketch.editFeature({ layerId: selectedLayer.id, feature: selectedFeature });
+    ref.current?.sketch.editFeature({
+      layerId: selectedLayer.id,
+      feature: selectedFeature,
+    });
   }, [selectedLayer, selectedFeature]);
 
   const handleCancelEditSketchFeature = useCallback(() => {
@@ -131,7 +140,9 @@ export default () => {
 
   const handleDeleteSketchFeature = useCallback(() => {
     if (
-      !(selectedLayer?.type === "simple" && selectedLayer.data?.isSketchLayer) ||
+      !(
+        selectedLayer?.type === "simple" && selectedLayer.data?.isSketchLayer
+      ) ||
       !selectedLayer.id ||
       !selectedFeature?.id
     )

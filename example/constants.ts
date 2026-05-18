@@ -14,13 +14,10 @@ export const DEFAULT_CAMERA = {
 
 export const TILES = [
   "default",
-  "default_label",
   "default_road",
   "open_street_map",
-  "esri_world_topo",
   "black_marble",
   "japan_gsi_standard",
-  "test_unexpected_type",
 ];
 
 export const SKETCH_TOOLS: SketchType[] = [

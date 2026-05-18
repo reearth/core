@@ -74,7 +74,7 @@ export type GlobeAtmosphereProperty = {
 
 export type TerrainProperty = {
   enabled?: boolean;
-  type?: "cesium" | "arcgis" | "cesiumion";
+  type?: "cesium" | "arcgis" | "cesiumion" | "reearth";
   url?: string;
   normal?: boolean;
   elevationHeatMap?: ElevationHeatMapProperty;
@@ -209,6 +209,7 @@ export type IndicatorProperty = {
 
 export type AssetsProperty = {
   cesium?: AssetsCesiumProperty;
+  reearthTerrain?: AssetsReearthTerrainProperty;
 };
 
 export type AssetsCesiumProperty = {
@@ -216,6 +217,13 @@ export type AssetsCesiumProperty = {
     ionAccessToken?: string;
     ionAsset?: string;
     ionUrl?: string;
+  };
+};
+
+export type AssetsReearthTerrainProperty = {
+  terrain?: {
+    /** Reearth terrain base URL — do NOT include '/layer.json', Cesium appends it automatically. e.g. 'https://terrain.reearth.land/' */
+    url?: string;
   };
 };
 

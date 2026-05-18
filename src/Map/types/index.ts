@@ -79,6 +79,7 @@ export type {
 } from "../../mantle";
 export * from "./event";
 export * from "./viewerProperty";
+export * from "./tileProvider";
 
 export type EngineRef = {
   name: string;

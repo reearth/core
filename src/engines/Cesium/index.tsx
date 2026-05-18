@@ -72,6 +72,7 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
     cesium,
     mouseEventHandles,
     cesiumIonAccessToken,
+    tileProvider,
     context,
     layerSelectWithRectEventHandlers,
     sceneLight,
@@ -167,6 +168,7 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
       <ImageryLayers
         tiles={property?.tiles}
         cesiumIonAccessToken={cesiumIonAccessToken}
+        tileProvider={tileProvider}
         onTilesChange={handleTilesChange}
       />
       <LabelImageryLayers tileLabels={property?.tileLabels} />
@@ -265,6 +267,7 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
       <Globe
         property={property}
         cesiumIonAccessToken={cesiumIonAccessToken}
+        tileProvider={tileProvider}
         onTerrainProviderChange={handleTerrainProviderChange}
       />
       <featureContext.Provider value={context}>{ready ? children : null}</featureContext.Provider>
@@ -293,5 +296,5 @@ export const engine: Engine = {
   featureComponent: Feature,
   clusterComponent: Cluster,
   sketchComponent: Sketch,
-  delegatedDataTypes: ["czml", "wms", "mvt", "3dtiles", "osm-buildings", "kml"],
+  delegatedDataTypes: ["czml", "wms", "mvt", "3dtiles", "osm-buildings", "google-photorealistic", "kml"],
 };
