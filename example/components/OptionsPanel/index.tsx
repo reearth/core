@@ -21,6 +21,7 @@ import { SKETCH_TOOLS, TILES } from "@/constants";
 import { TEST_LAYERS } from "@/testLayers";
 
 type OptionsPanelProps = {
+  customTileIds?: string[];
   currentTile?: string;
   setCurrentTile: (v: string) => void;
   cesiumIonAssetId?: number;
@@ -48,6 +49,7 @@ type OptionsPanelProps = {
 };
 
 const OptionsPanel: FC<OptionsPanelProps> = ({
+  customTileIds,
   currentTile,
   setCurrentTile,
   cesiumIonAssetId,
@@ -96,6 +98,11 @@ const OptionsPanel: FC<OptionsPanelProps> = ({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
+                {customTileIds?.map(tile => (
+                  <SelectItem key={tile} value={tile}>
+                    {tile}
+                  </SelectItem>
+                ))}
                 {TILES.map(tile => (
                   <SelectItem key={tile} value={tile}>
                     {tile}

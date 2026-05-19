@@ -47,6 +47,7 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
     shouldRender,
     layerSelectionReason,
     meta,
+    customProvider,
     displayCredits,
     layersRef,
     featureFlags,
@@ -72,7 +73,6 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
     cesium,
     mouseEventHandles,
     cesiumIonAccessToken,
-    tileProvider,
     context,
     layerSelectWithRectEventHandlers,
     sceneLight,
@@ -168,7 +168,7 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
       <ImageryLayers
         tiles={property?.tiles}
         cesiumIonAccessToken={cesiumIonAccessToken}
-        tileProvider={tileProvider}
+        customProvider={customProvider}
         onTilesChange={handleTilesChange}
       />
       <LabelImageryLayers tileLabels={property?.tileLabels} />
@@ -267,7 +267,7 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
       <Globe
         property={property}
         cesiumIonAccessToken={cesiumIonAccessToken}
-        tileProvider={tileProvider}
+        customProvider={customProvider}
         onTerrainProviderChange={handleTerrainProviderChange}
       />
       <featureContext.Provider value={context}>{ready ? children : null}</featureContext.Provider>

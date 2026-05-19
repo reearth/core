@@ -35,9 +35,9 @@ import type {
   Cesium3DTilesAppearance,
 } from "../../..";
 import { useRefValue } from "../../../../hooks";
-import { LayerSimple, TileProviderConfig } from "../../../../Map";
+import { LayerSimple, CustomProviderConfig } from "../../../../Map";
 import { layerIdField, sampleTerrainHeightFromCartesian } from "../../common";
-import { resolveTilesetUrl } from "../../core/tileProviderResolver";
+import { resolveTilesetUrl } from "../../core/customProviderResolver";
 import { arrayToCartecian3 } from "../../helpers/sphericalHaromic";
 import type { InternalCesium3DTileFeature } from "../../types";
 import {
@@ -754,17 +754,16 @@ export const useHooks = ({
     }
   }, [style, isTilesetReady]);
 
-  const tileProvider = meta?.tileProvider as TileProviderConfig | undefined;
+  const customProvider = meta?.customProvider as CustomProviderConfig | undefined;
 
   const googleMapPhotorealisticResource = useMemo((): string | Promise<Resource> | null => {
     if (type !== "google-photorealistic" || !isVisible) return null;
 
-    // First, try to use TileProviderConfig for Terravista URL (returns string directly)
-    const terravistaUrl = resolveTilesetUrl(tileProvider, "googlePhotorealistic");
-    if (terravistaUrl) {
-      // Terravista or custom URL - Sentinel will inject auth header
-      // Return string directly (not wrapped in Promise)
-      return terravistaUrl;
+    // First, try to use CustomProviderConfig URL (returns string directly)
+    const customUrl = resolveTilesetUrl(customProvider, "googlePhotorealistic");
+    if (customUrl) {
+      // Custom provider URL — return string directly (not wrapped in Promise)
+      return customUrl;
     }
 
     // For async resource loading (Google API or Cesium Ion), return Promise<Resource>
@@ -787,7 +786,7 @@ export const useHooks = ({
     };
 
     return loadTileset();
-  }, [type, isVisible, googleMapApiKey, meta?.cesiumIonAccessToken, tileProvider]);
+  }, [type, isVisible, googleMapApiKey, meta?.cesiumIonAccessToken, customProvider]);
 
   const tilesetUrl = useMemo((): string | Resource | Promise<Resource> | null => {
     if (!isVisible) return null;
@@ -797,15 +796,15 @@ export const useHooks = ({
       return googleMapPhotorealisticResource;
     }
 
-    // Re:Earth Buildings — public service; overridable via TileProviderConfig for self-hosted mirrors
+    // Re:Earth Buildings — public service; overridable via CustomProviderConfig for self-hosted mirrors
     if (type === "reearth-buildings") {
       return (
-        resolveTilesetUrl(tileProvider, "reearthBuildings") ??
+        resolveTilesetUrl(customProvider, "reearthBuildings") ??
         "https://buildings.reearth.land/tileset.json"
       );
     }
 
-    // OSM Buildings — only available via Cesium Ion (Terravista does not host this dataset).
+    // OSM Buildings — only available via Cesium Ion.
     if (type === "osm-buildings") {
       return IonResource.fromAssetId(96188, {
         accessToken: meta?.cesiumIonAccessToken as string | undefined,
@@ -825,7 +824,7 @@ export const useHooks = ({
     url,
     tileset,
     meta?.cesiumIonAccessToken,
-    tileProvider,
+    customProvider,
   ]);
 
   const imageBasedLighting = useMemo(() => {

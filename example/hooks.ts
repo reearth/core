@@ -49,16 +49,17 @@ export default () => {
     setSelectedFeature(ref.current?.layers.selectedFeature() ?? feature);
   }, []);
 
-  const meta = useMemo(() => {
-    const tileProvider = buildExampleTileProvider();
-    return {
-      tileProvider,
-      cesiumIonAccessToken: import.meta.env.EXAMPLE_CESIUM_ION_ACCESS_TOKEN || undefined,
-    };
-  }, []);
+  const customProvider = useMemo(() => buildExampleTileProvider(), []);
 
+  const meta = useMemo(() => ({
+    cesiumIonAccessToken: import.meta.env.EXAMPLE_CESIUM_ION_ACCESS_TOKEN || undefined,
+  }), []);
+
+  const customTileIds = customProvider?.imagery?.providers?.map(p => p.id) ?? [];
+
+  const allTileIds = [...TILES, ...customTileIds];
   const [currentTile, setCurrentTile] = useState(
-    TILES.includes(DEFAULT_VIEWER_PROPERTY.tiles?.[0]?.type ?? "")
+    allTileIds.includes(DEFAULT_VIEWER_PROPERTY.tiles?.[0]?.type ?? "")
       ? DEFAULT_VIEWER_PROPERTY.tiles?.[0]?.type
       : undefined,
   );
@@ -181,6 +182,8 @@ export default () => {
     handleAPIReady,
     handleSelect,
     meta,
+    customProvider,
+    customTileIds,
     currentTile,
     setCurrentTile,
     cesiumIonAssetId,

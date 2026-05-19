@@ -51,7 +51,6 @@ import {
   LayersRef,
   RequestingRenderMode,
 } from "../../Map";
-import type { TileProviderConfig } from "../../Map/types/tileProvider";
 import { TimelineManagerRef } from "../../Map/useTimelineManager";
 import { FEATURE_FLAGS } from "../../shared/featureFlags";
 
@@ -162,9 +161,6 @@ export default ({
     typeof meta?.cesiumIonAccessToken === "string" && meta.cesiumIonAccessToken
       ? meta.cesiumIonAccessToken
       : undefined;
-
-  // Extract TileProviderConfig from meta
-  const tileProvider = meta?.tileProvider as TileProviderConfig | undefined;
 
   // expose ref
   const engineAPI = useEngineRef(ref, cesium);
@@ -843,7 +839,6 @@ export default ({
   return {
     cesium,
     cesiumIonAccessToken,
-    tileProvider,
     mouseEventHandles,
     layerSelectWithRectEventHandlers,
     context,

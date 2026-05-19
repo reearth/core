@@ -8,8 +8,8 @@ import {
 import { useMemo, useRef } from "react";
 
 import { TerrainProperty } from "../../..";
-import { AssetsCesiumProperty, TileProviderConfig } from "../../../../Map";
-import { resolveTerrainUrl } from "../tileProviderResolver";
+import { AssetsCesiumProperty, CustomProviderConfig } from "../../../../Map";
+import { resolveTerrainUrl } from "../customProviderResolver";
 
 // Extended terrain types to include 'reearth'
 type TerrainType = NonNullable<TerrainProperty["type"]> | "reearth";
@@ -21,8 +21,8 @@ type ProviderOpts = Pick<TerrainProperty, "normal"> &
     ionAccessToken?: string | undefined;
     /** Reearth terrain URL (for type='reearth') */
     reearthTerrainUrl?: string | undefined;
-    /** TileProviderConfig for provider-agnostic configuration */
-    tileProvider?: TileProviderConfig | undefined;
+    /** CustomProviderConfig for provider-agnostic configuration */
+    customProvider?: CustomProviderConfig | undefined;
   };
 
 export default function useTerrainProviderPromise(opts: ProviderOpts) {
@@ -52,15 +52,15 @@ export default function useTerrainProviderPromise(opts: ProviderOpts) {
 function makeKey(type: TerrainType, opts: ProviderOpts) {
   const asset = opts.ionAsset ?? "";
   const url = opts.ionUrl ?? "";
-  const reearthTerrainUrl = opts.reearthTerrainUrl ?? resolveTerrainUrl(opts.tileProvider) ?? "";
+  const reearthTerrainUrl = opts.reearthTerrainUrl ?? resolveTerrainUrl(opts.customProvider) ?? "";
   const ionToken = opts.ionAccessToken ?? "";
   const normal = String(!!opts.normal);
   return `${type}|asset:${asset}|url:${url}|reearth:${reearthTerrainUrl}|ion:${ionToken}|normal:${normal}`;
 }
 
 function createProvider(type: TerrainType, opts: ProviderOpts): Promise<TerrainProvider> {
-  // First, try to use TileProviderConfig if available
-  const tileProviderUrl = resolveTerrainUrl(opts.tileProvider);
+  // First, try to use CustomProviderConfig if available
+  const tileProviderUrl = resolveTerrainUrl(opts.customProvider);
 
   switch (type) {
     case "reearth": {
@@ -73,7 +73,7 @@ function createProvider(type: TerrainType, opts: ProviderOpts): Promise<TerrainP
         }) as Promise<TerrainProvider>;
       }
       console.warn(
-        "[Terrain] type='reearth' requires tileProvider.terrainOverrides to be configured. " +
+        "[Terrain] type='reearth' requires customProvider.terrain.providers to be configured. " +
           "Falling back to ellipsoid.",
       );
       return Promise.resolve(new EllipsoidTerrainProvider());

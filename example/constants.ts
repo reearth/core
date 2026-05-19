@@ -12,14 +12,14 @@ export const DEFAULT_CAMERA = {
   roll: 6.2830631767616465,
 };
 
+// Static preset tile types — always available regardless of CustomProviderConfig.
+// Dynamic provider IDs (from EXAMPLE_IMAGERY_PROVIDERS) are appended at runtime in hooks.ts.
 export const TILES = [
-  // Terravista (requires TileProviderConfig)
-  "terravista_google_satellite",
-  "terravista_google_roadmap",
-  "terravista_black_marble",
   // Public (always available)
   "open_street_map",
   "japan_gsi_standard",
+  "stamen_watercolor",
+  "carto_light",
   // Cesium Ion — custom asset ID (enter asset ID in the input below)
   "cesium_ion",
   // Cesium Ion — preset assets (requires user-provided Ion token in scene settings)

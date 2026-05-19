@@ -10,7 +10,6 @@ import SpatialId from "./SpatialId";
 import type { Engine, EngineProps } from "./types";
 
 export * from "./types";
-export * from "./tileProviderDefaults";
 export { useGet, type WrappedRef, type Undefinable } from "./utils";
 
 export type {

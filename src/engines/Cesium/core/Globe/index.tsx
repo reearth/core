@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, type JSX } from "react";
 import { Globe as CesiumGlobe } from "resium";
 
 import type { ViewerProperty } from "../../..";
-import type { TileProviderConfig } from "../../../../Map/types/tileProvider";
+import type { CustomProviderConfig } from "../../../../Map/types/customProvider";
 import { toColor } from "../../common";
 
 import useTerrainProviderPromise from "./useTerrainProviderPromise";
@@ -10,14 +10,14 @@ import useTerrainProviderPromise from "./useTerrainProviderPromise";
 export type Props = {
   property?: ViewerProperty;
   cesiumIonAccessToken?: string;
-  tileProvider?: TileProviderConfig;
+  customProvider?: CustomProviderConfig;
   onTerrainProviderChange?: () => void;
 };
 
 export default function Globe({
   property,
   cesiumIonAccessToken,
-  tileProvider,
+  customProvider,
   onTerrainProviderChange,
 }: Props): JSX.Element | null {
   const providerPromise = useTerrainProviderPromise({
@@ -27,7 +27,7 @@ export default function Globe({
     ionAccessToken: property?.assets?.cesium?.terrain?.ionAccessToken || cesiumIonAccessToken,
     ionAsset: property?.assets?.cesium?.terrain?.ionAsset,
     ionUrl: property?.assets?.cesium?.terrain?.ionUrl,
-    tileProvider,
+    customProvider,
   });
 
   const baseColor = useMemo(

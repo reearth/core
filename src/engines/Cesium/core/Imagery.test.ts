@@ -1,34 +1,48 @@
+import { UrlTemplateImageryProvider } from "cesium";
 import { renderHook } from "@testing-library/react";
 import { expect, test, vi } from "vitest";
 
+import type { CustomProviderConfig } from "../../../Map/types/customProvider";
 import { type Tile, useImageryProviders } from "./Imagery";
 
 test("useImageryProviders", () => {
   const provider = vi.fn(({ url }: { url?: string } = {}): any => ({ hoge: url }));
   const osmProvider = vi.fn((): any => ({ osm: true }));
-  const terravistaProvider = vi.fn((): null => null); // returns null when no TileProviderConfig
 
-  // cesium_ion_default is the primary tile type used in this test (was "default").
-  // terravista_google_satellite and open_street_map are needed for the unknown-type fallback path.
   const presets = {
     cesium_ion_default: provider,
-    terravista_google_satellite: terravistaProvider,
     open_street_map: osmProvider,
   } as any;
 
   const { result, rerender } = renderHook(
-    ({ tiles, cesiumIonAccessToken }: { tiles: Tile[]; cesiumIonAccessToken?: string }) =>
+    ({
+      tiles,
+      cesiumIonAccessToken,
+      customProvider,
+    }: {
+      tiles: Tile[];
+      cesiumIonAccessToken?: string;
+      customProvider?: CustomProviderConfig;
+    }) =>
       useImageryProviders({
         tiles,
         presets,
         cesiumIonAccessToken,
+        customProvider,
       }),
-    { initialProps: { tiles: [{ id: "1", type: "cesium_ion_default" }], cesiumIonAccessToken: undefined } },
+    {
+      initialProps: {
+        tiles: [{ id: "1", type: "cesium_ion_default" }],
+        cesiumIonAccessToken: undefined,
+        customProvider: undefined,
+      },
+    },
   );
 
   const typedRerender = rerender as (props: {
     tiles: Tile[];
     cesiumIonAccessToken?: string;
+    customProvider?: CustomProviderConfig;
   }) => void;
 
   expect(result.current.providers).toEqual({ "1": ["cesium_ion_default", undefined, undefined, { hoge: undefined }] });
@@ -98,18 +112,32 @@ test("useImageryProviders", () => {
   expect(result.current.providers["1"][3]).not.toBe(prevImageryProvider2);
   expect(provider).toBeCalledTimes(4);
 
-  // unknown type: falls back to terravista_google_satellite (returns null) then open_street_map
+  // unknown type without customProvider: falls back directly to open_street_map
   typedRerender({
     tiles: [{ id: "1", type: "unexpected_type", url: "u" }],
   });
 
-  expect(result.current.providers).toEqual({
-    "1": ["unexpected_type", "u", undefined, { osm: true }],
-  });
+  expect(result.current.providers["1"][0]).toBe("unexpected_type");
+  expect(result.current.providers["1"][3]).toEqual({ osm: true });
   expect(result.current.updated).toBe(true);
-  expect(provider).toBeCalledTimes(4); // cesium_ion_default provider not called again
-  expect(terravistaProvider).toBeCalledTimes(1); // tried first
-  expect(osmProvider).toBeCalledTimes(1); // used as fallback
+  expect(osmProvider).toBeCalledTimes(1);
+
+  // unknown type with a matching customProvider entry: uses UrlTemplateImageryProvider
+  typedRerender({
+    tiles: [{ id: "1", type: "my_custom_satellite", url: "u" }],
+    customProvider: {
+      imagery: {
+        providers: [
+          { id: "my_custom_satellite", url: "https://example.com/{z}/{x}/{y}.png", credit: "© Example" },
+        ],
+      },
+    },
+  });
+
+  const dynamicProvider = result.current.providers["1"][3];
+  expect(dynamicProvider).toBeDefined();
+  expect(dynamicProvider).toBeInstanceOf(UrlTemplateImageryProvider);
+  expect(osmProvider).toBeCalledTimes(1); // osm not called again
 
   typedRerender({ tiles: [] });
   expect(result.current.providers).toEqual({});

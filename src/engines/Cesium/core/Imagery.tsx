@@ -4,12 +4,13 @@ import {
   ImageryProvider,
   TextureMagnificationFilter,
   TextureMinificationFilter,
+  UrlTemplateImageryProvider,
 } from "cesium";
 import { isEqual } from "lodash-es";
 import { useCallback, useMemo, useRef, useEffect } from "react";
 import { useCesium } from "resium";
 
-import type { TileProviderConfig } from "../../../Map/types/tileProvider";
+import type { CustomProviderConfig } from "../../../Map/types/customProvider";
 
 import { isValidPresetTileType, PresetTileType, tiles as tilePresets } from "./presets";
 
@@ -35,7 +36,7 @@ export type Tile = {
 export type Props = {
   tiles?: Tile[];
   cesiumIonAccessToken?: string;
-  tileProvider?: TileProviderConfig;
+  customProvider?: CustomProviderConfig;
   onTilesChange?: () => void;
 };
 
@@ -47,7 +48,7 @@ export type Props = {
 export default function ImageryLayers({
   tiles,
   cesiumIonAccessToken,
-  tileProvider,
+  customProvider,
   onTilesChange,
 }: Props) {
   const { imageryLayerCollection, scene } = useCesium();
@@ -55,7 +56,7 @@ export default function ImageryLayers({
   const { providers } = useImageryProviders({
     tiles,
     cesiumIonAccessToken,
-    tileProvider,
+    customProvider,
     presets: tilePresets,
   });
 
@@ -108,49 +109,57 @@ export default function ImageryLayers({
   return null;
 }
 
-type Providers = { [id: string]: [string | undefined, string | undefined, number | undefined, ImageryProvider] };
+type Providers = {
+  [id: string]: [string | undefined, string | undefined, number | undefined, ImageryProvider];
+};
 
 export function useImageryProviders({
   tiles = [],
   cesiumIonAccessToken,
-  tileProvider,
+  customProvider,
   presets,
 }: {
   tiles?: Tile[];
   cesiumIonAccessToken?: string;
-  tileProvider?: TileProviderConfig;
+  customProvider?: CustomProviderConfig;
   presets: {
     [K in PresetTileType]: (opts?: {
       url?: string;
       cesiumIonAccessToken?: string;
       heatmap?: boolean;
       zoomLevel?: number[];
-      tileProvider?: TileProviderConfig;
     }) => Promise<ImageryProvider> | ImageryProvider | null;
   };
 }): { providers: Providers; updated: boolean } {
   const newTile = useCallback(
-    (t: Tile, ciat?: string, tp?: TileProviderConfig) => {
+    (t: Tile, ciat?: string, tp?: CustomProviderConfig) => {
       const opts = {
         url: t.url,
         cesiumIonAccessToken: ciat,
         ionAssetId: t.ionAssetId,
         heatmap: t.heatmap,
         zoomLevel: t.zoomLevelForURL,
-        tileProvider: tp,
       };
       if (isValidPresetTileType(t.type)) {
         return presets[t.type](opts);
       }
-      // Unknown type: try terravista_google_satellite first (returns null if no TileProviderConfig),
-      // then fall back to open_street_map which is always available.
-      return presets["terravista_google_satellite"](opts) ?? presets["open_street_map"](opts);
+      // Dynamic: check customProvider.imagery.providers for a matching id
+      const customEntry = tp?.imagery?.providers?.find(p => p.id === t.type);
+      if (customEntry) {
+        return new UrlTemplateImageryProvider({
+          url: customEntry.url,
+          credit: customEntry.credit,
+          maximumLevel: customEntry.maximumLevel,
+          minimumLevel: customEntry.minimumLevel,
+        });
+      }
+      return presets["open_street_map"](opts);
     },
     [presets],
   );
 
   const prevCesiumIonAccessToken = useRef(cesiumIonAccessToken);
-  const prevTileProvider = useRef(tileProvider);
+  const prevCustomProvider = useRef(customProvider);
   const tileKeys = tiles.map(t => t.id).join(",");
   const prevTileKeys = useRef(tileKeys);
   const prevProviders = useRef<Providers>({});
@@ -164,10 +173,10 @@ export function useImageryProviders({
   );
   const prevZoomLevels = useRef(zoomLevels);
 
-  // Manage TileProviders so that TileProvider does not need to be recreated each time tiles are updated.
+  // Manage CustomProviders so that CustomProvider does not need to be recreated each time tiles are updated.
   const { providers, updated } = useMemo(() => {
     const isCesiumAccessTokenUpdated = prevCesiumIonAccessToken.current !== cesiumIonAccessToken;
-    const isTileProviderUpdated = prevTileProvider.current !== tileProvider;
+    const isTileProviderUpdated = prevCustomProvider.current !== customProvider;
     const prevProvidersKeys = Object.keys(prevProviders.current);
     const added = tiles.map(t => t.id).filter(t => t && !prevProvidersKeys.includes(t));
 
@@ -215,14 +224,28 @@ export function useImageryProviders({
                   prevUrl !== tile.url ||
                   prevIonAssetId !== tile.ionAssetId ||
                   isTileProviderUpdated ||
-                  (isCesiumAccessTokenUpdated && tile.type?.startsWith("cesium_ion"))
-                    ? [tile.type, tile.url, tile.ionAssetId, newTile(tile, cesiumIonAccessToken, tileProvider)]
+                  (isCesiumAccessTokenUpdated &&
+                    (tile.type?.startsWith("cesium_ion") ||
+                      tile.type === "default" ||
+                      tile.type === "default_road" ||
+                      tile.type === "default_label" ||
+                      tile.type === "black_marble"))
+                    ? [
+                        tile.type,
+                        tile.url,
+                        tile.ionAssetId,
+                        newTile(tile, cesiumIonAccessToken, customProvider),
+                      ]
                     : [prevType, prevUrl, prevIonAssetId, prevProvider],
                 ],
         )
         .filter(
-          (e): e is [string, [string | undefined, string | undefined, number | undefined, ImageryProvider]] =>
-            !!e?.[1][3],
+          (
+            e,
+          ): e is [
+            string,
+            [string | undefined, string | undefined, number | undefined, ImageryProvider],
+          ] => !!e?.[1][3],
         ),
     );
 
@@ -233,16 +256,20 @@ export function useImageryProviders({
       !isEqual(prevTileKeys.current, tileKeys) ||
       !isEqual(prevZoomLevels.current, zoomLevels) ||
       rawProviders.some(
-        p => p.tile && (p.prevType !== p.tile.type || p.prevUrl !== p.tile.url || p.prevIonAssetId !== p.tile.ionAssetId),
+        p =>
+          p.tile &&
+          (p.prevType !== p.tile.type ||
+            p.prevUrl !== p.tile.url ||
+            p.prevIonAssetId !== p.tile.ionAssetId),
       );
 
     prevTileKeys.current = tileKeys;
     prevZoomLevels.current = zoomLevels;
     prevCesiumIonAccessToken.current = cesiumIonAccessToken;
-    prevTileProvider.current = tileProvider;
+    prevCustomProvider.current = customProvider;
 
     return { providers, updated };
-  }, [cesiumIonAccessToken, tileProvider, tiles, tileKeys, newTile, zoomLevels]);
+  }, [cesiumIonAccessToken, customProvider, tiles, tileKeys, newTile, zoomLevels]);
 
   prevProviders.current = providers;
   return { providers, updated };
