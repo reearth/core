@@ -267,7 +267,6 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
       <Globe
         property={property}
         cesiumIonAccessToken={cesiumIonAccessToken}
-        customProvider={customProvider}
         onTerrainProviderChange={handleTerrainProviderChange}
       />
       <featureContext.Provider value={context}>{ready ? children : null}</featureContext.Provider>

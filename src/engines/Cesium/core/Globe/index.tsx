@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, type JSX } from "react";
 import { Globe as CesiumGlobe } from "resium";
 
 import type { ViewerProperty } from "../../..";
-import type { CustomProviderConfig } from "../../../../Map/types/customProvider";
 import { toColor } from "../../common";
 
 import useTerrainProviderPromise from "./useTerrainProviderPromise";
@@ -10,14 +9,12 @@ import useTerrainProviderPromise from "./useTerrainProviderPromise";
 export type Props = {
   property?: ViewerProperty;
   cesiumIonAccessToken?: string;
-  customProvider?: CustomProviderConfig;
   onTerrainProviderChange?: () => void;
 };
 
 export default function Globe({
   property,
   cesiumIonAccessToken,
-  customProvider,
   onTerrainProviderChange,
 }: Props): JSX.Element | null {
   const providerPromise = useTerrainProviderPromise({
@@ -27,7 +24,6 @@ export default function Globe({
     ionAccessToken: property?.assets?.cesium?.terrain?.ionAccessToken || cesiumIonAccessToken,
     ionAsset: property?.assets?.cesium?.terrain?.ionAsset,
     ionUrl: property?.assets?.cesium?.terrain?.ionUrl,
-    customProvider,
   });
 
   const baseColor = useMemo(
@@ -43,17 +39,13 @@ export default function Globe({
     providerPromise
       .then(resolvedProvider => {
         if (isCancelled) return;
-
-        // Only trigger callback if the resolved provider is actually different
         if (lastResolvedProviderRef.current !== resolvedProvider) {
           lastResolvedProviderRef.current = resolvedProvider;
           onTerrainProviderChange?.();
         }
       })
       .catch(error => {
-        if (!isCancelled) {
-          console.warn("Terrain provider failed to load:", error);
-        }
+        if (!isCancelled) console.warn("Terrain provider failed to load:", error);
       });
 
     return () => {

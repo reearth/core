@@ -8,33 +8,26 @@ import {
 import { useMemo, useRef } from "react";
 
 import { TerrainProperty } from "../../..";
-import { AssetsCesiumProperty, CustomProviderConfig } from "../../../../Map";
-import { resolveTerrainUrl } from "../customProviderResolver";
+import { AssetsCesiumProperty } from "../../../../Map";
 
-// Extended terrain types to include 'reearth'
 type TerrainType = NonNullable<TerrainProperty["type"]> | "reearth";
+
+const REEARTH_TERRAIN_URL = "https://terrain.reearth.land/cesium-mesh/ellipsoid";
 
 type ProviderOpts = Pick<TerrainProperty, "normal"> &
   AssetsCesiumProperty["terrain"] & {
     terrain?: boolean;
     terrainType?: TerrainType | null | undefined;
     ionAccessToken?: string | undefined;
-    /** Reearth terrain URL (for type='reearth') */
-    reearthTerrainUrl?: string | undefined;
-    /** CustomProviderConfig for provider-agnostic configuration */
-    customProvider?: CustomProviderConfig | undefined;
   };
 
 export default function useTerrainProviderPromise(opts: ProviderOpts) {
-  // Cache promises so we don't recreate providers on every toggle
   const cacheRef = useRef(new Map<string, Promise<TerrainProvider>>());
   const ellipsoidRef = useRef<TerrainProvider>(undefined);
 
   return useMemo<Promise<TerrainProvider>>(() => {
     if (!opts.terrain) {
-      // single shared ellipsoid provider
-      if (!ellipsoidRef.current)
-        ellipsoidRef.current = new EllipsoidTerrainProvider();
+      if (!ellipsoidRef.current) ellipsoidRef.current = new EllipsoidTerrainProvider();
       return Promise.resolve(ellipsoidRef.current);
     }
 
@@ -52,45 +45,27 @@ export default function useTerrainProviderPromise(opts: ProviderOpts) {
 function makeKey(type: TerrainType, opts: ProviderOpts) {
   const asset = opts.ionAsset ?? "";
   const url = opts.ionUrl ?? "";
-  const reearthTerrainUrl = opts.reearthTerrainUrl ?? resolveTerrainUrl(opts.customProvider) ?? "";
   const ionToken = opts.ionAccessToken ?? "";
   const normal = String(!!opts.normal);
-  return `${type}|asset:${asset}|url:${url}|reearth:${reearthTerrainUrl}|ion:${ionToken}|normal:${normal}`;
+  return `${type}|asset:${asset}|url:${url}|reearth:${REEARTH_TERRAIN_URL}|ion:${ionToken}|normal:${normal}`;
 }
 
 function createProvider(type: TerrainType, opts: ProviderOpts): Promise<TerrainProvider> {
-  // First, try to use CustomProviderConfig if available
-  const tileProviderUrl = resolveTerrainUrl(opts.customProvider);
-
   switch (type) {
-    case "reearth": {
-      // Explicit Reearth terrain — must have a URL configured.
-      const terrainUrl = opts.reearthTerrainUrl ?? tileProviderUrl;
-      if (terrainUrl) {
-        return CesiumTerrainProvider.fromUrl(terrainUrl, {
-          requestVertexNormals: !!opts.normal,
-          requestWaterMask: false,
-        }) as Promise<TerrainProvider>;
-      }
-      console.warn(
-        "[Terrain] type='reearth' requires customProvider.terrain.providers to be configured. " +
-          "Falling back to ellipsoid.",
-      );
-      return Promise.resolve(new EllipsoidTerrainProvider());
-    }
+    case "reearth":
+      return CesiumTerrainProvider.fromUrl(REEARTH_TERRAIN_URL, {
+        requestVertexNormals: !!opts.normal,
+        requestWaterMask: false,
+      }) as Promise<TerrainProvider>;
 
     case "cesium": {
-      // "cesium" preserves its original meaning: CesiumWorld Terrain (Ion Asset 1).
-      // If a tileProvider URL is configured it takes precedence — this allows reearth terrain
-      // deployments to upgrade without requiring a scene-data migration from "cesium" → "reearth".
-      const terrainUrl = opts.reearthTerrainUrl ?? tileProviderUrl;
-      if (terrainUrl) {
-        return CesiumTerrainProvider.fromUrl(terrainUrl, {
+      // "cesium" without Ion-specific config falls through to Re:Earth terrain (migration compat)
+      if (!opts.ionAsset && !opts.ionUrl) {
+        return CesiumTerrainProvider.fromUrl(REEARTH_TERRAIN_URL, {
           requestVertexNormals: !!opts.normal,
           requestWaterMask: false,
         }) as Promise<TerrainProvider>;
       }
-      // Legacy: fall back to CesiumWorld Terrain via Ion.
       return CesiumTerrainProvider.fromUrl(
         IonResource.fromAssetId(1, { accessToken: opts.ionAccessToken }),
         { requestVertexNormals: !!opts.normal, requestWaterMask: false },
@@ -103,9 +78,7 @@ function createProvider(type: TerrainType, opts: ProviderOpts): Promise<TerrainP
       ) as Promise<TerrainProvider>;
 
     case "cesiumion": {
-      if (!opts.ionAsset && !opts.ionUrl) {
-        return Promise.resolve(new EllipsoidTerrainProvider());
-      }
+      if (!opts.ionAsset && !opts.ionUrl) return Promise.resolve(new EllipsoidTerrainProvider());
       return CesiumTerrainProvider.fromUrl(
         opts.ionUrl ??
           IonResource.fromAssetId(parseInt(String(opts.ionAsset), 10), {
@@ -116,7 +89,6 @@ function createProvider(type: TerrainType, opts: ProviderOpts): Promise<TerrainP
     }
 
     default:
-      // Unknown type, return ellipsoid
       return Promise.resolve(new EllipsoidTerrainProvider());
   }
 }

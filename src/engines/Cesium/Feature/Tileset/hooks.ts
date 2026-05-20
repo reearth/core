@@ -35,9 +35,8 @@ import type {
   Cesium3DTilesAppearance,
 } from "../../..";
 import { useRefValue } from "../../../../hooks";
-import { LayerSimple, CustomProviderConfig } from "../../../../Map";
+import { LayerSimple } from "../../../../Map";
 import { layerIdField, sampleTerrainHeightFromCartesian } from "../../common";
-import { resolveTilesetUrl } from "../../core/customProviderResolver";
 import { arrayToCartecian3 } from "../../helpers/sphericalHaromic";
 import type { InternalCesium3DTileFeature } from "../../types";
 import {
@@ -754,27 +753,19 @@ export const useHooks = ({
     }
   }, [style, isTilesetReady]);
 
-  const customProvider = meta?.customProvider as CustomProviderConfig | undefined;
-
   const googleMapPhotorealisticResource = useMemo((): string | Promise<Resource> | null => {
     if (type !== "google-photorealistic" || !isVisible) return null;
 
-    // First, try to use CustomProviderConfig URL (returns string directly)
-    const customUrl = resolveTilesetUrl(customProvider, "googlePhotorealistic");
-    if (customUrl) {
-      // Custom provider URL — return string directly (not wrapped in Promise)
-      return customUrl;
-    }
+    // If the layer has an explicit URL (e.g. a self-hosted tile server), use it directly.
+    if (url) return url;
 
-    // For async resource loading (Google API or Cesium Ion), return Promise<Resource>
+    // Otherwise load via Google API key or Cesium Ion.
     const loadTileset = async (): Promise<Resource> => {
       try {
         if (googleMapApiKey) {
           const tileset = await createGooglePhotorealistic3DTileset({ key: googleMapApiKey });
           return tileset.resource;
         }
-
-        // Fallback: use user-configured Cesium Ion token
         const resource = await IonResource.fromAssetId(2275207, {
           accessToken: meta?.cesiumIonAccessToken as string | undefined,
         });
@@ -786,7 +777,7 @@ export const useHooks = ({
     };
 
     return loadTileset();
-  }, [type, isVisible, googleMapApiKey, meta?.cesiumIonAccessToken, customProvider]);
+  }, [type, isVisible, url, googleMapApiKey, meta?.cesiumIonAccessToken]);
 
   const tilesetUrl = useMemo((): string | Resource | Promise<Resource> | null => {
     if (!isVisible) return null;
@@ -796,12 +787,9 @@ export const useHooks = ({
       return googleMapPhotorealisticResource;
     }
 
-    // Re:Earth Buildings — public service; overridable via CustomProviderConfig for self-hosted mirrors
+    // Re:Earth Buildings — use layer's own url if provided, otherwise fall back to public service
     if (type === "reearth-buildings") {
-      return (
-        resolveTilesetUrl(customProvider, "reearthBuildings") ??
-        "https://buildings.reearth.land/tileset.json"
-      );
+      return url ?? "https://buildings.reearth.land/tileset.json";
     }
 
     // OSM Buildings — only available via Cesium Ion.
@@ -817,15 +805,7 @@ export const useHooks = ({
     }
 
     return null;
-  }, [
-    type,
-    isVisible,
-    googleMapPhotorealisticResource,
-    url,
-    tileset,
-    meta?.cesiumIonAccessToken,
-    customProvider,
-  ]);
+  }, [type, isVisible, googleMapPhotorealisticResource, url, tileset, meta?.cesiumIonAccessToken]);
 
   const imageBasedLighting = useMemo(() => {
     if (
