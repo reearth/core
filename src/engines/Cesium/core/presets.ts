@@ -28,10 +28,10 @@ const PRESET_TILE_TYPES = [
   "cesium_ion_earth_at_night",
 
   // Legacy aliases — kept for backward compatibility with existing apps
-  "default",        // → cesium_ion_default
-  "default_road",   // → cesium_ion_road
-  "default_label",  // → cesium_ion_labelled
-  "black_marble",   // → cesium_ion_earth_at_night
+  "default", // → cesium_ion_default
+  "default_road", // → cesium_ion_road
+  "default_label", // → cesium_ion_labelled
+  "black_marble", // → cesium_ion_earth_at_night
 ];
 
 export type PresetTileType = (typeof PRESET_TILE_TYPES)[number];
@@ -133,7 +133,6 @@ export const tiles = {
       return undefined as unknown as ImageryProvider;
     }),
   // --- Legacy aliases ---
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 } as any as {
   [K in PresetTileType]: (opts?: TileOptions) => Promise<ImageryProvider> | ImageryProvider | null;
 };

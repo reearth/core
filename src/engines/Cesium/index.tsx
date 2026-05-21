@@ -295,5 +295,13 @@ export const engine: Engine = {
   featureComponent: Feature,
   clusterComponent: Cluster,
   sketchComponent: Sketch,
-  delegatedDataTypes: ["czml", "wms", "mvt", "3dtiles", "osm-buildings", "google-photorealistic", "kml"],
+  delegatedDataTypes: [
+    "czml",
+    "wms",
+    "mvt",
+    "3dtiles",
+    "osm-buildings",
+    "google-photorealistic",
+    "kml",
+  ],
 };

@@ -35,9 +35,7 @@ export default () => {
 
   // TODO: use onLayerSelect props (core should export a type for selection).
   const [selectedLayer, setSelectedLayer] = useState<LazyLayer | undefined>();
-  const [selectedFeature, setSelectedFeature] = useState<
-    ComputedFeature | undefined
-  >();
+  const [selectedFeature, setSelectedFeature] = useState<ComputedFeature | undefined>();
   const handleSelect: (
     layerId: string | undefined,
     layer: (() => Promise<ComputedLayer | undefined>) | undefined,
@@ -51,9 +49,12 @@ export default () => {
 
   const customProvider = useMemo(() => buildExampleTileProvider(), []);
 
-  const meta = useMemo(() => ({
-    cesiumIonAccessToken: import.meta.env.EXAMPLE_CESIUM_ION_ACCESS_TOKEN || undefined,
-  }), []);
+  const meta = useMemo(
+    () => ({
+      cesiumIonAccessToken: import.meta.env.EXAMPLE_CESIUM_ION_ACCESS_TOKEN || undefined,
+    }),
+    [],
+  );
 
   const customTileIds = customProvider?.imagery?.providers?.map(p => p.id) ?? [];
 
@@ -67,8 +68,7 @@ export default () => {
   const [currentCamera, setCurrentCamera] = useState(DEFAULT_CAMERA);
   const [terrainEnabled, setTerrainEnabled] = useState(true);
   const [hideUnderground, setHideUnderground] = useState(false);
-  const [activeLayerIds, setActiveLayerIds] =
-    useState<string[]>(DEFAULT_LAYERS);
+  const [activeLayerIds, setActiveLayerIds] = useState<string[]>(DEFAULT_LAYERS);
 
   const viewerProperty: ViewerProperty = useMemo(
     () => ({
@@ -96,13 +96,11 @@ export default () => {
   );
 
   const layers = useMemo(
-    () => TEST_LAYERS.filter((layer) => activeLayerIds.includes(layer.id)),
+    () => TEST_LAYERS.filter(layer => activeLayerIds.includes(layer.id)),
     [activeLayerIds],
   );
 
-  const [sketchTool, setSketchTool] = useState<SketchType | undefined>(
-    undefined,
-  );
+  const [sketchTool, setSketchTool] = useState<SketchType | undefined>(undefined);
   useEffect(() => {
     ref.current?.sketch?.setType(sketchTool);
   }, [ref, sketchTool]);
@@ -123,9 +121,7 @@ export default () => {
 
   const handleEditSketchFeature = useCallback(() => {
     if (
-      !(
-        selectedLayer?.type === "simple" && selectedLayer.data?.isSketchLayer
-      ) ||
+      !(selectedLayer?.type === "simple" && selectedLayer.data?.isSketchLayer) ||
       !selectedLayer.id ||
       !selectedFeature?.id
     )
@@ -146,9 +142,7 @@ export default () => {
 
   const handleDeleteSketchFeature = useCallback(() => {
     if (
-      !(
-        selectedLayer?.type === "simple" && selectedLayer.data?.isSketchLayer
-      ) ||
+      !(selectedLayer?.type === "simple" && selectedLayer.data?.isSketchLayer) ||
       !selectedLayer.id ||
       !selectedFeature?.id
     )

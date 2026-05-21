@@ -42,23 +42,23 @@ const defaultMatcher = new StringMatcher()
     #endif
     vec4 color = computeDayColor(initialColor`,
   );
-  // Note: Commented out erase() call as it's not needed for Cesium 1.118.x
-  // The replace() above already handles the material code modification
-  // .erase([
-  //   "#ifdef APPLY_MATERIAL",
-  //   "czm_materialInput materialInput;",
-  //   "materialInput.st = v_textureCoordinates.st;",
-  //   "materialInput.normalEC = normalize(v_normalEC);",
-  //   "materialInput.positionToEyeEC = -v_positionEC;",
-  //   "materialInput.tangentToEyeMatrix = czm_eastNorthUpToEyeCoordinates(v_positionMC, normalize(v_normalEC));",
-  //   "materialInput.slope = v_slope;",
-  //   "materialInput.height = v_height;",
-  //   "materialInput.aspect = v_aspect;",
-  //   "czm_material material = czm_getMaterial(materialInput);",
-  //   "vec4 materialColor = vec4(material.diffuse, material.alpha);",
-  //   "color = alphaBlend(materialColor, color);",
-  //   "#endif",
-  // ]);
+// Note: Commented out erase() call as it's not needed for Cesium 1.118.x
+// The replace() above already handles the material code modification
+// .erase([
+//   "#ifdef APPLY_MATERIAL",
+//   "czm_materialInput materialInput;",
+//   "materialInput.st = v_textureCoordinates.st;",
+//   "materialInput.normalEC = normalize(v_normalEC);",
+//   "materialInput.positionToEyeEC = -v_positionEC;",
+//   "materialInput.tangentToEyeMatrix = czm_eastNorthUpToEyeCoordinates(v_positionMC, normalize(v_normalEC));",
+//   "materialInput.slope = v_slope;",
+//   "materialInput.height = v_height;",
+//   "materialInput.aspect = v_aspect;",
+//   "czm_material material = czm_getMaterial(materialInput);",
+//   "vec4 materialColor = vec4(material.diffuse, material.alpha);",
+//   "color = alphaBlend(materialColor, color);",
+//   "#endif",
+// ]);
 
 function makeGlobeShadersDirty(globe: Globe): void {
   // Invoke the internal makeShadersDirty() by setting a material to globe to
