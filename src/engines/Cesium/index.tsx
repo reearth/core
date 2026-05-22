@@ -301,6 +301,7 @@ export const engine: Engine = {
     "mvt",
     "3dtiles",
     "osm-buildings",
+    "reearth-buildings",
     "google-photorealistic",
     "kml",
   ],

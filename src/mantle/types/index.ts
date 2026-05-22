@@ -76,6 +76,7 @@ export type Data = {
   updateInterval?: number; // milliseconds
   parameters?: Record<string, any>;
   idProperty?: string;
+  provider?: string;
   serviceTokens?: {
     googleMapApiKey?: string;
   };

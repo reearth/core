@@ -8,8 +8,6 @@
 
 export interface ImageryProviderEntry {
   id: string;
-  name?: string;
-  nameJa?: string;
   url: string;
   credit?: string;
   maximumLevel?: number;

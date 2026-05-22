@@ -1,5 +1,4 @@
 import {
-  ArcGISTiledElevationTerrainProvider,
   CesiumTerrainProvider,
   EllipsoidTerrainProvider,
   IonResource,
@@ -10,7 +9,7 @@ import { useMemo, useRef } from "react";
 import { TerrainProperty } from "../../..";
 import { AssetsCesiumProperty } from "../../../../Map";
 
-type TerrainType = NonNullable<TerrainProperty["type"]> | "reearth";
+type TerrainType = NonNullable<TerrainProperty["type"]>;
 
 const REEARTH_TERRAIN_URL = "https://terrain.reearth.land/cesium-mesh/ellipsoid";
 
@@ -47,35 +46,23 @@ function makeKey(type: TerrainType, opts: ProviderOpts) {
   const url = opts.ionUrl ?? "";
   const ionToken = opts.ionAccessToken ?? "";
   const normal = String(!!opts.normal);
-  return `${type}|asset:${asset}|url:${url}|reearth:${REEARTH_TERRAIN_URL}|ion:${ionToken}|normal:${normal}`;
+  return `${type}|asset:${asset}|url:${url}|ion:${ionToken}|normal:${normal}`;
 }
 
 function createProvider(type: TerrainType, opts: ProviderOpts): Promise<TerrainProvider> {
   switch (type) {
-    case "reearth":
+    case "reearth_terrain":
       return CesiumTerrainProvider.fromUrl(REEARTH_TERRAIN_URL, {
         requestVertexNormals: !!opts.normal,
         requestWaterMask: false,
       }) as Promise<TerrainProvider>;
 
     case "cesium": {
-      // "cesium" without Ion-specific config falls through to Re:Earth terrain (migration compat)
-      if (!opts.ionAsset && !opts.ionUrl) {
-        return CesiumTerrainProvider.fromUrl(REEARTH_TERRAIN_URL, {
-          requestVertexNormals: !!opts.normal,
-          requestWaterMask: false,
-        }) as Promise<TerrainProvider>;
-      }
       return CesiumTerrainProvider.fromUrl(
         IonResource.fromAssetId(1, { accessToken: opts.ionAccessToken }),
         { requestVertexNormals: !!opts.normal, requestWaterMask: false },
       ) as Promise<TerrainProvider>;
     }
-
-    case "arcgis":
-      return ArcGISTiledElevationTerrainProvider.fromUrl(
-        "https://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer",
-      ) as Promise<TerrainProvider>;
 
     case "cesiumion": {
       if (!opts.ionAsset && !opts.ionUrl) return Promise.resolve(new EllipsoidTerrainProvider());
