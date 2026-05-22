@@ -76,6 +76,7 @@ const useData = (layer: ComputedLayer | undefined) => {
           : data?.layers
         : undefined,
       googleMapApiKey: data?.serviceTokens?.googleMapApiKey,
+      provider: data?.provider,
     };
   }, [layer]);
 };
@@ -488,7 +489,7 @@ export const useHooks = ({
   } = useClippingBox({ clipping: experimental_clipping, boxId });
 
   const [style, setStyle] = useState<Cesium3DTileStyle>();
-  const { url, type, idProperty, googleMapApiKey } = useData(layer);
+  const { url, type, idProperty, googleMapApiKey, provider } = useData(layer);
   const shouldUseFeatureIndex = !disableIndexingFeature && !!idProperty;
 
   const [isTilesetReady, setIsTilesetReady] = useState(false);
@@ -756,20 +757,24 @@ export const useHooks = ({
   const googleMapPhotorealisticResource = useMemo((): string | Promise<Resource> | null => {
     if (type !== "google-photorealistic" || !isVisible) return null;
 
-    // If the layer has an explicit URL (e.g. a self-hosted tile server), use it directly.
-    if (url) return url;
+    console.log("provider", provider);
 
     // Otherwise load via Google API key or Cesium Ion.
     const loadTileset = async (): Promise<Resource> => {
       try {
-        if (googleMapApiKey) {
-          const tileset = await createGooglePhotorealistic3DTileset({ key: googleMapApiKey });
-          return tileset.resource;
+        if (provider === "reearth") {
+          const resource = await IonResource.fromAssetId(2275207, {
+            accessToken: meta?.cesiumIonAccessToken as string | undefined,
+          });
+          return resource;
+        } else if (provider === "cesium-ion") {
+          const resource = await IonResource.fromAssetId(2275207, {
+            accessToken: meta?.cesiumIonAccessToken as string | undefined,
+          });
+          return resource;
         }
-        const resource = await IonResource.fromAssetId(2275207, {
-          accessToken: meta?.cesiumIonAccessToken as string | undefined,
-        });
-        return resource;
+        const tileset = await createGooglePhotorealistic3DTileset({ key: googleMapApiKey });
+        return tileset.resource;
       } catch (error) {
         console.error(`Error loading Photorealistic 3D Tiles tileset: ${error}`);
         throw error;
@@ -777,7 +782,7 @@ export const useHooks = ({
     };
 
     return loadTileset();
-  }, [type, isVisible, url, googleMapApiKey, meta?.cesiumIonAccessToken]);
+  }, [type, isVisible, googleMapApiKey, meta?.cesiumIonAccessToken, provider]);
 
   const tilesetUrl = useMemo((): string | Resource | Promise<Resource> | null => {
     if (!isVisible) return null;
