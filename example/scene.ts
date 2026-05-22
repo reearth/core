@@ -62,6 +62,7 @@ export const DEFAULT_VIEWER_PROPERTY: ViewerProperty = {
   terrain: {
     enabled: true,
     normal: true,
+    type: "reearth_terrain",
   },
   geoid: {
     server: {
