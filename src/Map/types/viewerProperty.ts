@@ -130,7 +130,7 @@ export type TileProperty = {
   id: string;
   type?: string;
   url?: string;
-  ionAssetId?: number;
+  cesiumIonAssetId?: number;
   opacity?: number;
   zoomLevel?: number[];
   zoomLevelForURL?: number[];

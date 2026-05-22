@@ -26,7 +26,7 @@ export type Tile = {
   id: string;
   url?: string;
   type?: string;
-  ionAssetId?: number;
+  cesiumIonAssetId?: number;
   opacity?: number;
   zoomLevel?: number[];
   zoomLevelForURL?: number[];
@@ -136,7 +136,7 @@ export function useImageryProviders({
       const opts = {
         url: t.url,
         cesiumIonAccessToken: ciat,
-        ionAssetId: t.ionAssetId,
+        cesiumIonAssetId: t.cesiumIonAssetId,
         heatmap: t.heatmap,
         zoomLevel: t.zoomLevelForURL,
       };
@@ -222,7 +222,7 @@ export function useImageryProviders({
                   added ||
                   prevType !== tile.type ||
                   prevUrl !== tile.url ||
-                  prevIonAssetId !== tile.ionAssetId ||
+                  prevIonAssetId !== tile.cesiumIonAssetId ||
                   isTileProviderUpdated ||
                   (isCesiumAccessTokenUpdated &&
                     (tile.type?.startsWith("cesium_ion") ||
@@ -233,7 +233,7 @@ export function useImageryProviders({
                     ? [
                         tile.type,
                         tile.url,
-                        tile.ionAssetId,
+                        tile.cesiumIonAssetId,
                         newTile(tile, cesiumIonAccessToken, customProvider),
                       ]
                     : [prevType, prevUrl, prevIonAssetId, prevProvider],
@@ -260,7 +260,7 @@ export function useImageryProviders({
           p.tile &&
           (p.prevType !== p.tile.type ||
             p.prevUrl !== p.tile.url ||
-            p.prevIonAssetId !== p.tile.ionAssetId),
+            p.prevIonAssetId !== p.tile.cesiumIonAssetId),
       );
 
     prevTileKeys.current = tileKeys;

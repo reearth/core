@@ -11,7 +11,7 @@ import {
 import { JapanGSIOptimalBVmapLabelImageryProvider } from "./labels/JapanGSIOptimalBVmapVectorMapLabel/JapanGSIOptimalBVmapLabelImageryProvider";
 
 const PRESET_TILE_TYPES = [
-  // Dynamic Cesium Ion asset — asset ID supplied per-tile via ionAssetId field
+  // Dynamic Cesium Ion asset — asset ID supplied per-tile via cesiumIonAssetId field
   "cesium_ion",
 
   // Public presets — always available, no auth required
@@ -43,17 +43,22 @@ export const isValidPresetTileType = (type: string | undefined): type is PresetT
 export type TileOptions = {
   url?: string;
   cesiumIonAccessToken?: string;
-  ionAssetId?: number;
+  cesiumIonAssetId?: number | string;
   heatmap?: boolean;
   tile_zoomLevel?: number[];
 };
 
 export const tiles = {
   // --- Dynamic Cesium Ion asset ---
-  // Uses per-tile ionAssetId; requires cesiumIonAccessToken.
+  // Uses per-tile cesiumIonAssetId; requires cesiumIonAccessToken.
   cesium_ion: (opts?: TileOptions) => {
-    if (!opts?.ionAssetId) return null;
-    return IonImageryProvider.fromAssetId(opts.ionAssetId, {
+    if (!opts?.cesiumIonAssetId) return null;
+    const NumberAssetId = parseInt(String(opts.cesiumIonAssetId), 10);
+    if (isNaN(NumberAssetId)) {
+      console.warn(`Invalid cesiumIonAssetId: ${opts.cesiumIonAssetId}`);
+      return null;
+    }
+    return IonImageryProvider.fromAssetId(NumberAssetId, {
       accessToken: opts?.cesiumIonAccessToken,
     }).catch(err => {
       console.error(err);

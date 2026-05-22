@@ -78,7 +78,7 @@ export default () => {
             {
               id: "default",
               type: currentTile,
-              ionAssetId: currentTile === "cesium_ion" ? cesiumIonAssetId : undefined,
+              cesiumIonAssetId: currentTile === "cesium_ion" ? cesiumIonAssetId : undefined,
               opacity: 1,
             },
           ]
