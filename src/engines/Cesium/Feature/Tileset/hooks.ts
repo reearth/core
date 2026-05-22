@@ -757,8 +757,6 @@ export const useHooks = ({
   const googleMapPhotorealisticResource = useMemo((): string | Promise<Resource> | null => {
     if (type !== "google-photorealistic" || !isVisible) return null;
 
-    console.log("provider", provider);
-
     // For Re:Earth provider, use the custom URL from customProvider or layer data
     if (provider === "reearth") {
       // Try to get URL from customProvider first, then fall back to layer URL
