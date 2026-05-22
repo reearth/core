@@ -65,6 +65,31 @@ export default function ImageryLayers({
 
     let cancelled = false;
     const addedLayers: CesiumImageryLayer[] = [];
+    // Track layers by their intended index to maintain order with async loading
+    const layersByIndex: (CesiumImageryLayer | null)[] = new Array(tiles?.length || 0).fill(null);
+
+    const reorderLayers = () => {
+      if (cancelled || scene.isDestroyed()) return;
+
+      // Move each layer to its correct position based on layersByIndex
+      layersByIndex.forEach((layer, targetIndex) => {
+        if (!layer) return;
+
+        const currentIndex = imageryLayerCollection.indexOf(layer);
+        if (currentIndex === -1) return; // Layer not in collection
+
+        // Calculate where this layer should be: count non-null layers before it
+        const desiredIndex = layersByIndex.slice(0, targetIndex).filter(l => l !== null).length;
+
+        if (currentIndex !== desiredIndex) {
+          // Move layer to correct position
+          imageryLayerCollection.remove(layer, false); // Don't destroy
+          imageryLayerCollection.add(layer, desiredIndex);
+        }
+      });
+
+      scene.requestRender();
+    };
 
     tiles?.forEach(({ id, zoomLevel, opacity, heatmap }, i) => {
       const providerOrPromise = providers[id]?.[3];
@@ -81,9 +106,14 @@ export default function ImageryLayers({
           magnificationFilter: heatmap ? TextureMagnificationFilter.LINEAR : undefined,
           minificationFilter: heatmap ? TextureMinificationFilter.NEAREST : undefined,
         });
-        imageryLayerCollection.add(layer, i);
+
+        // Always append to avoid index out of bounds
+        imageryLayerCollection.add(layer);
+        layersByIndex[i] = layer;
         addedLayers.push(layer);
-        scene.requestRender();
+
+        // Reorder all layers after each addition
+        reorderLayers();
       };
 
       if (providerOrPromise instanceof Promise) {
