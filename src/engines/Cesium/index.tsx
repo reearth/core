@@ -97,6 +97,7 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
     selectedLayerId,
     selectionReason: layerSelectionReason,
     meta,
+    customProvider,
     layersRef,
     featureFlags,
     timelineManagerRef,

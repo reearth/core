@@ -6,16 +6,25 @@
  * the engine (hardcoded in useTerrainProviderPromise) or via the layer's own url field.
  */
 
-export interface ImageryProviderEntry {
+export type ImageryProviderEntry = {
   id: string;
   url: string;
   credit?: string;
   maximumLevel?: number;
   minimumLevel?: number;
-}
+};
 
-export interface CustomProviderConfig {
+export type LayerProviderEntry = {
+  id: string;
+  url: string;
+  options?: Record<string, unknown>;
+};
+
+export type CustomProviderConfig = {
   imagery?: {
     providers?: ImageryProviderEntry[];
   };
-}
+  layers?: {
+    providers?: LayerProviderEntry[];
+  };
+};

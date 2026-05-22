@@ -27,6 +27,7 @@ import { e2eAccessToken, setE2ECesiumViewer } from "../../e2eConfig";
 import { ComputedFeature, DataType, SelectedFeatureInfo, LatLng, Camera } from "../../mantle";
 import {
   Credits,
+  CustomProviderConfig,
   LayerLoadEvent,
   LayerSelectWithRectEnd,
   LayerSelectWithRectMove,
@@ -69,6 +70,7 @@ export default ({
   selectedLayerId,
   selectionReason,
   meta,
+  customProvider,
   layersRef,
   featureFlags,
   timelineManagerRef,
@@ -101,6 +103,7 @@ export default ({
   layersRef?: RefObject<LayersRef | null>;
   selectionReason?: LayerSelectionReason;
   meta?: Record<string, unknown>;
+  customProvider?: CustomProviderConfig;
   featureFlags: number;
   timelineManagerRef?: TimelineManagerRef;
   isLayerDraggable?: boolean;
@@ -673,6 +676,7 @@ export default ({
     () => ({
       selectionReason,
       timelineManagerRef,
+      customProvider,
       flyTo: engineAPI.flyTo,
       getCamera: engineAPI.getCamera,
       onLayerEdit,
@@ -687,11 +691,12 @@ export default ({
     }),
     [
       selectionReason,
+      timelineManagerRef,
+      customProvider,
       engineAPI,
       onLayerEdit,
       onLayerVisibility,
       onLayerLoad,
-      timelineManagerRef,
       updateCredits,
     ],
   );

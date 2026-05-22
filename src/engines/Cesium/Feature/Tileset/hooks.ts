@@ -459,7 +459,7 @@ export const useHooks = ({
 }) => {
   const { viewer } = useCesium();
   const tilesetRef = useRef<Cesium3DTilesetType>(undefined);
-  const { onLayerLoad, updateCredits } = useContext();
+  const { onLayerLoad, updateCredits, customProvider } = useContext();
   const layerIdRef = useRef(layer?.id);
   layerIdRef.current = layer?.id;
 
@@ -759,15 +759,20 @@ export const useHooks = ({
 
     console.log("provider", provider);
 
+    // For Re:Earth provider, use the custom URL from customProvider or layer data
+    if (provider === "reearth") {
+      // Try to get URL from customProvider first, then fall back to layer URL
+      const customUrl = customProvider?.layers?.providers?.find(
+        p => p.id === "reearth_google_photorealistic_3d_tiles",
+      )?.url;
+
+      return customUrl || url || null;
+    }
+
     // Otherwise load via Google API key or Cesium Ion.
     const loadTileset = async (): Promise<Resource> => {
       try {
-        if (provider === "reearth") {
-          const resource = await IonResource.fromAssetId(2275207, {
-            accessToken: meta?.cesiumIonAccessToken as string | undefined,
-          });
-          return resource;
-        } else if (provider === "cesium-ion") {
+        if (provider === "cesium-ion") {
           const resource = await IonResource.fromAssetId(2275207, {
             accessToken: meta?.cesiumIonAccessToken as string | undefined,
           });
@@ -782,7 +787,7 @@ export const useHooks = ({
     };
 
     return loadTileset();
-  }, [type, isVisible, googleMapApiKey, meta?.cesiumIonAccessToken, provider]);
+  }, [type, isVisible, googleMapApiKey, meta?.cesiumIonAccessToken, provider, customProvider, url]);
 
   const tilesetUrl = useMemo((): string | Resource | Promise<Resource> | null => {
     if (!isVisible) return null;
