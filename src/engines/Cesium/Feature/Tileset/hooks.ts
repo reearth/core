@@ -770,7 +770,7 @@ export const useHooks = ({
     // Otherwise load via Google API key or Cesium Ion.
     const loadTileset = async (): Promise<Resource> => {
       try {
-        if (provider === "cesium-ion") {
+        if (provider === "cesium-ion" || !googleMapApiKey) {
           const resource = await IonResource.fromAssetId(2275207, {
             accessToken: meta?.cesiumIonAccessToken as string | undefined,
           });

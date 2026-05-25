@@ -96,7 +96,7 @@ export default function ImageryLayers({
       if (!providerOrPromise) return;
 
       const doAdd = (provider: ImageryProvider) => {
-        if (cancelled || scene.isDestroyed()) return;
+        if (!provider || cancelled || scene.isDestroyed()) return;
         const layer = new CesiumImageryLayer(provider, {
           minimumTerrainLevel: zoomLevel?.[0],
           maximumTerrainLevel: zoomLevel?.[1],
@@ -117,9 +117,9 @@ export default function ImageryLayers({
       };
 
       if (providerOrPromise instanceof Promise) {
-        providerOrPromise.then(doAdd);
+        providerOrPromise.then(doAdd).catch(err => console.error("Failed to load imagery provider:", err));
       } else {
-        doAdd(providerOrPromise as ImageryProvider);
+        doAdd(providerOrPromise);
       }
     });
 
@@ -173,7 +173,7 @@ export function useImageryProviders({
         cesiumIonAccessToken: ciat,
         cesiumIonAssetId: t.cesiumIonAssetId,
         heatmap: t.heatmap,
-        zoomLevel: t.zoomLevelForURL,
+        tile_zoomLevel: t.zoomLevelForURL,
       };
       if (isValidPresetTileType(t.type)) {
         return presets[t.type](opts);
@@ -279,7 +279,12 @@ export function useImageryProviders({
             e,
           ): e is [
             string,
-            [string | undefined, string | undefined, number | undefined, ImageryProvider],
+            [
+              string | undefined,
+              string | undefined,
+              number | undefined,
+              Promise<ImageryProvider> | ImageryProvider,
+            ],
           ] => !!e?.[1][3],
         ),
     );
