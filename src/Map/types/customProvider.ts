@@ -1,9 +1,11 @@
 /**
- * Generic provider configuration — imagery overrides only.
+ * Generic provider configuration for overriding external data sources.
  *
- * Allows configuring custom imagery tile providers in a vendor-agnostic way.
- * Terrain and layer (3D tileset) URLs are configured directly on the engine
- * the engine (hardcoded in useTerrainProviderPromise) or via the layer's own url field.
+ * - imagery.providers: imagery tile providers keyed by id
+ * - layers.providers: 3D tileset providers keyed by id
+ *
+ * Terrain is configured via viewer/engine terrain settings (see useTerrainProviderPromise)
+ * or via each layer's own `url` field.
  */
 
 export type ImageryProviderEntry = {
