@@ -47,6 +47,7 @@ import {
 } from "../Sketch/types";
 import type { TimelineManagerRef } from "../useTimelineManager";
 
+import type { CustomProviderConfig } from "./customProvider";
 import type { SceneMode, ViewerProperty } from "./viewerProperty";
 
 export type {
@@ -79,6 +80,7 @@ export type {
 } from "../../mantle";
 export * from "./event";
 export * from "./viewerProperty";
+export * from "./customProvider";
 
 export type EngineRef = {
   name: string;
@@ -237,6 +239,7 @@ export type EngineProps = {
   isLayerDragging?: boolean;
   shouldRender?: boolean;
   meta?: Record<string, unknown>;
+  customProvider?: CustomProviderConfig;
   displayCredits?: boolean;
   layersRef?: RefObject<LayersRef | null>;
   requestingRenderMode?: MutableRefObject<RequestingRenderMode>;

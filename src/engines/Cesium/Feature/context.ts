@@ -3,12 +3,14 @@ import { createContext, useContext as useReactContext } from "react";
 
 import type { Camera, LayerSelectionReason } from "../..";
 import { LayerEditEvent, LayerLoadEvent, LayerVisibilityEvent } from "../../../Map";
+import type { CustomProviderConfig } from "../../../Map/types/customProvider";
 import { TimelineManagerRef } from "../../../Map/useTimelineManager";
 import type { FlyTo } from "../../../types";
 
 export type Context = {
   selectionReason?: LayerSelectionReason;
   timelineManagerRef?: TimelineManagerRef;
+  customProvider?: CustomProviderConfig;
   getCamera?: () => Camera | undefined;
   flyTo?: FlyTo;
   onLayerEdit?: (e: LayerEditEvent) => void;

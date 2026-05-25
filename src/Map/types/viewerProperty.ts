@@ -74,7 +74,7 @@ export type GlobeAtmosphereProperty = {
 
 export type TerrainProperty = {
   enabled?: boolean;
-  type?: "cesium" | "arcgis" | "cesiumion";
+  type?: "cesium" | "cesiumion" | "reearth_terrain";
   url?: string;
   normal?: boolean;
   elevationHeatMap?: ElevationHeatMapProperty;
@@ -130,6 +130,7 @@ export type TileProperty = {
   id: string;
   type?: string;
   url?: string;
+  cesiumIonAssetId?: number;
   opacity?: number;
   zoomLevel?: number[];
   zoomLevelForURL?: number[];

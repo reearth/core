@@ -39,17 +39,13 @@ export default function Globe({
     providerPromise
       .then(resolvedProvider => {
         if (isCancelled) return;
-
-        // Only trigger callback if the resolved provider is actually different
         if (lastResolvedProviderRef.current !== resolvedProvider) {
           lastResolvedProviderRef.current = resolvedProvider;
           onTerrainProviderChange?.();
         }
       })
       .catch(error => {
-        if (!isCancelled) {
-          console.warn("Terrain provider failed to load:", error);
-        }
+        if (!isCancelled) console.warn("Terrain provider failed to load:", error);
       });
 
     return () => {

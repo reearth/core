@@ -14,8 +14,12 @@ function App() {
     handleAPIReady,
     handleSelect,
     meta,
+    customProvider,
+    customTileIds,
     currentTile,
     setCurrentTile,
+    cesiumIonAssetId,
+    setCesiumIonAssetId,
     currentCamera,
     setCurrentCamera,
     terrainEnabled,
@@ -46,8 +50,11 @@ function App() {
   return (
     <div className="relative w-screen h-screen overflow-hidden">
       <OptionsPanel
+        customTileIds={customTileIds}
         currentTile={currentTile}
         setCurrentTile={setCurrentTile}
+        cesiumIonAssetId={cesiumIonAssetId}
+        setCesiumIonAssetId={setCesiumIonAssetId}
         terrainEnabled={terrainEnabled}
         setTerrainEnabled={setTerrainEnabled}
         hideUnderground={hideUnderground}
@@ -78,6 +85,7 @@ function App() {
         onLayerSelect={handleSelect}
         engine="cesium"
         meta={meta}
+        customProvider={customProvider}
         viewerProperty={isReady ? viewerProperty : undefined}
         camera={currentCamera}
         onCameraChange={setCurrentCamera}

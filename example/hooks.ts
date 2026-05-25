@@ -4,6 +4,7 @@ import {
   ComputedFeature,
   ComputedLayer,
   Credits,
+  CustomProviderConfig,
   LayerSelectionReason,
   LazyLayer,
   MapRef,
@@ -46,6 +47,17 @@ export default () => {
     setSelectedFeature(ref.current?.layers.selectedFeature() ?? feature);
   }, []);
 
+  const customProvider = useMemo(() => {
+    const envValue = import.meta.env.EXAMPLE_CUSTOM_PROVIDER;
+    if (!envValue) return undefined;
+    try {
+      return JSON.parse(envValue) as CustomProviderConfig;
+    } catch (error) {
+      console.warn("[example] Failed to parse EXAMPLE_CUSTOM_PROVIDER:", error);
+      return undefined;
+    }
+  }, []);
+
   const meta = useMemo(
     () => ({
       cesiumIonAccessToken: import.meta.env.EXAMPLE_CESIUM_ION_ACCESS_TOKEN || undefined,
@@ -53,11 +65,15 @@ export default () => {
     [],
   );
 
+  const customTileIds = customProvider?.imagery?.providers?.map((p: { id: string }) => p.id) ?? [];
+
+  const allTileIds = [...TILES, ...customTileIds];
   const [currentTile, setCurrentTile] = useState(
-    TILES.includes(DEFAULT_VIEWER_PROPERTY.tiles?.[0]?.type ?? "")
+    allTileIds.includes(DEFAULT_VIEWER_PROPERTY.tiles?.[0]?.type ?? "")
       ? DEFAULT_VIEWER_PROPERTY.tiles?.[0]?.type
       : undefined,
   );
+  const [cesiumIonAssetId, setCesiumIonAssetId] = useState<number | undefined>(undefined);
   const [currentCamera, setCurrentCamera] = useState(DEFAULT_CAMERA);
   const [terrainEnabled, setTerrainEnabled] = useState(true);
   const [hideUnderground, setHideUnderground] = useState(false);
@@ -71,6 +87,7 @@ export default () => {
             {
               id: "default",
               type: currentTile,
+              cesiumIonAssetId: currentTile === "cesium_ion" ? cesiumIonAssetId : undefined,
               opacity: 1,
             },
           ]
@@ -84,7 +101,7 @@ export default () => {
         depthTestAgainstTerrain: hideUnderground,
       },
     }),
-    [currentTile, terrainEnabled, hideUnderground],
+    [currentTile, cesiumIonAssetId, terrainEnabled, hideUnderground],
   );
 
   const layers = useMemo(
@@ -118,7 +135,10 @@ export default () => {
       !selectedFeature?.id
     )
       return;
-    ref.current?.sketch.editFeature({ layerId: selectedLayer.id, feature: selectedFeature });
+    ref.current?.sketch.editFeature({
+      layerId: selectedLayer.id,
+      feature: selectedFeature,
+    });
   }, [selectedLayer, selectedFeature]);
 
   const handleCancelEditSketchFeature = useCallback(() => {
@@ -165,8 +185,12 @@ export default () => {
     handleAPIReady,
     handleSelect,
     meta,
+    customProvider,
+    customTileIds,
     currentTile,
     setCurrentTile,
+    cesiumIonAssetId,
+    setCesiumIonAssetId,
     currentCamera,
     setCurrentCamera,
     terrainEnabled,

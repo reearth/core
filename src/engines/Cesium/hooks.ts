@@ -1,7 +1,6 @@
 import {
   Entity,
   Cesium3DTileFeature,
-  Ion,
   Cesium3DTileset,
   JulianDate,
   Cesium3DTilePointFeature,
@@ -28,6 +27,7 @@ import { e2eAccessToken, setE2ECesiumViewer } from "../../e2eConfig";
 import { ComputedFeature, DataType, SelectedFeatureInfo, LatLng, Camera } from "../../mantle";
 import {
   Credits,
+  CustomProviderConfig,
   LayerLoadEvent,
   LayerSelectWithRectEnd,
   LayerSelectWithRectMove,
@@ -70,6 +70,7 @@ export default ({
   selectedLayerId,
   selectionReason,
   meta,
+  customProvider,
   layersRef,
   featureFlags,
   timelineManagerRef,
@@ -102,6 +103,7 @@ export default ({
   layersRef?: RefObject<LayersRef | null>;
   selectionReason?: LayerSelectionReason;
   meta?: Record<string, unknown>;
+  customProvider?: CustomProviderConfig;
   featureFlags: number;
   timelineManagerRef?: TimelineManagerRef;
   isLayerDraggable?: boolean;
@@ -137,7 +139,7 @@ export default ({
   const cesiumIonAccessToken =
     typeof meta?.cesiumIonAccessToken === "string" && meta.cesiumIonAccessToken
       ? meta.cesiumIonAccessToken
-      : Ion.defaultAccessToken;
+      : undefined;
 
   // expose ref
   const engineAPI = useEngineRef(ref, cesium);
@@ -674,6 +676,7 @@ export default ({
     () => ({
       selectionReason,
       timelineManagerRef,
+      customProvider,
       flyTo: engineAPI.flyTo,
       getCamera: engineAPI.getCamera,
       onLayerEdit,
@@ -688,11 +691,12 @@ export default ({
     }),
     [
       selectionReason,
+      timelineManagerRef,
+      customProvider,
       engineAPI,
       onLayerEdit,
       onLayerVisibility,
       onLayerLoad,
-      timelineManagerRef,
       updateCredits,
     ],
   );
@@ -730,7 +734,13 @@ export default ({
 
   useLayerDragDrop({ cesium, onLayerDrag, onLayerDrop, isLayerDraggable });
 
-  useExplicitRender({ cesium, requestingRenderMode, isLayerDragging, shouldRender, property });
+  useExplicitRender({
+    cesium,
+    requestingRenderMode,
+    isLayerDragging,
+    shouldRender,
+    property,
+  });
 
   const {
     cameraViewBoundaries,

@@ -13,6 +13,7 @@ import {
   type Cluster,
   type ComputedLayer,
   type Credits,
+  type CustomProviderConfig,
 } from "../Map";
 import { SketchFeature, SketchType } from "../Map/Sketch/types";
 import type { InteractionModeType } from "../shared/interactionMode";
@@ -42,6 +43,7 @@ export type CoreVisualizerProps = {
   interactionMode?: InteractionModeType;
   shouldRender?: boolean;
   meta?: Record<string, unknown>;
+  customProvider?: CustomProviderConfig;
   style?: CSSProperties;
   small?: boolean;
   ready?: boolean;
@@ -85,6 +87,7 @@ export const CoreVisualizer = memo(
         interactionMode,
         shouldRender,
         meta,
+        customProvider,
         displayCredits = true,
         style,
         zoomedLayerId,
@@ -165,6 +168,7 @@ export const CoreVisualizer = memo(
                 isLayerDragging={isLayerDragging}
                 isLayerDraggable={isEditable}
                 meta={meta}
+                customProvider={customProvider}
                 displayCredits={displayCredits}
                 style={style}
                 featureFlags={featureFlags}

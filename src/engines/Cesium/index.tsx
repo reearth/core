@@ -47,6 +47,7 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
     shouldRender,
     layerSelectionReason,
     meta,
+    customProvider,
     displayCredits,
     layersRef,
     featureFlags,
@@ -96,6 +97,7 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
     selectedLayerId,
     selectionReason: layerSelectionReason,
     meta,
+    customProvider,
     layersRef,
     featureFlags,
     timelineManagerRef,
@@ -167,6 +169,7 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
       <ImageryLayers
         tiles={property?.tiles}
         cesiumIonAccessToken={cesiumIonAccessToken}
+        customProvider={customProvider}
         onTilesChange={handleTilesChange}
       />
       <LabelImageryLayers tileLabels={property?.tileLabels} />
@@ -293,5 +296,14 @@ export const engine: Engine = {
   featureComponent: Feature,
   clusterComponent: Cluster,
   sketchComponent: Sketch,
-  delegatedDataTypes: ["czml", "wms", "mvt", "3dtiles", "osm-buildings", "kml"],
+  delegatedDataTypes: [
+    "czml",
+    "wms",
+    "mvt",
+    "3dtiles",
+    "osm-buildings",
+    "reearth-buildings",
+    "google-photorealistic",
+    "kml",
+  ],
 };

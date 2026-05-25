@@ -12,15 +12,21 @@ export const DEFAULT_CAMERA = {
   roll: 6.2830631767616465,
 };
 
+// Static preset tile types — always available regardless of CustomProviderConfig.
+// Dynamic provider IDs (from EXAMPLE_CUSTOM_PROVIDER) are appended at runtime in hooks.ts.
 export const TILES = [
-  "default",
-  "default_label",
-  "default_road",
+  // Public (always available)
   "open_street_map",
-  "esri_world_topo",
-  "black_marble",
   "japan_gsi_standard",
-  "test_unexpected_type",
+  "stamen_watercolor",
+  "carto_light",
+  // Cesium Ion — custom asset ID (enter asset ID in the input below)
+  "cesium_ion",
+  // Cesium Ion — preset assets (requires user-provided Ion token in scene settings)
+  "cesium_ion_default",
+  "cesium_ion_labelled",
+  "cesium_ion_road",
+  "cesium_ion_earth_at_night",
 ];
 
 export const SKETCH_TOOLS: SketchType[] = [

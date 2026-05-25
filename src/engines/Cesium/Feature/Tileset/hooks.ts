@@ -2,6 +2,7 @@ import {
   Cesium3DTileset as Cesium3DTilesetType,
   Cesium3DTileStyle,
   IonResource,
+  Resource,
   ClippingPlane,
   ClippingPlaneCollection as CesiumClippingPlaneCollection,
   Cartesian3,
@@ -75,6 +76,7 @@ const useData = (layer: ComputedLayer | undefined) => {
           : data?.layers
         : undefined,
       googleMapApiKey: data?.serviceTokens?.googleMapApiKey,
+      provider: data?.provider,
     };
   }, [layer]);
 };
@@ -457,7 +459,7 @@ export const useHooks = ({
 }) => {
   const { viewer } = useCesium();
   const tilesetRef = useRef<Cesium3DTilesetType>(undefined);
-  const { onLayerLoad, updateCredits } = useContext();
+  const { onLayerLoad, updateCredits, customProvider } = useContext();
   const layerIdRef = useRef(layer?.id);
   layerIdRef.current = layer?.id;
 
@@ -487,7 +489,7 @@ export const useHooks = ({
   } = useClippingBox({ clipping: experimental_clipping, boxId });
 
   const [style, setStyle] = useState<Cesium3DTileStyle>();
-  const { url, type, idProperty, googleMapApiKey } = useData(layer);
+  const { url, type, idProperty, googleMapApiKey, provider } = useData(layer);
   const shouldUseFeatureIndex = !disableIndexingFeature && !!idProperty;
 
   const [isTilesetReady, setIsTilesetReady] = useState(false);
@@ -752,20 +754,30 @@ export const useHooks = ({
     }
   }, [style, isTilesetReady]);
 
-  const googleMapPhotorealisticResource = useMemo(() => {
+  const googleMapPhotorealisticResource = useMemo((): string | Promise<Resource> | null => {
     if (type !== "google-photorealistic" || !isVisible) return null;
 
-    const loadTileset = async () => {
+    // For Re:Earth provider, use the custom URL from customProvider or layer data
+    if (provider === "reearth") {
+      // Try to get URL from customProvider first, then fall back to layer URL
+      const customUrl = customProvider?.layers?.providers?.find(
+        p => p.id === "reearth_google_photorealistic_3d_tiles",
+      )?.url;
+
+      return customUrl || url || null;
+    }
+
+    // Otherwise load via Google API key or Cesium Ion.
+    const loadTileset = async (): Promise<Resource> => {
       try {
-        if (googleMapApiKey) {
-          const tileset = await createGooglePhotorealistic3DTileset({ key: googleMapApiKey });
-          return tileset.resource;
-        } else {
-          const resource = IonResource.fromAssetId(2275207, {
+        if (provider === "cesium-ion" || !googleMapApiKey) {
+          const resource = await IonResource.fromAssetId(2275207, {
             accessToken: meta?.cesiumIonAccessToken as string | undefined,
           });
           return resource;
         }
+        const tileset = await createGooglePhotorealistic3DTileset({ key: googleMapApiKey });
+        return tileset.resource;
       } catch (error) {
         console.error(`Error loading Photorealistic 3D Tiles tileset: ${error}`);
         throw error;
@@ -773,19 +785,35 @@ export const useHooks = ({
     };
 
     return loadTileset();
-  }, [type, isVisible, googleMapApiKey, meta?.cesiumIonAccessToken]);
+  }, [type, isVisible, googleMapApiKey, meta?.cesiumIonAccessToken, provider, customProvider, url]);
 
-  const tilesetUrl = useMemo(() => {
-    return type === "osm-buildings" && isVisible
-      ? IonResource.fromAssetId(96188, {
-          accessToken: meta?.cesiumIonAccessToken as string | undefined,
-        }) // https://github.com/CesiumGS/cesium/blob/main/packages/engine/Source/Scene/createOsmBuildings.js#L53
-      : googleMapPhotorealisticResource && isVisible
-        ? googleMapPhotorealisticResource
-        : type === "3dtiles" && isVisible
-          ? (url ?? tileset)
-          : null;
-  }, [type, isVisible, meta?.cesiumIonAccessToken, googleMapPhotorealisticResource, url, tileset]);
+  const tilesetUrl = useMemo((): string | Resource | Promise<Resource> | null => {
+    if (!isVisible) return null;
+
+    // Google Photorealistic 3D Tiles
+    if (googleMapPhotorealisticResource) {
+      return googleMapPhotorealisticResource;
+    }
+
+    // Re:Earth Buildings — use layer's own url if provided, otherwise fall back to public service
+    if (type === "reearth-buildings") {
+      return url ?? "https://buildings.reearth.land/tileset.json";
+    }
+
+    // OSM Buildings — only available via Cesium Ion.
+    if (type === "osm-buildings") {
+      return IonResource.fromAssetId(96188, {
+        accessToken: meta?.cesiumIonAccessToken as string | undefined,
+      }); // https://github.com/CesiumGS/cesium/blob/main/packages/engine/Source/Scene/createOsmBuildings.js#L53
+    }
+
+    // Standard 3D Tiles with explicit URL
+    if (type === "3dtiles") {
+      return url ?? tileset ?? null;
+    }
+
+    return null;
+  }, [type, isVisible, googleMapPhotorealisticResource, url, tileset, meta?.cesiumIonAccessToken]);
 
   const imageBasedLighting = useMemo(() => {
     if (

@@ -21,8 +21,11 @@ import { SKETCH_TOOLS, TILES } from "@/constants";
 import { TEST_LAYERS } from "@/testLayers";
 
 type OptionsPanelProps = {
+  customTileIds?: string[];
   currentTile?: string;
   setCurrentTile: (v: string) => void;
+  cesiumIonAssetId?: number;
+  setCesiumIonAssetId: (v: number | undefined) => void;
   terrainEnabled: boolean;
   setTerrainEnabled: (v: boolean) => void;
   hideUnderground: boolean;
@@ -46,8 +49,11 @@ type OptionsPanelProps = {
 };
 
 const OptionsPanel: FC<OptionsPanelProps> = ({
+  customTileIds,
   currentTile,
   setCurrentTile,
+  cesiumIonAssetId,
+  setCesiumIonAssetId,
   terrainEnabled,
   setTerrainEnabled,
   hideUnderground,
@@ -92,6 +98,11 @@ const OptionsPanel: FC<OptionsPanelProps> = ({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
+                {customTileIds?.map(tile => (
+                  <SelectItem key={tile} value={tile}>
+                    {tile}
+                  </SelectItem>
+                ))}
                 {TILES.map(tile => (
                   <SelectItem key={tile} value={tile}>
                     {tile}
@@ -99,6 +110,23 @@ const OptionsPanel: FC<OptionsPanelProps> = ({
                 ))}
               </SelectContent>
             </Select>
+            {currentTile === "cesium_ion" && (
+              <div className="flex items-center gap-2 mt-1">
+                <label className="text-sm font-medium leading-none opacity-70 shrink-0">
+                  Asset ID
+                </label>
+                <input
+                  type="number"
+                  className="w-full border rounded px-2 py-1 text-sm"
+                  placeholder="e.g. 3812"
+                  value={cesiumIonAssetId ?? ""}
+                  onChange={e => {
+                    const v = parseInt(e.target.value, 10);
+                    setCesiumIonAssetId(isNaN(v) ? undefined : v);
+                  }}
+                />
+              </div>
+            )}
           </OptionSection>
 
           <OptionSection title="Terrain">
