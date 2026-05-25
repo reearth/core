@@ -7,13 +7,11 @@ on:
 
 jobs:
   release:
-    permissions:
-      contents: write
     uses: reearth/core/.github/workflows/npm_release.yml@beta
     with:
       branch: beta
       tag: beta
       version-args: --preid beta prerelease
     secrets:
-      PAT: ${{ secrets.GITHUB_TOKEN }}
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      PAT: ${{ secrets.PAT }}
