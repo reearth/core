@@ -90,6 +90,7 @@ function Tileset({
         onReady={handleReady}
         debugWireframe={showWireframe}
         debugShowBoundingVolume={showBoundingVolume}
+        showCreditsOnScreen
       />
       {builtinBoxProps && (
         <Box
