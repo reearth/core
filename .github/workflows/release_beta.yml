@@ -15,5 +15,5 @@ jobs:
       tag: beta
       version-args: --preid beta prerelease
     secrets:
-      PAT: ${{ secrets.GITHUB_TOKEN }}
+      PAT: ${{ secrets.PAT }}
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
