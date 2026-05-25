@@ -140,7 +140,12 @@ export default function ImageryLayers({
 }
 
 type Providers = {
-  [id: string]: [string | undefined, string | undefined, number | undefined, ImageryProvider];
+  [id: string]: [
+    string | undefined,
+    string | undefined,
+    number | undefined,
+    Promise<ImageryProvider> | ImageryProvider,
+  ];
 };
 
 export function useImageryProviders({
