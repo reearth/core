@@ -7,6 +7,8 @@ on:
 
 jobs:
   release:
+    permissions:
+      contents: write
     uses: reearth/core/.github/workflows/npm_release.yml@beta
     with:
         branch: alpha
