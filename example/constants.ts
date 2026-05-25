@@ -13,7 +13,7 @@ export const DEFAULT_CAMERA = {
 };
 
 // Static preset tile types — always available regardless of CustomProviderConfig.
-// Dynamic provider IDs (from EXAMPLE_IMAGERY_PROVIDERS) are appended at runtime in hooks.ts.
+// Dynamic provider IDs (from EXAMPLE_CUSTOM_PROVIDER) are appended at runtime in hooks.ts.
 export const TILES = [
   // Public (always available)
   "open_street_map",
