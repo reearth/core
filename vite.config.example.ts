@@ -24,6 +24,7 @@ export default defineConfig({
   },
   envPrefix: "EXAMPLE_",
   server: {
+    port: 3000,
     proxy: {
       // Proxy terrain requests to avoid CORS in dev — terrain.reearth.land
       // does not send Access-Control-Allow-Origin headers.

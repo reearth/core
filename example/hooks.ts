@@ -4,6 +4,7 @@ import {
   ComputedFeature,
   ComputedLayer,
   Credits,
+  CustomProviderConfig,
   LayerSelectionReason,
   LazyLayer,
   MapRef,
@@ -12,7 +13,6 @@ import {
   ViewerProperty,
 } from "@reearth/core";
 
-import { buildExampleTileProvider } from "./buildExampleMeta";
 import { DEFAULT_CAMERA, DEFAULT_LAYERS, TILES } from "./constants";
 import { DEFAULT_VIEWER_PROPERTY } from "./scene";
 import { TEST_LAYERS } from "./testLayers";
@@ -47,7 +47,16 @@ export default () => {
     setSelectedFeature(ref.current?.layers.selectedFeature() ?? feature);
   }, []);
 
-  const customProvider = useMemo(() => buildExampleTileProvider(), []);
+  const customProvider = useMemo(() => {
+    const envValue = import.meta.env.EXAMPLE_CUSTOM_PROVIDER;
+    if (!envValue) return undefined;
+    try {
+      return JSON.parse(envValue) as CustomProviderConfig;
+    } catch (error) {
+      console.warn("[example] Failed to parse EXAMPLE_CUSTOM_PROVIDER:", error);
+      return undefined;
+    }
+  }, []);
 
   const meta = useMemo(
     () => ({
@@ -56,7 +65,7 @@ export default () => {
     [],
   );
 
-  const customTileIds = customProvider?.imagery?.providers?.map(p => p.id) ?? [];
+  const customTileIds = customProvider?.imagery?.providers?.map((p: { id: string }) => p.id) ?? [];
 
   const allTileIds = [...TILES, ...customTileIds];
   const [currentTile, setCurrentTile] = useState(
