@@ -15,5 +15,5 @@ jobs:
         tag: alpha
         version-args: --preid alpha prerelease
     secrets:
+      PAT: ${{ secrets.GITHUB_TOKEN }}
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-      PAT: ${{ secrets.PAT }}
