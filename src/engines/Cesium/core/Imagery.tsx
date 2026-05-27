@@ -117,7 +117,9 @@ export default function ImageryLayers({
       };
 
       if (providerOrPromise instanceof Promise) {
-        providerOrPromise.then(doAdd).catch(err => console.error("Failed to load imagery provider:", err));
+        providerOrPromise
+          .then(doAdd)
+          .catch(err => console.error("Failed to load imagery provider:", err));
       } else {
         doAdd(providerOrPromise);
       }
@@ -188,7 +190,7 @@ export function useImageryProviders({
           minimumLevel: customEntry.minimumLevel,
         });
       }
-      return presets["open_street_map"](opts);
+      return null;
     },
     [presets],
   );

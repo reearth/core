@@ -119,15 +119,14 @@ test("useImageryProviders", () => {
   expect(result.current.providers["1"][3]).not.toBe(prevImageryProvider2);
   expect(provider).toBeCalledTimes(4);
 
-  // unknown type without customProvider: falls back directly to open_street_map
+  // unknown type without customProvider: returns null and is filtered out
   typedRerender({
     tiles: [{ id: "1", type: "unexpected_type", url: "u" }],
   });
 
-  expect(result.current.providers["1"][0]).toBe("unexpected_type");
-  expect(result.current.providers["1"][3]).toEqual({ osm: true });
+  expect(result.current.providers["1"]).toBeUndefined();
   expect(result.current.updated).toBe(true);
-  expect(osmProvider).toBeCalledTimes(1);
+  expect(osmProvider).toBeCalledTimes(0); // OSM provider should never be called
 
   // unknown type with a matching customProvider entry: uses UrlTemplateImageryProvider
   typedRerender({
@@ -148,7 +147,7 @@ test("useImageryProviders", () => {
   const dynamicProvider = result.current.providers["1"][3];
   expect(dynamicProvider).toBeDefined();
   expect(dynamicProvider).toBeInstanceOf(UrlTemplateImageryProvider);
-  expect(osmProvider).toBeCalledTimes(1); // osm not called again
+  expect(osmProvider).toBeCalledTimes(0); // osm never called with new behavior
 
   typedRerender({ tiles: [] });
   expect(result.current.providers).toEqual({});
