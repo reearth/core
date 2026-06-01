@@ -121,17 +121,9 @@ export default function Feature({
           layers: data?.layers,
           provider: data?.provider,
           googleMapApiKey: data?.serviceTokens?.googleMapApiKey,
-          cesiumIonAccessToken: props.meta?.cesiumIonAccessToken,
         }),
       ),
-    [
-      data?.type,
-      data?.url,
-      data?.layers,
-      data?.provider,
-      data?.serviceTokens?.googleMapApiKey,
-      props.meta?.cesiumIonAccessToken,
-    ],
+    [data?.type, data?.url, data?.layers, data?.provider, data?.serviceTokens?.googleMapApiKey],
   );
 
   const { requestRender } = useContext();
