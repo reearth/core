@@ -112,7 +112,19 @@ export default function Feature({
     displayType.every(k => components[k][1].noFeature && !components[k][1].noLayer);
   const useTransition = !!layer?.transition?.useTransition;
   const cacheable = !data?.updateInterval && !useTransition;
-  const urlMD5 = useMemo(() => (data?.url ? generateIDWithMD5(data.url) : ""), [data?.url]);
+  const dataSourceKey = useMemo(
+    () =>
+      generateIDWithMD5(
+        JSON.stringify({
+          type: data?.type,
+          url: data?.url,
+          layers: data?.layers,
+          provider: data?.provider,
+          googleMapApiKey: data?.serviceTokens?.googleMapApiKey,
+        }),
+      ),
+    [data?.type, data?.url, data?.layers, data?.provider, data?.serviceTokens?.googleMapApiKey],
+  );
 
   const { requestRender } = useContext();
   // TODO: Find a way to wait updating the entity
@@ -139,7 +151,7 @@ export default function Feature({
       !(sketchEditingFeature?.layerId === layer.id && sketchEditingFeature?.feature?.id === f?.id);
 
     const componentId =
-      urlMD5 +
+      dataSourceKey +
       generateIDWithMD5(
         `${layer.id}_${
           f?.id ?? ""
@@ -221,9 +233,9 @@ export default function Feature({
             layer?.layer?.type === "simple" && !!layer?.layer?.["3dtiles"]?.specularEnvironmentMaps;
 
           // "noFeature" component should be recreated when the following value is changed.
-          // data.url, isVisible
+          // data source, Cesium Ion token, isVisible
           const key =
-            urlMD5 +
+            dataSourceKey +
             generateIDWithMD5(
               `${
                 layer?.id || ""
@@ -243,7 +255,7 @@ export default function Feature({
         })}
       </>
     );
-  }, [areAllDisplayTypeNoFeature, displayType, layer, isHidden, urlMD5, props]);
+  }, [areAllDisplayTypeNoFeature, displayType, layer, isHidden, dataSourceKey, props]);
 
   return (
     <>

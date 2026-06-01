@@ -1,4 +1,4 @@
-import { memo, useMemo, type JSX } from "react";
+import { useMemo, type JSX } from "react";
 import { Cesium3DTileset } from "resium";
 
 import type { Cesium3DTilesAppearance, ComputedLayer } from "../../..";
@@ -37,6 +37,7 @@ function Tileset({
     property ?? {};
   const boxId = `${layer?.id}_box`;
   const {
+    tilesetKey,
     tilesetUrl,
     ref,
     style,
@@ -46,6 +47,7 @@ function Tileset({
     builtinBoxProps,
     imageBasedLighting,
     handleReady,
+    handleError,
   } = useHooks({
     id,
     boxId,
@@ -72,6 +74,7 @@ function Tileset({
   return !isVisible || !tilesetUrl ? null : (
     <>
       <Cesium3DTileset
+        key={tilesetKey}
         ref={ref}
         url={tilesetUrl}
         customShader={
@@ -88,6 +91,7 @@ function Tileset({
         colorBlendMode={colorBlendModeFor3DTile(colorBlendMode)}
         imageBasedLighting={imageBasedLighting}
         onReady={handleReady}
+        onError={handleError}
         debugWireframe={showWireframe}
         debugShowBoundingVolume={showBoundingVolume}
         showCreditsOnScreen
@@ -111,19 +115,7 @@ function Tileset({
   );
 }
 
-export default memo(
-  Tileset,
-  (prev, next) =>
-    prev.id === next.id &&
-    prev.isVisible === next.isVisible &&
-    prev.property === next.property &&
-    prev.layer?.layer === next.layer?.layer &&
-    prev.viewerProperty === next.viewerProperty &&
-    prev.meta === next.meta &&
-    prev.evalFeature === next.evalFeature &&
-    prev.onComputedFeatureFetch === next.onComputedFeatureFetch &&
-    prev.onFeatureDelete === next.onFeatureDelete,
-);
+export default Tileset;
 
 export const config: FeatureComponentConfig = {
   noFeature: true,

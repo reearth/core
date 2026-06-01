@@ -23,7 +23,15 @@ import {
   createGooglePhotorealistic3DTileset,
 } from "cesium";
 import { pick } from "lodash-es";
-import { MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  MutableRefObject,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { CesiumComponentRef, useCesium } from "resium";
 
 import type {
@@ -490,11 +498,52 @@ export const useHooks = ({
 
   const [style, setStyle] = useState<Cesium3DTileStyle>();
   const { url, type, idProperty, googleMapApiKey, provider } = useData(layer);
+  const cesiumIonAccessToken =
+    typeof meta?.cesiumIonAccessToken === "string" ? meta.cesiumIonAccessToken : undefined;
   const shouldUseFeatureIndex = !disableIndexingFeature && !!idProperty;
 
   const [isTilesetReady, setIsTilesetReady] = useState(false);
   const [isTilesetCompReady, setIsTilesetCompReady] = useState(false);
   const [isTilesetRefReady, setIsTilesetRefReady] = useState(false);
+
+  const reearthGooglePhotorealisticUrl = useMemo(
+    () =>
+      customProvider?.layers?.providers?.find(
+        p => p.id === "reearth_google_photorealistic_3d_tiles",
+      )?.url,
+    [customProvider],
+  );
+
+  const tilesetKey = useMemo(
+    () =>
+      generateIDWithMD5(
+        JSON.stringify({
+          type,
+          url,
+          tileset,
+          provider,
+          googleMapApiKey,
+          reearthGooglePhotorealisticUrl,
+          cesiumIonAccessToken:
+            type === "osm-buildings" ||
+            (type === "google-photorealistic" && (provider === "cesium-ion" || !googleMapApiKey))
+              ? cesiumIonAccessToken
+              : undefined,
+        }),
+      ),
+    [
+      type,
+      url,
+      tileset,
+      provider,
+      googleMapApiKey,
+      reearthGooglePhotorealisticUrl,
+      cesiumIonAccessToken,
+    ],
+  );
+  const currentTilesetKeyRef = useRef(tilesetKey);
+  currentTilesetKeyRef.current = tilesetKey;
+  const tilesetRefKeyRef = useRef<string | undefined>(undefined);
 
   const prevPlanes = useRef(_planes);
   const planes = useMemo(() => {
@@ -563,26 +612,45 @@ export const useHooks = ({
 
   const ref = useCallback(
     (tileset: CesiumComponentRef<Cesium3DTilesetType> | null) => {
-      if (tileset?.cesiumElement) {
-        attachTag(tileset.cesiumElement, {
+      const cesiumElement = tileset?.cesiumElement;
+      if (tilesetKey !== currentTilesetKeyRef.current) {
+        return;
+      }
+      if (cesiumElement) {
+        attachTag(cesiumElement, {
           layerId: layer?.id || id,
           featureIndex: shouldUseFeatureIndex ? featureIndex : undefined,
           appearanceType: "3dtiles",
         });
       }
-      if (layer?.id && tileset?.cesiumElement) {
-        (tileset?.cesiumElement as any)[layerIdField] = layer.id;
+      if (layer?.id && cesiumElement) {
+        (cesiumElement as any)[layerIdField] = layer.id;
       }
-      tilesetRef.current = tileset?.cesiumElement;
-      setIsTilesetRefReady(!!tileset?.cesiumElement);
+      tilesetRef.current = cesiumElement;
+      tilesetRefKeyRef.current = cesiumElement ? tilesetKey : undefined;
+      setIsTilesetRefReady(!!cesiumElement);
     },
-    [id, layer?.id, featureIndex, shouldUseFeatureIndex],
+    [id, layer?.id, featureIndex, shouldUseFeatureIndex, tilesetKey],
   );
 
   const selectedFeatureIdsRef = useRef<string[]>([]);
   const selectedFeatureColorRef = useRef(selectedFeatureColor);
   selectedFeatureColorRef.current = selectedFeatureColor;
   const [selectedFeatureColorMap] = useState(() => new Map<string, Color>());
+
+  // The Cesium3DTileset child remounts when tilesetKey changes, while this hook stays mounted.
+  useLayoutEffect(() => {
+    setIsTilesetCompReady(false);
+    setIsTilesetReady(false);
+    if (tilesetRefKeyRef.current !== tilesetKey) {
+      tilesetRef.current = undefined;
+      tilesetRefKeyRef.current = undefined;
+      setIsTilesetRefReady(false);
+    }
+    featureIndex.records.clear();
+    selectedFeatureIdsRef.current = [];
+    selectedFeatureColorMap.clear();
+  }, [tilesetKey, featureIndex, selectedFeatureColorMap]);
 
   useEffect(() => {
     if (!tilesetRef.current || !shouldUseFeatureIndex || !isTilesetReady) return;
@@ -759,12 +827,7 @@ export const useHooks = ({
 
     // For Re:Earth provider, use the custom URL from customProvider or layer data
     if (provider === "reearth") {
-      // Try to get URL from customProvider first, then fall back to layer URL
-      const customUrl = customProvider?.layers?.providers?.find(
-        p => p.id === "reearth_google_photorealistic_3d_tiles",
-      )?.url;
-
-      return customUrl || url || null;
+      return reearthGooglePhotorealisticUrl || url || null;
     }
 
     // Otherwise load via Google API key or Cesium Ion.
@@ -772,11 +835,13 @@ export const useHooks = ({
       try {
         if (provider === "cesium-ion" || !googleMapApiKey) {
           const resource = await IonResource.fromAssetId(2275207, {
-            accessToken: meta?.cesiumIonAccessToken as string | undefined,
+            accessToken: cesiumIonAccessToken,
           });
           return resource;
         }
-        const tileset = await createGooglePhotorealistic3DTileset({ key: googleMapApiKey });
+        const tileset = await createGooglePhotorealistic3DTileset({
+          key: googleMapApiKey,
+        });
         return tileset.resource;
       } catch (error) {
         console.error(`Error loading Photorealistic 3D Tiles tileset: ${error}`);
@@ -785,7 +850,15 @@ export const useHooks = ({
     };
 
     return loadTileset();
-  }, [type, isVisible, googleMapApiKey, meta?.cesiumIonAccessToken, provider, customProvider, url]);
+  }, [
+    type,
+    isVisible,
+    googleMapApiKey,
+    cesiumIonAccessToken,
+    provider,
+    reearthGooglePhotorealisticUrl,
+    url,
+  ]);
 
   const tilesetUrl = useMemo((): string | Resource | Promise<Resource> | null => {
     if (!isVisible) return null;
@@ -803,7 +876,7 @@ export const useHooks = ({
     // OSM Buildings — only available via Cesium Ion.
     if (type === "osm-buildings") {
       return IonResource.fromAssetId(96188, {
-        accessToken: meta?.cesiumIonAccessToken as string | undefined,
+        accessToken: cesiumIonAccessToken,
       }); // https://github.com/CesiumGS/cesium/blob/main/packages/engine/Source/Scene/createOsmBuildings.js#L53
     }
 
@@ -813,7 +886,7 @@ export const useHooks = ({
     }
 
     return null;
-  }, [type, isVisible, googleMapPhotorealisticResource, url, tileset, meta?.cesiumIonAccessToken]);
+  }, [type, isVisible, googleMapPhotorealisticResource, url, tileset, cesiumIonAccessToken]);
 
   const imageBasedLighting = useMemo(() => {
     if (
@@ -854,11 +927,29 @@ export const useHooks = ({
 
   const handleReady = useCallback(
     (tileset: Cesium3DTileset) => {
+      if (tilesetKey !== currentTilesetKeyRef.current) {
+        return;
+      }
       setIsTilesetCompReady(true);
       onLayerFetch?.({ properties: tileset.properties });
       onLayerLoad?.({ layerId: layerIdRef.current });
     },
-    [onLayerFetch, onLayerLoad],
+    [onLayerFetch, onLayerLoad, tilesetKey],
+  );
+
+  const handleError = useCallback(
+    (error: unknown) => {
+      if (tilesetKey !== currentTilesetKeyRef.current) {
+        return;
+      }
+      tilesetRef.current = undefined;
+      tilesetRefKeyRef.current = undefined;
+      setIsTilesetCompReady(false);
+      setIsTilesetRefReady(false);
+      setIsTilesetReady(false);
+      console.error("Error loading Cesium 3D Tileset:", error);
+    },
+    [tilesetKey],
   );
 
   useEffect(() => {
@@ -874,6 +965,7 @@ export const useHooks = ({
   }, [type, updateCredits]);
 
   return {
+    tilesetKey,
     tilesetUrl,
     ref,
     style,
@@ -883,5 +975,6 @@ export const useHooks = ({
     builtinBoxProps,
     imageBasedLighting,
     handleReady,
+    handleError,
   };
 };
