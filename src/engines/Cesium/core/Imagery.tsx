@@ -75,11 +75,34 @@ export default function ImageryLayers({
     presets: tilePresets,
   });
 
+  // Store layers keyed by tile ID to allow incremental updates
+  const layersRef = useRef<
+    Map<
+      string,
+      {
+        layer: CesiumImageryLayer;
+        tile: Tile;
+        provider: Promise<ImageryProvider> | ImageryProvider;
+      }
+    >
+  >(new Map());
+
   useEffect(() => {
     if (!imageryLayerCollection || !scene) return;
 
     let cancelled = false;
-    const addedLayers: CesiumImageryLayer[] = [];
+    const currentTileIds = new Set(stableTiles?.map(t => t.id) || []);
+
+    // Remove layers for tiles that no longer exist
+    layersRef.current.forEach(({ layer }, id) => {
+      if (!currentTileIds.has(id)) {
+        if (imageryLayerCollection.contains(layer)) {
+          imageryLayerCollection.remove(layer);
+        }
+        layersRef.current.delete(id);
+      }
+    });
+
     // Track layers by their intended index to maintain order with async loading
     const layersByIndex: (CesiumImageryLayer | null)[] = new Array(stableTiles?.length || 0).fill(
       null,
@@ -108,9 +131,49 @@ export default function ImageryLayers({
       scene.requestRender();
     };
 
-    stableTiles?.forEach(({ id, zoomLevel, opacity, heatmap }, i) => {
+    stableTiles?.forEach((tile, i) => {
+      const { id, zoomLevel, opacity, heatmap } = tile;
+      const existing = layersRef.current.get(id);
       const providerOrPromise = providers[id]?.[3];
+
       if (!providerOrPromise) return;
+
+      // Check if we can reuse the existing layer with just an opacity update
+      if (existing) {
+        const prevTile = existing.tile;
+        const prevProvider = existing.provider;
+        // Must check provider reference - if provider changed (e.g. cesiumIonAccessToken updated),
+        // the layer needs to be recreated even if tile properties are the same
+        const canReuseLayer =
+          prevProvider === providerOrPromise &&
+          prevTile.type === tile.type &&
+          prevTile.url === tile.url &&
+          prevTile.cesiumIonAssetId === tile.cesiumIonAssetId &&
+          prevTile.zoomLevel?.[0] === zoomLevel?.[0] &&
+          prevTile.zoomLevel?.[1] === zoomLevel?.[1] &&
+          prevTile.heatmap === heatmap;
+
+        if (canReuseLayer) {
+          // Only opacity might have changed - update it directly if needed
+          const nextAlpha = opacity ?? 1;
+          if (existing.layer.alpha !== nextAlpha) {
+            existing.layer.alpha = nextAlpha;
+            scene.requestRender();
+          }
+          // Update stored tile and provider for next comparison
+          existing.tile = tile;
+          existing.provider = providerOrPromise;
+          layersByIndex[i] = existing.layer;
+          reorderLayers();
+          return;
+        }
+
+        // Need to recreate the layer - remove the old one
+        if (imageryLayerCollection.contains(existing.layer)) {
+          imageryLayerCollection.remove(existing.layer);
+        }
+        layersRef.current.delete(id);
+      }
 
       const doAdd = (provider: ImageryProvider) => {
         if (!provider || cancelled || scene.isDestroyed()) return;
@@ -127,7 +190,8 @@ export default function ImageryLayers({
         // Always append to avoid index out of bounds
         imageryLayerCollection.add(layer);
         layersByIndex[i] = layer;
-        addedLayers.push(layer);
+        // Store the provider reference to detect when provider changes (e.g. token update)
+        layersRef.current.set(id, { layer, tile, provider: providerOrPromise });
 
         // Reorder all layers after each addition
         reorderLayers();
@@ -147,15 +211,24 @@ export default function ImageryLayers({
 
     return () => {
       cancelled = true;
-      for (const layer of addedLayers) {
-        if (!scene.isDestroyed() && imageryLayerCollection.contains(layer)) {
+      // Don't remove layers on cleanup - they'll be managed by the next render
+      // This prevents flickering when tiles change
+    };
+  }, [providers, stableTiles, imageryLayerCollection, scene, onTilesChange]);
+
+  // Cleanup all layers on unmount
+  useEffect(() => {
+    const layers = layersRef.current;
+    return () => {
+      if (!imageryLayerCollection || !scene || scene.isDestroyed()) return;
+      layers.forEach(({ layer }) => {
+        if (imageryLayerCollection.contains(layer)) {
           imageryLayerCollection.remove(layer);
         }
-      }
+      });
+      layers.clear();
     };
-    // Note: Using `stableTiles` to prevent re-renders when tiles reference changes but content is identical.
-    // This also stabilizes `providers` since it depends on tiles in useImageryProviders.
-  }, [providers, stableTiles, imageryLayerCollection, scene, onTilesChange]);
+  }, [imageryLayerCollection, scene]);
 
   return null;
 }

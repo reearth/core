@@ -228,17 +228,132 @@ test("ImageryLayers should not re-render when tiles array reference changes but 
   mockAdd.mockClear();
   mockRemove.mockClear();
 
-  // Re-render with DIFFERENT content (changed opacity)
-  const differentTiles: Tile[] = [
-    { id: "1", type: "open_street_map", opacity: 0.5 }, // opacity changed
+  // Re-render with ONLY opacity changed
+  const opacityChangedTiles: Tile[] = [
+    { id: "1", type: "open_street_map", opacity: 0.5 }, // only opacity changed
   ];
 
-  rerender({ tiles: differentTiles });
+  rerender({ tiles: opacityChangedTiles });
 
   // Wait for effects to run
   await new Promise(resolve => setTimeout(resolve, 0));
 
-  // Effect SHOULD run - old layers removed and new ones added
+  // With our optimization, when ONLY opacity changes, the layer is NOT recreated
+  // The layer.alpha property is updated directly without removing/adding the layer
+  expect(mockRemove).not.toHaveBeenCalled();
+  expect(mockAdd).not.toHaveBeenCalled();
+
+  // Clear mocks
+  mockAdd.mockClear();
+  mockRemove.mockClear();
+
+  // Re-render with DIFFERENT tile type (requires layer recreation)
+  const differentTypeTiles: Tile[] = [
+    { id: "1", type: "stamen_watercolor", opacity: 0.5 }, // type changed
+  ];
+
+  rerender({ tiles: differentTypeTiles });
+
+  // Wait for effects to run
+  await new Promise(resolve => setTimeout(resolve, 0));
+
+  // When provider changes (type, url, etc.), layer IS recreated
+  expect(mockRemove).toHaveBeenCalled();
+  expect(mockAdd).toHaveBeenCalled();
+});
+
+test("ImageryLayers should optimize opacity changes without recreating layers", async () => {
+  const tiles: Tile[] = [{ id: "1", type: "open_street_map", opacity: 1.0 }];
+
+  const { rerender } = renderHook(
+    ({ tiles }: { tiles: Tile[] }) => {
+      return ImageryLayers({
+        tiles,
+        cesiumIonAccessToken: undefined,
+        customProvider: undefined,
+        onTilesChange: undefined,
+      });
+    },
+    {
+      initialProps: { tiles },
+    },
+  );
+
+  // Wait for initial render
+  await new Promise(resolve => setTimeout(resolve, 0));
+
+  // Clear initial render calls
+  mockAdd.mockClear();
+  mockRemove.mockClear();
+
+  // Change opacity multiple times
+  for (const opacity of [0.8, 0.6, 0.4, 0.2]) {
+    rerender({ tiles: [{ id: "1", type: "open_street_map", opacity }] });
+    await new Promise(resolve => setTimeout(resolve, 0));
+  }
+
+  // After multiple opacity changes, layers should NEVER be removed/added
+  // The optimization updates layer.alpha directly
+  expect(mockRemove).not.toHaveBeenCalled();
+  expect(mockAdd).not.toHaveBeenCalled();
+});
+
+test("ImageryLayers should recreate layer when customProvider changes even if tile properties are same", async () => {
+  // Use a custom provider that we can change
+  const tiles: Tile[] = [{ id: "1", type: "my_custom", opacity: 0.8 }];
+
+  const customProvider1: CustomProviderConfig = {
+    imagery: {
+      providers: [
+        {
+          id: "my_custom",
+          url: "https://tiles1.example.com/{z}/{x}/{y}.png",
+          credit: "© Example 1",
+        },
+      ],
+    },
+  };
+
+  const customProvider2: CustomProviderConfig = {
+    imagery: {
+      providers: [
+        {
+          id: "my_custom",
+          url: "https://tiles2.example.com/{z}/{x}/{y}.png", // Different URL
+          credit: "© Example 2",
+        },
+      ],
+    },
+  };
+
+  const { rerender } = renderHook(
+    ({ tiles, customProvider }: { tiles: Tile[]; customProvider?: CustomProviderConfig }) => {
+      return ImageryLayers({
+        tiles,
+        cesiumIonAccessToken: undefined,
+        customProvider,
+        onTilesChange: undefined,
+      });
+    },
+    {
+      initialProps: { tiles, customProvider: customProvider1 },
+    },
+  );
+
+  // Wait for initial render
+  await new Promise(resolve => setTimeout(resolve, 0));
+
+  // Clear initial render calls
+  mockAdd.mockClear();
+  mockRemove.mockClear();
+
+  // Change the customProvider (this creates a new provider with different URL)
+  // Tile properties stay the same
+  rerender({ tiles, customProvider: customProvider2 });
+  await new Promise(resolve => setTimeout(resolve, 0));
+
+  // Layer SHOULD be recreated because the provider changed
+  // (even though tile properties didn't change)
   expect(mockRemove).toHaveBeenCalled();
   expect(mockAdd).toHaveBeenCalled();
 });
