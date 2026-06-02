@@ -1,0 +1,18 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: core
+  namespace: reearth
+  description: A library that abstracts a map engine as one common API.
+  annotations:
+    github.com/project-slug: reearth/core
+  links:
+  - url: https://github.com/reearth/core
+    title: GitHub
+    icon: github
+  tags:
+  - typescript
+spec:
+  type: service
+  lifecycle: production
+  owner: reearth/cto-office
