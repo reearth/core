@@ -297,3 +297,63 @@ test("ImageryLayers should optimize opacity changes without recreating layers", 
   expect(mockRemove).not.toHaveBeenCalled();
   expect(mockAdd).not.toHaveBeenCalled();
 });
+
+test("ImageryLayers should recreate layer when customProvider changes even if tile properties are same", async () => {
+  // Use a custom provider that we can change
+  const tiles: Tile[] = [{ id: "1", type: "my_custom", opacity: 0.8 }];
+
+  const customProvider1: CustomProviderConfig = {
+    imagery: {
+      providers: [
+        {
+          id: "my_custom",
+          url: "https://tiles1.example.com/{z}/{x}/{y}.png",
+          credit: "© Example 1",
+        },
+      ],
+    },
+  };
+
+  const customProvider2: CustomProviderConfig = {
+    imagery: {
+      providers: [
+        {
+          id: "my_custom",
+          url: "https://tiles2.example.com/{z}/{x}/{y}.png", // Different URL
+          credit: "© Example 2",
+        },
+      ],
+    },
+  };
+
+  const { rerender } = renderHook(
+    ({ tiles, customProvider }: { tiles: Tile[]; customProvider?: CustomProviderConfig }) => {
+      return ImageryLayers({
+        tiles,
+        cesiumIonAccessToken: undefined,
+        customProvider,
+        onTilesChange: undefined,
+      });
+    },
+    {
+      initialProps: { tiles, customProvider: customProvider1 },
+    },
+  );
+
+  // Wait for initial render
+  await new Promise(resolve => setTimeout(resolve, 0));
+
+  // Clear initial render calls
+  mockAdd.mockClear();
+  mockRemove.mockClear();
+
+  // Change the customProvider (this creates a new provider with different URL)
+  // Tile properties stay the same
+  rerender({ tiles, customProvider: customProvider2 });
+  await new Promise(resolve => setTimeout(resolve, 0));
+
+  // Layer SHOULD be recreated because the provider changed
+  // (even though tile properties didn't change)
+  expect(mockRemove).toHaveBeenCalled();
+  expect(mockAdd).toHaveBeenCalled();
+});

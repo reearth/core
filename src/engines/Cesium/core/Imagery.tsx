@@ -76,7 +76,16 @@ export default function ImageryLayers({
   });
 
   // Store layers keyed by tile ID to allow incremental updates
-  const layersRef = useRef<Map<string, { layer: CesiumImageryLayer; tile: Tile }>>(new Map());
+  const layersRef = useRef<
+    Map<
+      string,
+      {
+        layer: CesiumImageryLayer;
+        tile: Tile;
+        provider: Promise<ImageryProvider> | ImageryProvider;
+      }
+    >
+  >(new Map());
 
   useEffect(() => {
     if (!imageryLayerCollection || !scene) return;
@@ -132,7 +141,11 @@ export default function ImageryLayers({
       // Check if we can reuse the existing layer with just an opacity update
       if (existing) {
         const prevTile = existing.tile;
+        const prevProvider = existing.provider;
+        // Must check provider reference - if provider changed (e.g. cesiumIonAccessToken updated),
+        // the layer needs to be recreated even if tile properties are the same
         const canReuseLayer =
+          prevProvider === providerOrPromise &&
           prevTile.type === tile.type &&
           prevTile.url === tile.url &&
           prevTile.cesiumIonAssetId === tile.cesiumIonAssetId &&
@@ -147,8 +160,9 @@ export default function ImageryLayers({
             existing.layer.alpha = nextAlpha;
             scene.requestRender();
           }
-          // Update stored tile for next comparison
+          // Update stored tile and provider for next comparison
           existing.tile = tile;
+          existing.provider = providerOrPromise;
           layersByIndex[i] = existing.layer;
           reorderLayers();
           return;
@@ -176,7 +190,8 @@ export default function ImageryLayers({
         // Always append to avoid index out of bounds
         imageryLayerCollection.add(layer);
         layersByIndex[i] = layer;
-        layersRef.current.set(id, { layer, tile });
+        // Store the provider reference to detect when provider changes (e.g. token update)
+        layersRef.current.set(id, { layer, tile, provider: providerOrPromise });
 
         // Reorder all layers after each addition
         reorderLayers();
