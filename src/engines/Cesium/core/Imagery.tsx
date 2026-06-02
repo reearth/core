@@ -142,8 +142,9 @@ export default function ImageryLayers({
 
         if (canReuseLayer) {
           // Only opacity might have changed - update it directly if needed
-          if (opacity !== undefined && existing.layer.alpha !== opacity) {
-            existing.layer.alpha = opacity;
+          const nextAlpha = opacity ?? 1;
+          if (existing.layer.alpha !== nextAlpha) {
+            existing.layer.alpha = nextAlpha;
             scene.requestRender();
           }
           // Update stored tile for next comparison
