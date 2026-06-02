@@ -53,20 +53,45 @@ export default function ImageryLayers({
 }: Props) {
   const { imageryLayerCollection, scene } = useCesium();
 
+  // Create a stable tiles reference that only changes when the content actually changes
+  const prevTilesRef = useRef(tiles);
+  const stableTiles = useMemo(() => {
+    if (!isEqual(prevTilesRef.current, tiles)) {
+      prevTilesRef.current = tiles;
+    }
+    return prevTilesRef.current;
+  }, [tiles]);
+
   const { providers } = useImageryProviders({
-    tiles,
+    tiles: stableTiles,
     cesiumIonAccessToken,
     customProvider,
     presets: tilePresets,
   });
 
+  // Store layers keyed by tile ID to allow incremental updates
+  const layersRef = useRef<Map<string, { layer: CesiumImageryLayer; tile: Tile }>>(new Map());
+
   useEffect(() => {
     if (!imageryLayerCollection || !scene) return;
 
     let cancelled = false;
-    const addedLayers: CesiumImageryLayer[] = [];
+    const currentTileIds = new Set(stableTiles?.map(t => t.id) || []);
+
+    // Remove layers for tiles that no longer exist
+    layersRef.current.forEach(({ layer }, id) => {
+      if (!currentTileIds.has(id)) {
+        if (imageryLayerCollection.contains(layer)) {
+          imageryLayerCollection.remove(layer);
+        }
+        layersRef.current.delete(id);
+      }
+    });
+
     // Track layers by their intended index to maintain order with async loading
-    const layersByIndex: (CesiumImageryLayer | null)[] = new Array(tiles?.length || 0).fill(null);
+    const layersByIndex: (CesiumImageryLayer | null)[] = new Array(stableTiles?.length || 0).fill(
+      null,
+    );
 
     const reorderLayers = () => {
       if (cancelled || scene.isDestroyed()) return;
@@ -91,9 +116,43 @@ export default function ImageryLayers({
       scene.requestRender();
     };
 
-    tiles?.forEach(({ id, zoomLevel, opacity, heatmap }, i) => {
+    stableTiles?.forEach((tile, i) => {
+      const { id, zoomLevel, opacity, heatmap } = tile;
+      const existing = layersRef.current.get(id);
       const providerOrPromise = providers[id]?.[3];
+
       if (!providerOrPromise) return;
+
+      // Check if we can reuse the existing layer with just an opacity update
+      if (existing) {
+        const prevTile = existing.tile;
+        const canReuseLayer =
+          prevTile.type === tile.type &&
+          prevTile.url === tile.url &&
+          prevTile.cesiumIonAssetId === tile.cesiumIonAssetId &&
+          prevTile.zoomLevel?.[0] === zoomLevel?.[0] &&
+          prevTile.zoomLevel?.[1] === zoomLevel?.[1] &&
+          prevTile.heatmap === heatmap;
+
+        if (canReuseLayer) {
+          // Only opacity might have changed - update it directly if needed
+          if (opacity !== undefined && existing.layer.alpha !== opacity) {
+            existing.layer.alpha = opacity;
+            scene.requestRender();
+          }
+          // Update stored tile for next comparison
+          existing.tile = tile;
+          layersByIndex[i] = existing.layer;
+          reorderLayers();
+          return;
+        }
+
+        // Need to recreate the layer - remove the old one
+        if (imageryLayerCollection.contains(existing.layer)) {
+          imageryLayerCollection.remove(existing.layer);
+        }
+        layersRef.current.delete(id);
+      }
 
       const doAdd = (provider: ImageryProvider) => {
         if (!provider || cancelled || scene.isDestroyed()) return;
@@ -110,14 +169,16 @@ export default function ImageryLayers({
         // Always append to avoid index out of bounds
         imageryLayerCollection.add(layer);
         layersByIndex[i] = layer;
-        addedLayers.push(layer);
+        layersRef.current.set(id, { layer, tile });
 
         // Reorder all layers after each addition
         reorderLayers();
       };
 
       if (providerOrPromise instanceof Promise) {
-        providerOrPromise.then(doAdd).catch(err => console.error("Failed to load imagery provider:", err));
+        providerOrPromise
+          .then(doAdd)
+          .catch(err => console.error("Failed to load imagery provider:", err));
       } else {
         doAdd(providerOrPromise);
       }
@@ -128,13 +189,24 @@ export default function ImageryLayers({
 
     return () => {
       cancelled = true;
-      for (const layer of addedLayers) {
-        if (!scene.isDestroyed() && imageryLayerCollection.contains(layer)) {
+      // Don't remove layers on cleanup - they'll be managed by the next render
+      // This prevents flickering when tiles change
+    };
+  }, [providers, stableTiles, imageryLayerCollection, scene, onTilesChange]);
+
+  // Cleanup all layers on unmount
+  useEffect(() => {
+    const layers = layersRef.current;
+    return () => {
+      if (!imageryLayerCollection || !scene || scene.isDestroyed()) return;
+      layers.forEach(({ layer }) => {
+        if (imageryLayerCollection.contains(layer)) {
           imageryLayerCollection.remove(layer);
         }
-      }
+      });
+      layers.clear();
     };
-  }, [providers, tiles, imageryLayerCollection, scene, onTilesChange]);
+  }, [imageryLayerCollection, scene]);
 
   return null;
 }
