@@ -53,8 +53,21 @@ export default function ImageryLayers({
 }: Props) {
   const { imageryLayerCollection, scene } = useCesium();
 
+  // Create a stable tiles reference that only changes when the content actually changes
+  const prevTilesRef = useRef(tiles);
+  const stableTiles = useMemo(() => {
+    const tilesChanged = !isEqual(prevTilesRef.current, tiles);
+    if (tilesChanged) {
+      prevTilesRef.current = tiles;
+      return tiles;
+    }
+    return prevTilesRef.current;
+  }, [tiles]);
+
+  // Pass stableTiles to useImageryProviders to prevent providers from being recreated
+  // when tiles reference changes but content is the same
   const { providers } = useImageryProviders({
-    tiles,
+    tiles: stableTiles,
     cesiumIonAccessToken,
     customProvider,
     presets: tilePresets,
@@ -66,7 +79,9 @@ export default function ImageryLayers({
     let cancelled = false;
     const addedLayers: CesiumImageryLayer[] = [];
     // Track layers by their intended index to maintain order with async loading
-    const layersByIndex: (CesiumImageryLayer | null)[] = new Array(tiles?.length || 0).fill(null);
+    const layersByIndex: (CesiumImageryLayer | null)[] = new Array(stableTiles?.length || 0).fill(
+      null,
+    );
 
     const reorderLayers = () => {
       if (cancelled || scene.isDestroyed()) return;
@@ -91,7 +106,7 @@ export default function ImageryLayers({
       scene.requestRender();
     };
 
-    tiles?.forEach(({ id, zoomLevel, opacity, heatmap }, i) => {
+    stableTiles?.forEach(({ id, zoomLevel, opacity, heatmap }, i) => {
       const providerOrPromise = providers[id]?.[3];
       if (!providerOrPromise) return;
 
@@ -117,7 +132,9 @@ export default function ImageryLayers({
       };
 
       if (providerOrPromise instanceof Promise) {
-        providerOrPromise.then(doAdd).catch(err => console.error("Failed to load imagery provider:", err));
+        providerOrPromise
+          .then(doAdd)
+          .catch(err => console.error("Failed to load imagery provider:", err));
       } else {
         doAdd(providerOrPromise);
       }
@@ -134,7 +151,9 @@ export default function ImageryLayers({
         }
       }
     };
-  }, [providers, tiles, imageryLayerCollection, scene, onTilesChange]);
+    // Note: Using `stableTiles` to prevent re-renders when tiles reference changes but content is identical.
+    // This also stabilizes `providers` since it depends on tiles in useImageryProviders.
+  }, [providers, stableTiles, imageryLayerCollection, scene, onTilesChange]);
 
   return null;
 }
