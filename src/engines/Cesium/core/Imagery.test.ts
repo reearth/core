@@ -1,10 +1,44 @@
 import { renderHook } from "@testing-library/react";
 import { UrlTemplateImageryProvider } from "cesium";
-import { expect, test, vi } from "vitest";
+import { expect, test, vi, beforeEach } from "vitest";
 
 import type { CustomProviderConfig } from "../../../Map/types/customProvider";
 
-import { type Tile, useImageryProviders } from "./Imagery";
+import ImageryLayers, { type Tile, useImageryProviders } from "./Imagery";
+
+// Mock Cesium scene and imageryLayerCollection for ImageryLayers component tests
+const mockAdd = vi.fn();
+const mockRemove = vi.fn();
+const mockContains = vi.fn(() => true);
+const mockIndexOf = vi.fn(() => 0);
+const mockRequestRender = vi.fn();
+
+const mockImageryLayerCollection = {
+  add: mockAdd,
+  remove: mockRemove,
+  contains: mockContains,
+  indexOf: mockIndexOf,
+};
+
+const mockScene = {
+  requestRender: mockRequestRender,
+  isDestroyed: () => false,
+};
+
+vi.mock("resium", () => ({
+  useCesium: () => ({
+    imageryLayerCollection: mockImageryLayerCollection,
+    scene: mockScene,
+  }),
+}));
+
+beforeEach(() => {
+  mockAdd.mockClear();
+  mockRemove.mockClear();
+  mockContains.mockClear();
+  mockIndexOf.mockClear();
+  mockRequestRender.mockClear();
+});
 
 test("useImageryProviders", () => {
   const provider = vi.fn(({ url }: { url?: string } = {}): any => ({ hoge: url }));
@@ -152,4 +186,59 @@ test("useImageryProviders", () => {
 
   typedRerender({ tiles: [] });
   expect(result.current.providers).toEqual({});
+});
+
+test("ImageryLayers should not re-render when tiles array reference changes but content is the same", async () => {
+  const tiles: Tile[] = [{ id: "1", type: "open_street_map", opacity: 0.8 }];
+
+  const { rerender } = renderHook(
+    ({ tiles }: { tiles: Tile[] }) => {
+      return ImageryLayers({
+        tiles,
+        cesiumIonAccessToken: undefined,
+        customProvider: undefined,
+        onTilesChange: undefined,
+      });
+    },
+    {
+      initialProps: { tiles },
+    },
+  );
+
+  // Wait for initial render to complete
+  await new Promise(resolve => setTimeout(resolve, 0));
+
+  // Clear mock calls from initial render
+  mockAdd.mockClear();
+  mockRemove.mockClear();
+
+  // Re-render with a NEW tiles array reference but SAME content
+  const newTilesArraySameContent: Tile[] = [{ id: "1", type: "open_street_map", opacity: 0.8 }];
+
+  rerender({ tiles: newTilesArraySameContent });
+
+  // Wait for any effects to run
+  await new Promise(resolve => setTimeout(resolve, 0));
+
+  // Effect should NOT have run again - no layers should be removed or added
+  expect(mockRemove).not.toHaveBeenCalled();
+  expect(mockAdd).not.toHaveBeenCalled();
+
+  // Clear mocks
+  mockAdd.mockClear();
+  mockRemove.mockClear();
+
+  // Re-render with DIFFERENT content (changed opacity)
+  const differentTiles: Tile[] = [
+    { id: "1", type: "open_street_map", opacity: 0.5 }, // opacity changed
+  ];
+
+  rerender({ tiles: differentTiles });
+
+  // Wait for effects to run
+  await new Promise(resolve => setTimeout(resolve, 0));
+
+  // Effect SHOULD run - old layers removed and new ones added
+  expect(mockRemove).toHaveBeenCalled();
+  expect(mockAdd).toHaveBeenCalled();
 });

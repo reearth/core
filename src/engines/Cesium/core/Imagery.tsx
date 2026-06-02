@@ -54,14 +54,20 @@ export default function ImageryLayers({
   const { imageryLayerCollection, scene } = useCesium();
 
   // Create a stable tiles reference that only changes when the content actually changes
-  const prevTilesRef = useRef(tiles);
+  // Normalize `undefined` to a stable empty array so `useImageryProviders` doesn't allocate a new default `[]` each render.
+  const emptyTiles = useMemo<Tile[]>(() => [], []);
+  const tilesValue = tiles ?? emptyTiles;
+
+  const prevTilesRef = useRef<Tile[]>(tilesValue);
   const stableTiles = useMemo(() => {
-    if (!isEqual(prevTilesRef.current, tiles)) {
-      prevTilesRef.current = tiles;
+    if (!isEqual(prevTilesRef.current, tilesValue)) {
+      prevTilesRef.current = tilesValue;
     }
     return prevTilesRef.current;
-  }, [tiles]);
+  }, [tilesValue]);
 
+  // Pass stableTiles to useImageryProviders to prevent providers from being recreated
+  // when tiles reference changes but content is the same
   const { providers } = useImageryProviders({
     tiles: stableTiles,
     cesiumIonAccessToken,
