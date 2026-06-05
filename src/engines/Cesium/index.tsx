@@ -253,7 +253,9 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
         useWebVR={!!property?.scene?.vr || undefined} // NOTE: useWebVR={false} will crash Cesium
         debugShowFramesPerSecond={!!property?.debug?.showFramesPerSecond}
         verticalExaggerationRelativeHeight={property?.scene?.verticalExaggerationRelativeHeight}
-        verticalExaggeration={property?.scene?.verticalExaggeration}
+        verticalExaggeration={
+          property?.terrain?.enabled ? property?.scene?.verticalExaggeration : 1
+        }
       />
       <SkyBox show={property?.sky?.skyBox?.show ?? true} />
       <Fog enabled={property?.sky?.fog?.enabled ?? true} density={property?.sky?.fog?.density} />
