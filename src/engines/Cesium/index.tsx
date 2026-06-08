@@ -120,7 +120,6 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
     onMount,
     onCreditsUpdate,
   });
-
   return (
     <Viewer
       ref={cesium}
@@ -254,7 +253,7 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
         debugShowFramesPerSecond={!!property?.debug?.showFramesPerSecond}
         verticalExaggerationRelativeHeight={property?.scene?.verticalExaggerationRelativeHeight}
         verticalExaggeration={
-          property?.terrain?.enabled ? property?.scene?.verticalExaggeration : 1
+          property?.terrain?.enabled ? (property?.scene?.verticalExaggeration ?? 1) : 1
         }
       />
       <SkyBox show={property?.sky?.skyBox?.show ?? true} />
