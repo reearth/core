@@ -121,6 +121,10 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
     onCreditsUpdate,
   });
 
+  const verticalExaggeration = property?.terrain?.enabled
+    ? (property?.scene?.verticalExaggeration ?? 1)
+    : 1;
+
   return (
     <Viewer
       ref={cesium}
@@ -253,9 +257,7 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
         useWebVR={!!property?.scene?.vr || undefined} // NOTE: useWebVR={false} will crash Cesium
         debugShowFramesPerSecond={!!property?.debug?.showFramesPerSecond}
         verticalExaggerationRelativeHeight={property?.scene?.verticalExaggerationRelativeHeight}
-        verticalExaggeration={
-          property?.terrain?.enabled ? property?.scene?.verticalExaggeration : 1
-        }
+        verticalExaggeration={verticalExaggeration}
       />
       <SkyBox show={property?.sky?.skyBox?.show ?? true} />
       <Fog enabled={property?.sky?.fog?.enabled ?? true} density={property?.sky?.fog?.density} />
