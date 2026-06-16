@@ -4,6 +4,7 @@
 - **Map**: Engine + mantle
 
 ![Architecture](docs/architecture.svg)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Freearth%2Fcore.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Freearth%2Fcore?ref=badge_shield)
 
 ## Context
 
@@ -23,3 +24,7 @@ You have several way to develop this library.
 1. You can use storybook: `yarn storybook`
 2. You can use example project: `yarn dev`
 3. You can also use different project with this library: `yarn build && yarn link`, then `cd ../other-project && yarn link @reearth/core`
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Freearth%2Fcore.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Freearth%2Fcore?ref=badge_large)
