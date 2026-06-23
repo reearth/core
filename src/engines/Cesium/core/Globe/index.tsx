@@ -1,5 +1,6 @@
+import { type Globe as CesiumGlobeType } from "cesium";
 import { useEffect, useMemo, useRef, type JSX } from "react";
-import { Globe as CesiumGlobe } from "resium";
+import { Globe as CesiumGlobe, type CesiumComponentRef } from "resium";
 
 import type { ViewerProperty } from "../../..";
 import { toColor } from "../../common";
@@ -31,8 +32,26 @@ export default function Globe({
     [property?.globe?.baseColor],
   );
 
-  const lastResolvedProviderRef = useRef<any>(null);
+  // Direct ref to the underlying Cesium Globe object.
+  // Resium's Globe.update() is skipped on initial mount when C.current=false
+  // (a Resium timing issue). This effect guarantees globe.terrainProvider is
+  // always applied once the Promise resolves, regardless of prop-change timing.
+  const cesiumGlobeRef = useRef<CesiumComponentRef<CesiumGlobeType>>(null);
+  useEffect(() => {
+    let cancelled = false;
+    providerPromise.then(resolvedProvider => {
+      if (cancelled) return;
+      const cesiumGlobe = cesiumGlobeRef.current?.cesiumElement;
+      if (cesiumGlobe) {
+        cesiumGlobe.terrainProvider = resolvedProvider;
+      }
+    }).catch(() => {
+      // provider errors are handled by the existing useEffect below
+    });
+    return () => { cancelled = true; };
+  }, [providerPromise]);
 
+  const lastResolvedProviderRef = useRef<any>(null);
   useEffect(() => {
     let isCancelled = false;
 
@@ -55,6 +74,7 @@ export default function Globe({
 
   return (
     <CesiumGlobe
+      ref={cesiumGlobeRef}
       baseColor={baseColor}
       enableLighting={!!property?.globe?.enableLighting}
       showGroundAtmosphere={property?.globe?.atmosphere?.enabled ?? true}
