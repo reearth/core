@@ -55,7 +55,7 @@ export default function Globe({
     };
   }, [providerPromise]);
 
-  const lastResolvedProviderRef = useRef<any>(null);
+  const lastResolvedProviderRef = useRef<Awaited<typeof providerPromise> | null>(null);
   useEffect(() => {
     let isCancelled = false;
 
