@@ -39,16 +39,20 @@ export default function Globe({
   const cesiumGlobeRef = useRef<CesiumComponentRef<CesiumGlobeType>>(null);
   useEffect(() => {
     let cancelled = false;
-    providerPromise.then(resolvedProvider => {
-      if (cancelled) return;
-      const cesiumGlobe = cesiumGlobeRef.current?.cesiumElement;
-      if (cesiumGlobe) {
-        cesiumGlobe.terrainProvider = resolvedProvider;
-      }
-    }).catch(() => {
-      // provider errors are handled by the existing useEffect below
-    });
-    return () => { cancelled = true; };
+    providerPromise
+      .then(resolvedProvider => {
+        if (cancelled) return;
+        const cesiumGlobe = cesiumGlobeRef.current?.cesiumElement;
+        if (cesiumGlobe) {
+          cesiumGlobe.terrainProvider = resolvedProvider;
+        }
+      })
+      .catch(() => {
+        // provider errors are handled by the existing useEffect below
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [providerPromise]);
 
   const lastResolvedProviderRef = useRef<any>(null);
