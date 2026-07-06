@@ -51,6 +51,7 @@ import {
 export default function useEngineRef(
   ref: Ref<EngineRef>,
   cesium: RefObject<CesiumComponentRef<Cesium.Viewer> | null>,
+  hasCesiumIonAssetRef?: RefObject<boolean | undefined>,
 ): EngineRef {
   const cancelCameraFlight = useRef<() => void>(undefined);
   const mouseEventCallbacks = useRef<MouseEventCallbacks>({
@@ -983,7 +984,7 @@ export default function useEngineRef(
       getCredits: () => {
         const viewer = cesium.current?.cesiumElement;
         if (!viewer || viewer.isDestroyed()) return;
-        return getCredits(viewer);
+        return getCredits(viewer, hasCesiumIonAssetRef?.current);
       },
     };
   }, [cesium]);

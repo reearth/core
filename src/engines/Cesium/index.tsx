@@ -49,6 +49,7 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
     meta,
     customProvider,
     displayCredits,
+    hasCesiumIonAsset,
     layersRef,
     featureFlags,
     requestingRenderMode,
@@ -119,6 +120,7 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
     onCameraChange,
     onMount,
     onCreditsUpdate,
+    hasCesiumIonAsset,
   });
 
   const verticalExaggeration = property?.terrain?.enabled

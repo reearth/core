@@ -905,7 +905,7 @@ export function getExtrudedHeight(
   return;
 }
 
-export function getCredits(viewer: Viewer) {
+export function getCredits(viewer: Viewer, hasCesiumIonAsset?: boolean) {
   if (!viewer) return emptyCredites;
   const creditDisplay = viewer.creditDisplay as
     | (CreditDisplay & {
@@ -924,7 +924,11 @@ export function getCredits(viewer: Viewer) {
 
   const credits: Credits = {
     engine: {
-      cesium: cesiumCredits?.html ? { html: cesiumCredits.html } : undefined,
+      // Only include Cesium-ion credit when Ion assets are actually in use.
+      // hasCesiumIonAsset === false means explicitly no Ion assets; undefined preserves existing behavior.
+      cesium: hasCesiumIonAsset === false
+        ? undefined
+        : (cesiumCredits?.html ? { html: cesiumCredits.html } : undefined),
     },
     lightbox: Array.from(lightboxCredits?._array ?? []).map(c => ({
       html: c?.credit?.html,
