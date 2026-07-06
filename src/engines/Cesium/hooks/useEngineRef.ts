@@ -987,7 +987,7 @@ export default function useEngineRef(
         return getCredits(viewer, hasCesiumIonAssetRef?.current);
       },
     };
-  }, [cesium]);
+  }, [cesium, hasCesiumIonAssetRef]);
 
   useImperativeHandle(ref, () => e, [e]);
 

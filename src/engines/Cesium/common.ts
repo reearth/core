@@ -926,9 +926,12 @@ export function getCredits(viewer: Viewer, hasCesiumIonAsset?: boolean) {
     engine: {
       // Only include Cesium-ion credit when Ion assets are actually in use.
       // hasCesiumIonAsset === false means explicitly no Ion assets; undefined preserves existing behavior.
-      cesium: hasCesiumIonAsset === false
-        ? undefined
-        : (cesiumCredits?.html ? { html: cesiumCredits.html } : undefined),
+      cesium:
+        hasCesiumIonAsset === false
+          ? undefined
+          : cesiumCredits?.html
+            ? { html: cesiumCredits.html }
+            : undefined,
     },
     lightbox: Array.from(lightboxCredits?._array ?? []).map(c => ({
       html: c?.credit?.html,
