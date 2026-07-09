@@ -50,7 +50,6 @@ export type CoreVisualizerProps = {
   hiddenLayers?: string[];
   zoomedLayerId?: string;
   displayCredits?: boolean;
-  hasCesiumIonAsset?: boolean;
   onCameraChange?: (camera: Camera) => void;
   onLayerDrop?: (layerId: string, propertyKey: string, position: LatLng | undefined) => void;
   onLayerSelect?: (
@@ -90,7 +89,6 @@ export const CoreVisualizer = memo(
         meta,
         customProvider,
         displayCredits = true,
-        hasCesiumIonAsset,
         style,
         zoomedLayerId,
         children,
@@ -172,7 +170,6 @@ export const CoreVisualizer = memo(
                 meta={meta}
                 customProvider={customProvider}
                 displayCredits={displayCredits}
-                hasCesiumIonAsset={hasCesiumIonAsset}
                 style={style}
                 featureFlags={featureFlags}
                 shouldRender={shouldRender}
