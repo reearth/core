@@ -1,5 +1,5 @@
 import { Cartesian3, Color, DirectionalLight, SceneMode, SunLight, Viewer } from "cesium";
-import { RefObject, useMemo } from "react";
+import { RefObject, useEffect, useMemo } from "react";
 import { CesiumComponentRef } from "resium";
 
 import { ViewerProperty } from "../..";
@@ -60,6 +60,20 @@ export default ({
         : undefined,
     [property?.scene?.backgroundColor],
   );
+
+  const showSkyBox = property?.sky?.skyBox?.show ?? true;
+
+  useEffect(() => {
+    const scene = cesium.current?.cesiumElement?.scene;
+    if (!scene) return;
+    // set backgroundColor
+    scene.backgroundColor = sceneBackgroundColor ?? Color.BLACK;
+    // Cesium 1.139 bug: SkyBox.show does not forward to _panorama.show,
+    // so we must set it directly.
+    const panorama = (scene.skyBox as any)?._panorama;
+    if (panorama) panorama.show = showSkyBox;
+    scene.requestRender();
+  }, [cesium, sceneBackgroundColor, showSkyBox]);
 
   const sceneMsaaSamples = useMemo(() => {
     // TODO: FXAA doesn't support alpha blending in Cesium, so we will enable FXAA when this is fixed.
