@@ -21,32 +21,21 @@ describe("computeHasCesiumIonAsset", () => {
     });
 
     test("returns true for cesium_ion tile type", () => {
-      expect(
-        computeHasCesiumIonAsset({ tiles: [{ type: "cesium_ion" }] }),
-      ).toBe(true);
+      expect(computeHasCesiumIonAsset({ tiles: [{ type: "cesium_ion" }] })).toBe(true);
     });
 
     test("returns true for cesium_ion_default tile type", () => {
-      expect(
-        computeHasCesiumIonAsset({ tiles: [{ type: "cesium_ion_default" }] }),
-      ).toBe(true);
+      expect(computeHasCesiumIonAsset({ tiles: [{ type: "cesium_ion_default" }] })).toBe(true);
     });
 
     test("returns true for legacy tile types", () => {
-      for (const type of [
-        "default",
-        "default_road",
-        "default_label",
-        "black_marble",
-      ]) {
+      for (const type of ["default", "default_road", "default_label", "black_marble"]) {
         expect(computeHasCesiumIonAsset({ tiles: [{ type }] })).toBe(true);
       }
     });
 
     test("returns false for non-ion tile type", () => {
-      expect(
-        computeHasCesiumIonAsset({ tiles: [{ type: "open_street_map" }] }),
-      ).toBe(false);
+      expect(computeHasCesiumIonAsset({ tiles: [{ type: "open_street_map" }] })).toBe(false);
     });
   });
 
@@ -105,9 +94,7 @@ describe("computeHasCesiumIonAsset", () => {
   describe("layers", () => {
     test("returns true for osm-buildings layer", () => {
       expect(
-        computeHasCesiumIonAsset(undefined, [
-          makeSimple({ type: "osm-buildings" }),
-        ] as any),
+        computeHasCesiumIonAsset(undefined, [makeSimple({ type: "osm-buildings" })] as any),
       ).toBe(true);
     });
 
@@ -129,9 +116,7 @@ describe("computeHasCesiumIonAsset", () => {
 
     test("returns false for google-photorealistic with no provider (google API path)", () => {
       expect(
-        computeHasCesiumIonAsset(undefined, [
-          makeSimple({ type: "google-photorealistic" }),
-        ] as any),
+        computeHasCesiumIonAsset(undefined, [makeSimple({ type: "google-photorealistic" })] as any),
       ).toBe(false);
     });
 
@@ -169,9 +154,7 @@ describe("computeHasCesiumIonAsset", () => {
     });
 
     test("returns false for layer with no data", () => {
-      expect(computeHasCesiumIonAsset(undefined, [makeSimple()] as any)).toBe(
-        false,
-      );
+      expect(computeHasCesiumIonAsset(undefined, [makeSimple()] as any)).toBe(false);
     });
   });
 
@@ -223,10 +206,9 @@ describe("computeHasCesiumIonAsset", () => {
 
     test("returns true when only terrain uses ion", () => {
       expect(
-        computeHasCesiumIonAsset(
-          { terrain: { enabled: true, type: "cesium" } },
-          [makeSimple({ type: "geojson" })] as any,
-        ),
+        computeHasCesiumIonAsset({ terrain: { enabled: true, type: "cesium" } }, [
+          makeSimple({ type: "geojson" }),
+        ] as any),
       ).toBe(true);
     });
 
