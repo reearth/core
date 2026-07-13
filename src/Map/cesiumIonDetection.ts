@@ -34,11 +34,9 @@ function layerUsesIon(layer: LayerSimple): boolean {
   if (!data) return false;
   if (data.type === "osm-buildings") return true;
   if (data.type === "google-photorealistic") {
-    if (data.provider === "reearth") return false;
-    if (data.serviceTokens?.googleMapApiKey && data.provider !== "cesium-ion") return false;
-    return true;
+    return data.provider === "cesium-ion";
   }
-  if (data.type === "3dtiles" && isIonUrl(data.url)) return true;
+  if (isIonUrl(data.url)) return true;
   return false;
 }
 
