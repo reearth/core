@@ -92,6 +92,7 @@ export default ({
   onCameraChange,
   onMount,
   onCreditsUpdate,
+  hasCesiumIonAsset,
 }: {
   ref: React.ForwardedRef<EngineRef>;
   property?: ViewerProperty;
@@ -133,6 +134,7 @@ export default ({
   onCameraChange?: (camera: Camera) => void;
   onMount?: () => void;
   onCreditsUpdate?: (credits: Credits) => void;
+  hasCesiumIonAsset?: boolean;
 }) => {
   const cesium = useRef<CesiumComponentRef<CesiumViewer>>(null);
 
@@ -141,8 +143,11 @@ export default ({
       ? meta.cesiumIonAccessToken
       : undefined;
 
+  const hasCesiumIonAssetRef = useRef(hasCesiumIonAsset);
+  hasCesiumIonAssetRef.current = hasCesiumIonAsset;
+
   // expose ref
-  const engineAPI = useEngineRef(ref, cesium);
+  const engineAPI = useEngineRef(ref, cesium, hasCesiumIonAssetRef);
 
   const layerSelectWithRectEventHandlers = useLayerSelectWithRect({
     cesium,
@@ -667,7 +672,7 @@ export default ({
       if (!onCreditsUpdateRef.current) return;
       const viewer = cesium.current?.cesiumElement;
       if (!viewer || viewer.isDestroyed()) return;
-      const credits = getCredits(viewer);
+      const credits = getCredits(viewer, hasCesiumIonAssetRef.current);
       onCreditsUpdateRef.current(credits);
     }, 3000);
   }, []);

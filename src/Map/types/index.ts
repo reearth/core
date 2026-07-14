@@ -241,6 +241,7 @@ export type EngineProps = {
   meta?: Record<string, unknown>;
   customProvider?: CustomProviderConfig;
   displayCredits?: boolean;
+  hasCesiumIonAsset?: boolean;
   layersRef?: RefObject<LayersRef | null>;
   requestingRenderMode?: MutableRefObject<RequestingRenderMode>;
   timelineManagerRef?: TimelineManagerRef;
