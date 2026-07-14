@@ -21,21 +21,21 @@ describe("computeHasCesiumIonAsset", () => {
     });
 
     test("returns true for cesium_ion tile type", () => {
-      expect(computeHasCesiumIonAsset({ tiles: [{ type: "cesium_ion" }] })).toBe(true);
+      expect(computeHasCesiumIonAsset({ tiles: [{ id: "", type: "cesium_ion" }] })).toBe(true);
     });
 
     test("returns true for cesium_ion_default tile type", () => {
-      expect(computeHasCesiumIonAsset({ tiles: [{ type: "cesium_ion_default" }] })).toBe(true);
+      expect(computeHasCesiumIonAsset({ tiles: [{ id: "", type: "cesium_ion_default" }] })).toBe(true);
     });
 
     test("returns true for legacy tile types", () => {
       for (const type of ["default", "default_road", "default_label", "black_marble"]) {
-        expect(computeHasCesiumIonAsset({ tiles: [{ type }] })).toBe(true);
+        expect(computeHasCesiumIonAsset({ tiles: [{ id: "", type }] })).toBe(true);
       }
     });
 
     test("returns false for non-ion tile type", () => {
-      expect(computeHasCesiumIonAsset({ tiles: [{ type: "open_street_map" }] })).toBe(false);
+      expect(computeHasCesiumIonAsset({ tiles: [{ id: "", type: "open_street_map" }] })).toBe(false);
     });
   });
 
@@ -183,7 +183,7 @@ describe("computeHasCesiumIonAsset", () => {
       expect(
         computeHasCesiumIonAsset(
           {
-            tiles: [{ type: "open_street_map" }],
+            tiles: [{ id: "", type: "open_street_map" }],
             terrain: { enabled: false, type: "cesium" },
           },
           [
@@ -198,7 +198,7 @@ describe("computeHasCesiumIonAsset", () => {
 
     test("returns true when only tile uses ion", () => {
       expect(
-        computeHasCesiumIonAsset({ tiles: [{ type: "default" }] }, [
+        computeHasCesiumIonAsset({ tiles: [{ id: "", type: "default" }] }, [
           makeSimple({ type: "geojson" }),
         ] as any),
       ).toBe(true);
