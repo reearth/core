@@ -52,13 +52,6 @@ jobs:
           # installer changes.
           node-version: 22.14.0
           registry-url: "https://registry.npmjs.org"
-      - name: Activate npm via corepack
-        # Node 22 ships npm 10.x; Trusted Publishing needs >=11.5.1. corepack
-        # fetches a fresh npm binary, avoiding the broken self-upgrade path.
-        run: |
-          corepack enable npm
-          corepack prepare npm@11.5.1 --activate
-          npm --version
       - name: Run install
         run: yarn install --frozen-lockfile
       - name: Build
@@ -91,6 +84,14 @@ jobs:
             git tag -a "${TAG}" -m "${TAG}"
             git push origin "${TAG}"
           fi
+      - name: Activate npm via corepack
+        # Done AFTER all yarn steps: enabling the corepack npm shim earlier makes
+        # it intercept `yarn` and fail. Node 22 ships npm 10.x; Trusted Publishing
+        # needs >=11.5.1, so activate it just before publishing.
+        run: |
+          corepack enable npm
+          corepack prepare npm@11.5.1 --activate
+          npm --version
       - name: Publish to npm with provenance (OIDC)
         # No NPM_TOKEN: auth is the OIDC handshake configured as a Trusted
         # Publisher on npmjs.com. --access public because @reearth/core is scoped.
