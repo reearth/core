@@ -1,0 +1,63 @@
+# Prepares an alpha release.
+#
+# Dispatch this workflow on the `alpha` branch. It bumps the alpha prerelease
+# version, commits it to a `release/alpha-<version>` branch, and opens a PR
+# into `alpha`. Merging that PR triggers release_alpha.yml, which tags the
+# release and publishes to npm (dist-tag `alpha`) via OIDC.
+#
+# Uses only the built-in GITHUB_TOKEN: no PAT, no GitHub App. The version bump
+# never touches the protected `alpha` branch directly; it goes through the PR,
+# so no branch-protection bypass is required.
+
+name: Prepare Alpha Release
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write # push the release/alpha-* branch
+  pull-requests: write # open the release PR
+
+jobs:
+  prepare:
+    name: Open alpha release PR
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/alpha'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.14.0
+      - name: Set up git user
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      - name: Run install
+        run: yarn install --frozen-lockfile
+      - name: Bump alpha prerelease version
+        id: bump
+        # --no-git-tag-version: we commit the bump onto the release branch
+        # ourselves; the tag is created later by the publish workflow. This
+        # still runs the preversion (yarn test run) and version (yarn build)
+        # npm scripts, so tests and the build gate the bump.
+        run: |
+          npm version --preid alpha prerelease --no-git-tag-version
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+      - name: Create release branch and PR
+        env:
+          VERSION: ${{ steps.bump.outputs.version }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          BRANCH="release/alpha-${VERSION}"
+          git checkout -b "$BRANCH"
+          git add package.json
+          git commit -m "chore: release ${VERSION}"
+          git push origin "$BRANCH"
+          gh pr create \
+            --base alpha \
+            --head "$BRANCH" \
+            --title "chore: release ${VERSION}" \
+            --body "Prepares alpha release \`${VERSION}\`.
+
+          Merging this PR tags \`v${VERSION}\` and publishes \`@reearth/core@${VERSION}\` to the npm \`alpha\` dist-tag via OIDC trusted publishing (with provenance)."
