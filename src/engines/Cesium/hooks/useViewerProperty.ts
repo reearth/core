@@ -1,11 +1,4 @@
-import {
-  Cartesian3,
-  Color,
-  DirectionalLight,
-  SceneMode,
-  SunLight,
-  Viewer,
-} from "cesium";
+import { Cartesian3, Color, DirectionalLight, SceneMode, SunLight, Viewer } from "cesium";
 import { RefObject, useEffect, useMemo } from "react";
 import { CesiumComponentRef } from "resium";
 
