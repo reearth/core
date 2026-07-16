@@ -1,19 +1,98 @@
+# Tags and publishes an alpha release when its release PR is merged.
+#
+# Triggered when a `release/alpha-*` PR (opened by "Prepare Alpha Release") is
+# merged into `alpha`. It builds, pushes the `v<version>` tag, and publishes
+# @reearth/core to the npm `alpha` dist-tag.
+#
+# Publishing is secured via npm Trusted Publishing (OIDC): no NPM_TOKEN, no PAT,
+# no GitHub App. Auth is a short-lived OIDC handshake and every publish carries
+# a provenance attestation (verify with `npm audit signatures`).
+#
+# Tag + publish are combined into this single job on purpose: a tag pushed by
+# GITHUB_TOKEN does not trigger other workflows, so publishing here (rather than
+# in a separate `on: push: tags` workflow) is what lets us avoid a privileged
+# token entirely.
+#
+# npm Trusted Publisher (one-time, already configured on npmjs.com):
+#   @reearth/core -> repo reearth/core, workflow release_alpha.yml, action
+#   "npm publish". Keep this file named release_alpha.yml so that stays valid.
+#
+# beta/latest still publish via npm_release.yml + NPM_TOKEN and are unaffected.
+
+name: Release Alpha
+
 on:
-  push:
-    branches: alpha
-    paths-ignore:
-      - "package.json"
-  workflow_dispatch:
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: write # push the version tag
+  id-token: write # OIDC token for npm Trusted Publishing + provenance
 
 jobs:
-  release:
-    permissions:
-      contents: write
-    uses: reearth/core/.github/workflows/npm_release.yml@beta
-    with:
-      branch: alpha
-      tag: alpha
-      version-args: --preid alpha prerelease
-    secrets:
-      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-      PAT: ${{ secrets.PAT }}
+  publish:
+    name: Tag and publish alpha
+    runs-on: ubuntu-latest
+    # Gates the whole job (tag + publish) on a required reviewer approving the
+    # npm-publish environment, so a merged PR can't auto-publish unreviewed.
+    environment: npm-publish
+    # Only for merged release PRs into alpha (not every closed PR).
+    if: >-
+      github.event.pull_request.merged == true &&
+      github.event.pull_request.base.ref == 'alpha' &&
+      startsWith(github.event.pull_request.head.ref, 'release/alpha-')
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+      - uses: actions/setup-node@v4
+        with:
+          # Trusted Publishing requires Node >=22.14 and npm >=11.5.1. Pin a
+          # concrete >=22.14 version so the floor can't regress via runner
+          # installer changes.
+          node-version: 22.14.0
+          registry-url: "https://registry.npmjs.org"
+      - name: Run install
+        run: yarn install --frozen-lockfile
+      - name: Build
+        run: yarn build
+      - name: Verify tag matches package.json version
+        id: version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Publishing @reearth/core@$VERSION"
+      - name: Create and push tag
+        run: |
+          TAG="${{ steps.version.outputs.tag }}"
+          HEAD_SHA=$(git rev-parse HEAD)
+          # Commit the remote tag points to (peel annotated tags via ^{}); empty
+          # if the tag does not exist remotely.
+          REMOTE_SHA=$(git ls-remote --tags origin "refs/tags/${TAG}^{}" | awk '{print $1}')
+          [ -z "$REMOTE_SHA" ] && REMOTE_SHA=$(git ls-remote --tags origin "refs/tags/${TAG}" | awk '{print $1}')
+          if [ -n "$REMOTE_SHA" ]; then
+            if [ "$REMOTE_SHA" = "$HEAD_SHA" ]; then
+              echo "Tag ${TAG} already exists and matches HEAD; skipping tag push."
+            else
+              echo "::error::Tag ${TAG} already exists but points to ${REMOTE_SHA}, not the release commit ${HEAD_SHA}. Refusing to publish a mismatched build."
+              exit 1
+            fi
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git tag -a "${TAG}" -m "${TAG}"
+            git push origin "${TAG}"
+          fi
+      - name: Activate npm via corepack
+        # Done AFTER all yarn steps: enabling the corepack npm shim earlier makes
+        # it intercept `yarn` and fail. Node 22 ships npm 10.x; Trusted Publishing
+        # needs >=11.5.1, so activate it just before publishing.
+        run: |
+          corepack enable npm
+          corepack prepare npm@11.5.1 --activate
+          npm --version
+      - name: Publish to npm with provenance (OIDC)
+        # No NPM_TOKEN: auth is the OIDC handshake configured as a Trusted
+        # Publisher on npmjs.com. --access public because @reearth/core is scoped.
+        run: npm publish --provenance --access public --tag alpha

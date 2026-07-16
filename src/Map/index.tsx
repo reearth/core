@@ -2,6 +2,7 @@ import { forwardRef, useMemo, type Ref, type JSX } from "react";
 
 import { INTERACTION_MODES } from "../shared/interactionMode";
 
+import { computeHasCesiumIonAsset } from "./cesiumIonDetection";
 import Geoid from "./Geoid";
 import useHooks, { MapRef } from "./hooks";
 import Layers, { type Props as LayersProps } from "./Layers";
@@ -44,7 +45,10 @@ export type Props = {
   | "selectedLayerId"
   | "viewerProperty"
 > &
-  Omit<EngineProps, "onLayerSelect" | "layerSelectionReason" | "selectedLayerId"> &
+  Omit<
+    EngineProps,
+    "onLayerSelect" | "layerSelectionReason" | "selectedLayerId" | "hasCesiumIonAsset"
+  > &
   Omit<SketchProps, "layersRef" | "engineRef" | "SketchComponent">;
 
 function MapFn(
@@ -102,6 +106,11 @@ function MapFn(
     onAPIReady,
   });
 
+  const hasCesiumIonAsset = useMemo(
+    () => computeHasCesiumIonAsset(props.property, layers),
+    [props.property, layers],
+  );
+
   const selectedLayerIds = useMemo(
     () => ({
       layerId: selectedLayer.layerId,
@@ -125,7 +134,8 @@ function MapFn(
       onLayerSelect={handleEngineLayerSelect}
       featureFlags={featureFlags}
       onMount={handleEngineMount}
-      {...props}>
+      {...props}
+      hasCesiumIonAsset={hasCesiumIonAsset}>
       <Layers
         ref={layersRef}
         engineRef={engineRef}
