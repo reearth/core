@@ -1,4 +1,9 @@
-import { ArcType, Color, KeyboardEventModifier, ScreenSpaceEventType } from "cesium";
+import {
+  ArcType,
+  Color,
+  KeyboardEventModifier,
+  ScreenSpaceEventType,
+} from "cesium";
 import React, { forwardRef } from "react";
 import {
   Viewer,
@@ -27,7 +32,10 @@ import LabelImageryLayers from "./core/labels/LabelImageryLayers";
 import Event from "./Event";
 import Feature, { context as featureContext } from "./Feature";
 import useHooks from "./hooks";
-import { AmbientOcclusion, AmbientOcclusionOutputType } from "./PostProcesses/hbao";
+import {
+  AmbientOcclusion,
+  AmbientOcclusionOutputType,
+} from "./PostProcesses/hbao";
 import { AMBIENT_OCCLUSION_QUALITY } from "./PostProcesses/hbao/config";
 import Sketch from "./Sketch";
 
@@ -170,7 +178,8 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
       onMouseEnter={mouseEventHandles.mouseEnter}
       onMouseLeave={mouseEventHandles.mouseLeave}
       onWheel={mouseEventHandles.wheel}
-      automaticallyTrackDataSourceClocks={false}>
+      automaticallyTrackDataSourceClocks={false}
+    >
       <Event onMount={handleMount} onUnmount={handleUnmount} />
       <Clock timelineManagerRef={timelineManagerRef} />
       <ImageryLayers
@@ -221,7 +230,8 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
       <ScreenSpaceCameraController
         maximumZoomDistance={
           property?.camera?.limiter?.enabled
-            ? (property.camera?.limiter?.targetArea?.height ?? Number.POSITIVE_INFINITY)
+            ? (property.camera?.limiter?.targetArea?.height ??
+              Number.POSITIVE_INFINITY)
             : Number.POSITIVE_INFINITY
         }
         enableCollisionDetection={!property?.camera?.allowEnterGround}
@@ -259,11 +269,16 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
         useDepthPicking={true}
         useWebVR={!!property?.scene?.vr || undefined} // NOTE: useWebVR={false} will crash Cesium
         debugShowFramesPerSecond={!!property?.debug?.showFramesPerSecond}
-        verticalExaggerationRelativeHeight={property?.scene?.verticalExaggerationRelativeHeight}
+        verticalExaggerationRelativeHeight={
+          property?.scene?.verticalExaggerationRelativeHeight
+        }
         verticalExaggeration={verticalExaggeration}
       />
       <SkyBox show={showSkyBox} />
-      <Fog enabled={property?.sky?.fog?.enabled ?? true} density={property?.sky?.fog?.density} />
+      <Fog
+        enabled={property?.sky?.fog?.enabled ?? true}
+        density={property?.sky?.fog?.density}
+      />
       <Sun show={property?.sky?.sun?.show ?? true} />
       <Moon show={property?.sky?.moon?.show ?? true} />
       <SkyAtmosphere
@@ -277,9 +292,13 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
         cesiumIonAccessToken={cesiumIonAccessToken}
         onTerrainProviderChange={handleTerrainProviderChange}
       />
-      <featureContext.Provider value={context}>{ready ? children : null}</featureContext.Provider>
+      <featureContext.Provider value={context}>
+        {ready ? children : null}
+      </featureContext.Provider>
       <AmbientOcclusion
-        {...AMBIENT_OCCLUSION_QUALITY[property?.render?.ambientOcclusion?.quality || "low"]}
+        {...AMBIENT_OCCLUSION_QUALITY[
+          property?.render?.ambientOcclusion?.quality || "low"
+        ]}
         enabled={!!property?.render?.ambientOcclusion?.enabled}
         intensity={property?.render?.ambientOcclusion?.intensity ?? 100}
         outputType={
