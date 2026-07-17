@@ -80,6 +80,7 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
     sceneBackgroundColor,
     sceneMsaaSamples,
     sceneMode,
+    showSkyBox,
     cameraViewBoundaries,
     cameraViewOuterBoundaries,
     cameraViewBoundariesMaterial,
@@ -261,7 +262,7 @@ const Cesium: React.ForwardRefRenderFunction<EngineRef, EngineProps> = (
         verticalExaggerationRelativeHeight={property?.scene?.verticalExaggerationRelativeHeight}
         verticalExaggeration={verticalExaggeration}
       />
-      <SkyBox show={property?.sky?.skyBox?.show ?? true} />
+      <SkyBox show={showSkyBox} />
       <Fog enabled={property?.sky?.fog?.enabled ?? true} density={property?.sky?.fog?.density} />
       <Sun show={property?.sky?.sun?.show ?? true} />
       <Moon show={property?.sky?.moon?.show ?? true} />

@@ -732,10 +732,11 @@ export default ({
     });
   }, [time, timelineManagerRef]);
 
-  const { sceneLight, sceneBackgroundColor, sceneMsaaSamples, sceneMode } = useViewerProperty({
-    property,
-    cesium,
-  });
+  const { sceneLight, sceneBackgroundColor, sceneMsaaSamples, sceneMode, showSkyBox } =
+    useViewerProperty({
+      property,
+      cesium,
+    });
 
   useLayerDragDrop({ cesium, onLayerDrag, onLayerDrop, isLayerDraggable });
 
@@ -792,6 +793,7 @@ export default ({
     sceneBackgroundColor,
     sceneMsaaSamples,
     sceneMode,
+    showSkyBox,
     cameraViewBoundaries,
     cameraViewOuterBoundaries,
     cameraViewBoundariesMaterial,
