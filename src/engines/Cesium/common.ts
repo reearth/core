@@ -914,24 +914,33 @@ export function getCredits(viewer: Viewer, hasCesiumIonAsset?: boolean) {
           screenCredits: { _array: { credit?: CesiumCredit }[] };
         };
         _currentCesiumCredit: CesiumCredit;
+        // _cesiumCredit is the per-instance clone that beginFrame() resets _currentCesiumCredit to
+        // each frame. addCreditToNextFrame(ionCredit) sets _currentCesiumCredit to _defaultCredit
+        // (a different object) when Ion tiles are actually rendering — see GlobeSurfaceTileProvider
+        // updateCredits(). If they are equal, no Ion tile rendered in the most-recent frame.
+        _cesiumCredit: CesiumCredit;
       })
     | undefined;
 
   if (!creditDisplay) return emptyCredites;
 
   const { lightboxCredits, screenCredits } = creditDisplay?._currentFrameCredits || {};
-  const cesiumCredits = creditDisplay._currentCesiumCredit;
+  const currentCesiumCredit = creditDisplay._currentCesiumCredit;
+  const staticCesiumCredit = creditDisplay._cesiumCredit;
+
+  // Ion tiles are truly rendering when _currentCesiumCredit !== _cesiumCredit.
+  // beginFrame() resets _currentCesiumCredit = _cesiumCredit each frame; only
+  // addCreditToNextFrame() (called for every ready+visible Ion layer) overrides it.
+  // hasCesiumIonAsset === false is a fast-path: skip the check when Ion is definitely absent.
+  const ionIsRendering =
+    hasCesiumIonAsset !== false &&
+    currentCesiumCredit !== undefined &&
+    staticCesiumCredit !== undefined &&
+    currentCesiumCredit !== staticCesiumCredit;
 
   const credits: Credits = {
     engine: {
-      // Only include Cesium-ion credit when Ion assets are actually in use.
-      // hasCesiumIonAsset === false means explicitly no Ion assets; undefined preserves existing behavior.
-      cesium:
-        hasCesiumIonAsset === false
-          ? undefined
-          : cesiumCredits?.html
-            ? { html: cesiumCredits.html }
-            : undefined,
+      cesium: ionIsRendering ? { html: currentCesiumCredit.html } : undefined,
     },
     lightbox: Array.from(lightboxCredits?._array ?? []).map(c => ({
       html: c?.credit?.html,

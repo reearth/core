@@ -20,30 +20,31 @@ describe("computeHasCesiumIonAsset", () => {
       expect(computeHasCesiumIonAsset({ tiles: [] })).toBe(false);
     });
 
-    test("returns true for cesium_ion tile type", () => {
+    test("returns true for cesium_ion tile type with valid assetId", () => {
       expect(
-        computeHasCesiumIonAsset({ tiles: [{ id: "", type: "cesium_ion" }] }),
+        computeHasCesiumIonAsset(
+          { tiles: [{ id: "", type: "cesium_ion", cesiumIonAssetId: 12345 }] },
+          undefined,
+          "my-token",
+        ),
       ).toBe(true);
     });
 
-    test("returns true for cesium_ion_default tile type", () => {
+    test("returns true for cesium_ion_default tile type when token present", () => {
       expect(
-        computeHasCesiumIonAsset({
-          tiles: [{ id: "", type: "cesium_ion_default" }],
-        }),
+        computeHasCesiumIonAsset(
+          { tiles: [{ id: "", type: "cesium_ion_default" }] },
+          undefined,
+          "my-token",
+        ),
       ).toBe(true);
     });
 
-    test("returns true for legacy tile types", () => {
-      for (const type of [
-        "default",
-        "default_road",
-        "default_label",
-        "black_marble",
-      ]) {
-        expect(computeHasCesiumIonAsset({ tiles: [{ id: "", type }] })).toBe(
-          true,
-        );
+    test("returns true for legacy tile types when token present", () => {
+      for (const type of ["default", "default_road", "default_label", "black_marble"]) {
+        expect(
+          computeHasCesiumIonAsset({ tiles: [{ id: "", type }] }, undefined, "my-token"),
+        ).toBe(true);
       }
     });
 
@@ -65,12 +66,21 @@ describe("computeHasCesiumIonAsset", () => {
       ).toBe(true);
     });
 
-    test("returns true for cesiumion terrain type when enabled", () => {
+    test("returns true for cesiumion terrain type with ionAsset", () => {
+      expect(
+        computeHasCesiumIonAsset({
+          terrain: { enabled: true, type: "cesiumion" },
+          assets: { cesium: { terrain: { ionAsset: "1" } } },
+        } as any),
+      ).toBe(true);
+    });
+
+    test("returns false for cesiumion terrain type without ionAsset or ionUrl", () => {
       expect(
         computeHasCesiumIonAsset({
           terrain: { enabled: true, type: "cesiumion" },
         }),
-      ).toBe(true);
+      ).toBe(false);
     });
 
     test("returns false for cesium terrain when disabled", () => {
@@ -221,9 +231,11 @@ describe("computeHasCesiumIonAsset", () => {
 
     test("returns true when only tile uses ion", () => {
       expect(
-        computeHasCesiumIonAsset({ tiles: [{ id: "", type: "default" }] }, [
-          makeSimple({ type: "geojson" }),
-        ] as any),
+        computeHasCesiumIonAsset(
+          { tiles: [{ id: "", type: "default" }] },
+          [makeSimple({ type: "geojson" })] as any,
+          "my-token",
+        ),
       ).toBe(true);
     });
 
@@ -240,6 +252,46 @@ describe("computeHasCesiumIonAsset", () => {
       expect(computeHasCesiumIonAsset()).toBe(false);
       expect(computeHasCesiumIonAsset(undefined, undefined)).toBe(false);
       expect(computeHasCesiumIonAsset(undefined, [])).toBe(false);
+    });
+  });
+
+  describe("token and assetId gating", () => {
+    test("returns false for cesium_ion tile with no cesiumIonAssetId", () => {
+      expect(
+        computeHasCesiumIonAsset(
+          { tiles: [{ id: "", type: "cesium_ion" }] },
+          undefined,
+          "my-token",
+        ),
+      ).toBe(false);
+    });
+
+    test("returns false for cesium_ion tile with assetId of 0", () => {
+      expect(
+        computeHasCesiumIonAsset(
+          { tiles: [{ id: "", type: "cesium_ion", cesiumIonAssetId: 0 }] },
+          undefined,
+          "my-token",
+        ),
+      ).toBe(false);
+    });
+
+    test("returns false for cesium_ion_default when no token", () => {
+      expect(
+        computeHasCesiumIonAsset({ tiles: [{ id: "", type: "cesium_ion_default" }] }),
+      ).toBe(false);
+    });
+
+    test("returns false for legacy tile types when no token", () => {
+      for (const type of ["default", "default_road", "default_label", "black_marble"]) {
+        expect(computeHasCesiumIonAsset({ tiles: [{ id: "", type }] })).toBe(false);
+      }
+    });
+
+    test("returns true for cesium_ion with valid assetId (token gate is at engine level)", () => {
+      expect(
+        computeHasCesiumIonAsset({ tiles: [{ id: "", type: "cesium_ion", cesiumIonAssetId: 2275207 }] }),
+      ).toBe(true);
     });
   });
 });
