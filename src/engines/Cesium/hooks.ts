@@ -63,7 +63,6 @@ interface CustomGlobeSurface {
 type CesiumMouseEvent = (movement: CesiumMovementEvent, target: RootEventTarget) => void;
 type CesiumMouseWheelEvent = (delta: number) => void;
 
-
 export default ({
   ref,
   property,
@@ -147,7 +146,6 @@ export default ({
   const effectiveHasCesiumIonAsset = hasCesiumIonAsset && !!cesiumIonAccessToken;
   const hasCesiumIonAssetRef = useRef(effectiveHasCesiumIonAsset);
   hasCesiumIonAssetRef.current = effectiveHasCesiumIonAsset;
-
 
   // expose ref
   const engineAPI = useEngineRef(ref, cesium, hasCesiumIonAssetRef);
