@@ -177,6 +177,50 @@ describe("Expression evaluation", () => {
   });
 });
 
+describe("hyphenated property names", () => {
+  test("${post-code} root property with hyphen", () => {
+    const feature = {
+      properties: { "post-code": "123-456" },
+    } as Feature;
+    expect(new Expression("${post-code}", feature).evaluate()).toBe("123-456");
+  });
+
+  test("${address.post-code} property with hyphen inside a group via dot notation", () => {
+    const feature = {
+      properties: { address: { "post-code": "150-0001", city: "Tokyo" } },
+    } as Feature;
+    expect(new Expression("${address.post-code}", feature).evaluate()).toBe("150-0001");
+  });
+
+  test("${post-code.zip} hyphen in group name, plain member", () => {
+    const feature = {
+      properties: { "post-code": { zip: "999" } },
+    } as Feature;
+    expect(new Expression("${post-code.zip}", feature).evaluate()).toBe("999");
+  });
+
+  test("${post-code.zip-code} both group name and property have hyphens", () => {
+    const feature = {
+      properties: { "post-code": { "zip-code": "100-0001" } },
+    } as Feature;
+    expect(new Expression("${post-code.zip-code}", feature).evaluate()).toBe("100-0001");
+  });
+
+  test("${address['post-code']} bracket notation still works", () => {
+    const feature = {
+      properties: { address: { "post-code": "150-0001" } },
+    } as Feature;
+    expect(new Expression("${address['post-code']}", feature).evaluate()).toBe("150-0001");
+  });
+
+  test("${address.city} plain dot access without hyphen still works", () => {
+    const feature = {
+      properties: { address: { "post-code": "150-0001", city: "Tokyo" } },
+    } as Feature;
+    expect(new Expression("${address.city}", feature).evaluate()).toBe("Tokyo");
+  });
+});
+
 describe("expression caches", () => {
   beforeEach(() => {
     EXPRESSION_CACHES.clear();

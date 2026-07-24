@@ -253,7 +253,7 @@ function parseMemberExpression(expression: Expression, ast: any) {
     return new Node(ExpressionNodeType.MEMBER, "brackets", obj, val);
   }
 
-  val = new Node(ExpressionNodeType.LITERAL_STRING, ast.property.name);
+  val = new Node(ExpressionNodeType.LITERAL_STRING, restoreReservedWord(ast.property.name));
   return new Node(ExpressionNodeType.MEMBER, "dot", obj, val);
 }
 
