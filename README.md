@@ -26,7 +26,7 @@ You have several way to develop this library.
 
 ## Releasing (alpha)
 
-Alpha versions are published to npm via **npm Trusted Publishing (OIDC)**: no npm token is stored anywhere, and every release ships with a signed [provenance](https://docs.npmjs.com/generating-provenance-statements) attestation. Releasing is a two-step, approval-gated flow that you drive from the **Actions** tab — you never publish from your laptop.
+Alpha versions are published to npm via **npm Trusted Publishing (OIDC)**: no npm token is stored anywhere, and every release ships with a signed [provenance](https://docs.npmjs.com/generating-provenance-statements) attestation. Releasing is a two-step, approval-gated flow that you drive from the **Actions** tab, so you never publish from your laptop.
 
 ```mermaid
 flowchart TD
