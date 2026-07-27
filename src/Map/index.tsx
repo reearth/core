@@ -106,10 +106,13 @@ function MapFn(
     onAPIReady,
   });
 
-  const hasCesiumIonAsset = useMemo(
-    () => computeHasCesiumIonAsset(props.property, layers),
-    [props.property, layers],
-  );
+  const hasCesiumIonAsset = useMemo(() => {
+    const token =
+      typeof props.meta?.cesiumIonAccessToken === "string" && props.meta.cesiumIonAccessToken
+        ? (props.meta.cesiumIonAccessToken as string)
+        : undefined;
+    return computeHasCesiumIonAsset(props.property, layers, token);
+  }, [props.property, layers, props.meta]);
 
   const selectedLayerIds = useMemo(
     () => ({

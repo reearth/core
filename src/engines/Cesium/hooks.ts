@@ -143,8 +143,9 @@ export default ({
       ? meta.cesiumIonAccessToken
       : undefined;
 
-  const hasCesiumIonAssetRef = useRef(hasCesiumIonAsset);
-  hasCesiumIonAssetRef.current = hasCesiumIonAsset;
+  const effectiveHasCesiumIonAsset = hasCesiumIonAsset && !!cesiumIonAccessToken;
+  const hasCesiumIonAssetRef = useRef(effectiveHasCesiumIonAsset);
+  hasCesiumIonAssetRef.current = effectiveHasCesiumIonAsset;
 
   // expose ref
   const engineAPI = useEngineRef(ref, cesium, hasCesiumIonAssetRef);
@@ -665,9 +666,10 @@ export default ({
   onCreditsUpdateRef.current = onCreditsUpdate;
   const updateCredits = useCallback(() => {
     if (!onCreditsUpdateRef.current) return;
-    // currently we don't have a proper way to get the credits update event
-    // wait for 3 seconds to get latest credits
-    // some internal property is been used here.
+    // Wait for tiles to load/render before checking credits. Cesium's GlobeSurfaceTileProvider
+    // calls addCreditToNextFrame() each frame for ready+visible Ion layers, which sets
+    // _currentCesiumCredit !== _cesiumCredit — that comparison is the actual Ion-rendering check
+    // inside getCredits(). 3 s gives tiles enough time to reach that state.
     setTimeout(() => {
       if (!onCreditsUpdateRef.current) return;
       const viewer = cesium.current?.cesiumElement;

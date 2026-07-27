@@ -1,4 +1,4 @@
-import { type Globe as CesiumGlobeType } from "cesium";
+import { EllipsoidTerrainProvider, type Globe as CesiumGlobeType } from "cesium";
 import { useEffect, useMemo, useRef, type JSX } from "react";
 import { Globe as CesiumGlobe, type CesiumComponentRef } from "resium";
 
@@ -48,7 +48,13 @@ export default function Globe({
         }
       })
       .catch(() => {
-        // provider errors are handled by the existing useEffect below
+        // Fall back to flat terrain so stale Ion terrain doesn't persist and mislead
+        // the runtime Ion-credit check.
+        if (cancelled) return;
+        const cesiumGlobe = cesiumGlobeRef.current?.cesiumElement;
+        if (cesiumGlobe) {
+          cesiumGlobe.terrainProvider = new EllipsoidTerrainProvider();
+        }
       });
     return () => {
       cancelled = true;
@@ -68,7 +74,10 @@ export default function Globe({
         }
       })
       .catch(error => {
-        if (!isCancelled) console.warn("Terrain provider failed to load:", error);
+        if (isCancelled) return;
+        console.warn("Terrain provider failed to load:", error);
+        // Notify so the engine re-evaluates credits even when terrain fails.
+        onTerrainProviderChange?.();
       });
 
     return () => {
