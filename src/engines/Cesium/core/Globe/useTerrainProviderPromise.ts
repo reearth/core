@@ -46,7 +46,7 @@ function makeKey(type: TerrainType, opts: ProviderOpts) {
   const url = opts.ionUrl ?? "";
   const ionToken = opts.ionAccessToken ?? "";
   const normal = String(!!opts.normal);
-  const wm = String(opts.waterMask ?? true);
+  const wm = String(opts.waterMask ?? false);
   return `${type}|asset:${asset}|url:${url}|ion:${ionToken}|normal:${normal}|wm:${wm}`;
 }
 
@@ -55,13 +55,13 @@ function createProvider(type: TerrainType, opts: ProviderOpts): Promise<TerrainP
     case "reearth_terrain":
       return CesiumTerrainProvider.fromUrl(REEARTH_TERRAIN_URL, {
         requestVertexNormals: !!opts.normal,
-        requestWaterMask: opts.waterMask ?? true,
+        requestWaterMask: opts.waterMask ?? false,
       }) as Promise<TerrainProvider>;
 
     case "cesium": {
       return CesiumTerrainProvider.fromUrl(
         IonResource.fromAssetId(1, { accessToken: opts.ionAccessToken }),
-        { requestVertexNormals: !!opts.normal, requestWaterMask: opts.waterMask ?? true },
+        { requestVertexNormals: !!opts.normal, requestWaterMask: opts.waterMask ?? false },
       ) as Promise<TerrainProvider>;
     }
 
@@ -72,7 +72,7 @@ function createProvider(type: TerrainType, opts: ProviderOpts): Promise<TerrainP
           IonResource.fromAssetId(parseInt(String(opts.ionAsset), 10), {
             accessToken: opts.ionAccessToken,
           }),
-        { requestVertexNormals: !!opts.normal, requestWaterMask: opts.waterMask ?? true },
+        { requestVertexNormals: !!opts.normal, requestWaterMask: opts.waterMask ?? false },
       ) as Promise<TerrainProvider>;
     }
 
