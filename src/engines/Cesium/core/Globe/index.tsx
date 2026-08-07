@@ -22,6 +22,7 @@ export default function Globe({
     terrain: property?.terrain?.enabled,
     terrainType: property?.terrain?.type,
     normal: property?.terrain?.normal,
+    waterMask: property?.terrain?.waterMask,
     ionAccessToken: property?.assets?.cesium?.terrain?.ionAccessToken || cesiumIonAccessToken,
     ionAsset: property?.assets?.cesium?.terrain?.ionAsset,
     ionUrl: property?.assets?.cesium?.terrain?.ionUrl,

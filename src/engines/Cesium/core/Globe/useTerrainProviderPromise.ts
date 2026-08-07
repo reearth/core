@@ -13,7 +13,7 @@ type TerrainType = NonNullable<TerrainProperty["type"]>;
 
 const REEARTH_TERRAIN_URL = "https://terrain.reearth.land/cesium-mesh/ellipsoid";
 
-type ProviderOpts = Pick<TerrainProperty, "normal"> &
+type ProviderOpts = Pick<TerrainProperty, "normal" | "waterMask"> &
   AssetsCesiumProperty["terrain"] & {
     terrain?: boolean;
     terrainType?: TerrainType | null | undefined;
@@ -46,7 +46,8 @@ function makeKey(type: TerrainType, opts: ProviderOpts) {
   const url = opts.ionUrl ?? "";
   const ionToken = opts.ionAccessToken ?? "";
   const normal = String(!!opts.normal);
-  return `${type}|asset:${asset}|url:${url}|ion:${ionToken}|normal:${normal}`;
+  const wm = String(opts.waterMask ?? true);
+  return `${type}|asset:${asset}|url:${url}|ion:${ionToken}|normal:${normal}|wm:${wm}`;
 }
 
 function createProvider(type: TerrainType, opts: ProviderOpts): Promise<TerrainProvider> {
@@ -54,13 +55,13 @@ function createProvider(type: TerrainType, opts: ProviderOpts): Promise<TerrainP
     case "reearth_terrain":
       return CesiumTerrainProvider.fromUrl(REEARTH_TERRAIN_URL, {
         requestVertexNormals: !!opts.normal,
-        requestWaterMask: true,
+        requestWaterMask: opts.waterMask ?? true,
       }) as Promise<TerrainProvider>;
 
     case "cesium": {
       return CesiumTerrainProvider.fromUrl(
         IonResource.fromAssetId(1, { accessToken: opts.ionAccessToken }),
-        { requestVertexNormals: !!opts.normal, requestWaterMask: true },
+        { requestVertexNormals: !!opts.normal, requestWaterMask: opts.waterMask ?? true },
       ) as Promise<TerrainProvider>;
     }
 
@@ -71,7 +72,7 @@ function createProvider(type: TerrainType, opts: ProviderOpts): Promise<TerrainP
           IonResource.fromAssetId(parseInt(String(opts.ionAsset), 10), {
             accessToken: opts.ionAccessToken,
           }),
-        { requestVertexNormals: !!opts.normal, requestWaterMask: true },
+        { requestVertexNormals: !!opts.normal, requestWaterMask: opts.waterMask ?? true },
       ) as Promise<TerrainProvider>;
     }
 
