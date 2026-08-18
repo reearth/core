@@ -77,6 +77,7 @@ export type TerrainProperty = {
   type?: "cesium" | "cesiumion" | "reearth_terrain";
   url?: string;
   normal?: boolean;
+  waterMask?: boolean;
   elevationHeatMap?: ElevationHeatMapProperty;
 };
 
