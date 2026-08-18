@@ -1,16 +1,8 @@
 // ref: https://github.com/takram-design-engineering/plateau-view/blob/main/libs/cesium-helpers/src/convertPolygonToHierarchyArray.ts
 
 import { Cartesian3, type PolygonHierarchy } from "@cesium/engine";
-import _unkinkPolygon from "@turf/unkink-polygon";
-import type { Feature, LineString, MultiPolygon, Polygon, Position } from "geojson";
-
-// @turf/unkink-polygon exports types only at top-level index.d.ts, not via the
-// "exports" field, so moduleResolution:bundler can't find them. Cast manually.
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-const unkinkPolygon = _unkinkPolygon as (
-  input: Polygon | MultiPolygon | Feature<Polygon | MultiPolygon>,
-) => { features: Array<Feature<Polygon>> };
+import unkinkPolygon from "@turf/unkink-polygon";
+import type { LineString, MultiPolygon, Polygon, Position } from "geojson";
 
 export function isNotNullish<T>(value: T | null | undefined): value is T {
   return value != null;
