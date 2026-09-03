@@ -815,9 +815,10 @@ function tileProperties(
 ): { key: string; value: any }[] {
   return t
     .getPropertyIds()
-    .reduce<
-      { key: string; value: any }[]
-    >((a, b) => [...a, { key: b, value: t.getProperty(b) }], []);
+    .reduce<{ key: string; value: any }[]>(
+      (a, b) => [...a, { key: b, value: t.getProperty(b) }],
+      [],
+    );
 }
 
 function getLayerId(target: RootEventTarget): string | undefined {

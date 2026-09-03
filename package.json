@@ -34,7 +34,7 @@
     "node": ">=20"
   },
   "peerDependencies": {
-    "cesium": "1.118.x",
+    "cesium": "^1.137.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
@@ -136,6 +136,8 @@
     "web-streams-polyfill": "^4.2.0"
   },
   "resolutions": {
-    "jackspeak": "3.1.2"
+    "jackspeak": "3.1.2",
+    "vite": "^7.3.6",
+    "lodash-es": "^4.18.1"
   }
 }

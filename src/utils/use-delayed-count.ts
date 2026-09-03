@@ -2,8 +2,7 @@ import { useRef, useState, useCallback, useEffect } from "react";
 import { usePreviousDistinct } from "react-use";
 
 export type Durations =
-  | [number | null | undefined, number | null | undefined][]
-  | (number | null | undefined)[];
+  [number | null | undefined, number | null | undefined][] | (number | null | undefined)[];
 
 export const useDelayedCount = (durations: Durations = []) => {
   const [mode, setMode] = useState(0);
