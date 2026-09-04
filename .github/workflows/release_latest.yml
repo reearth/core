@@ -13,7 +13,7 @@ jobs:
   release:
     permissions:
       contents: write
-    uses: reearth/core/.github/workflows/npm_release.yml@beta
+    uses: reearth/core/.github/workflows/npm_release.yml@b70d597c18e8346abd10066dfb3f7addd9ed1af3 # beta
     with:
       branch: main
       tag: latest
