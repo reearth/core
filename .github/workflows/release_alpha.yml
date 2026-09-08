@@ -50,7 +50,7 @@ jobs:
           # Trusted Publishing requires Node >=22.14 and npm >=11.5.1. Pin a
           # concrete >=22.14 version so the floor can't regress via runner
           # installer changes.
-          node-version: 22.14.0
+          node-version: 24.20.0
           registry-url: "https://registry.npmjs.org"
       - name: Run install
         run: yarn install --frozen-lockfile
