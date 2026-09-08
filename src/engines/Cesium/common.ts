@@ -501,12 +501,10 @@ export const zoom = (
 export const getCamera = (viewer: Viewer | CesiumWidget | undefined): Camera | undefined => {
   if (!viewer || viewer.isDestroyed() || !viewer.camera || !viewer.scene) return undefined;
   const { camera } = viewer;
-  if (
-    !(
-      camera.frustum instanceof PerspectiveFrustum ||
-      camera.frustum instanceof OrthographicOffCenterFrustum
-    )
-  )
+  if (!(
+    camera.frustum instanceof PerspectiveFrustum ||
+    camera.frustum instanceof OrthographicOffCenterFrustum
+  ))
     return;
   const { latitude, longitude, height } = camera.positionCartographic;
   const lat = CesiumMath.toDegrees(latitude);
