@@ -73,11 +73,11 @@ const makeCtx = (features: Feature[]) => ({
 // Run with: pnpm bench
 // ---------------------------------------------------------------------------
 describe("evalSimpleLayer — baseline throughput", () => {
-  bench("1k  features × 5  expr", () => evalSimpleLayer(e5, makeCtx(f1k)));
-  bench("10k features × 5  expr", () => evalSimpleLayer(e5, makeCtx(f10k)));
-  bench("10k features × 10 expr", () => evalSimpleLayer(e10, makeCtx(f10k)));
-  bench("10k features × 15 expr", () => evalSimpleLayer(e15, makeCtx(f10k)));
-  bench("35k features × 10 expr", () => evalSimpleLayer(e10, makeCtx(f35k)));
+  bench("1k  features × 5  expr", async () => { await evalSimpleLayer(e5, makeCtx(f1k)); });
+  bench("10k features × 5  expr", async () => { await evalSimpleLayer(e5, makeCtx(f10k)); });
+  bench("10k features × 10 expr", async () => { await evalSimpleLayer(e10, makeCtx(f10k)); });
+  bench("10k features × 15 expr", async () => { await evalSimpleLayer(e15, makeCtx(f10k)); });
+  bench("35k features × 10 expr", async () => { await evalSimpleLayer(e10, makeCtx(f35k)); });
 });
 
 // ---------------------------------------------------------------------------
