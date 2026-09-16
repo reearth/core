@@ -91,6 +91,11 @@ jobs:
       - name: Activate npm via corepack
         # Node 22 ships npm 10.x; Trusted Publishing needs >=11.5.1, so activate
         # it just before publishing.
+        # COREPACK_ENABLE_STRICT=0: packageManager field in package.json makes
+        # corepack intercept `npm` and refuse with "use pnpm instead". Disabling
+        # strict mode lets npm run alongside the declared pnpm packageManager.
+        env:
+          COREPACK_ENABLE_STRICT: "0"
         run: |
           corepack enable npm
           corepack prepare npm@11.5.1 --activate
@@ -98,4 +103,6 @@ jobs:
       - name: Publish to npm with provenance (OIDC)
         # No NPM_TOKEN: auth is the OIDC handshake configured as a Trusted
         # Publisher on npmjs.com. --access public because @reearth/core is scoped.
+        env:
+          COREPACK_ENABLE_STRICT: "0"
         run: npm publish --provenance --access public --tag alpha
