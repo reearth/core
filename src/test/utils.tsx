@@ -1,6 +1,6 @@
 // TODO: remove MockedProvider after double-checking the test here is not necessary
 // import { MockedProvider as MockedGqlProvider, MockedResponse } from "@apollo/client/testing";
-import { render as rtlRender } from "@testing-library/react";
+import { render as rtlRender, type RenderResult } from "@testing-library/react";
 import { vitest } from "vitest";
 
 // import { Provider as I18nProvider } from "../services/i18n";
@@ -26,7 +26,7 @@ const render = (
   ui: React.ReactElement<any>,
   // queryMocks?: readonly MockedResponse<Record<string, any>>[],
   { ...renderOptions } = {},
-) => {
+): RenderResult => {
   const Wrapper: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
     return <>{children}</>;
   };

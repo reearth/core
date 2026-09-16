@@ -1,7 +1,7 @@
 // ref: https://github.com/takram-design-engineering/plateau-view/blob/main/libs/cesium-helpers/src/convertPolygonToHierarchyArray.ts
 
 import { Cartesian3, type PolygonHierarchy } from "@cesium/engine";
-import unkinkPolygon from "@turf/unkink-polygon";
+import { unkinkPolygon } from "@turf/turf";
 import type { LineString, MultiPolygon, Polygon, Position } from "geojson";
 
 export function isNotNullish<T>(value: T | null | undefined): value is T {
