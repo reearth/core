@@ -27,6 +27,8 @@ const computedLayer = {
 // input layer hasn't changed, so useMemo can cache the provider.
 // ---------------------------------------------------------------------------
 describe("extractSimpleLayer reference stability — baseline", () => {
+  // Remove this test when P2a lands — expect(ref1).not.toBe(ref2) will fail once
+  // extractSimpleLayer returns a stable reference for unchanged input.
   it("returns a NEW reference on every call (documents current broken behavior)", () => {
     const ref1 = extractSimpleLayer(computedLayer);
     const ref2 = extractSimpleLayer(computedLayer);
@@ -37,24 +39,5 @@ describe("extractSimpleLayer reference stability — baseline", () => {
     // Identity is unstable — this is the bug
     // useMemo sees currentLayer change every render → provider always rebuilt
     expect(ref1).not.toBe(ref2);
-  });
-
-  it("simulates 10 re-renders: provider constructs 10× due to unstable reference", () => {
-    let constructCount = 0;
-    let prev = extractSimpleLayer(computedLayer);
-
-    for (let i = 0; i < 10; i++) {
-      const next = extractSimpleLayer(computedLayer);
-      if (next !== prev) {
-        // useMemo recomputes → new MVTImageryProvider() would be called
-        constructCount++;
-        prev = next;
-      }
-    }
-
-    // BASELINE:  constructCount = 10 (every re-render triggers a new provider)
-    // AFTER FIX: constructCount = 0  (stable reference, memo actually caches)
-    console.log(`Provider constructions in 10 re-renders (baseline): ${constructCount}`);
-    expect(constructCount).toBe(10);
   });
 });
