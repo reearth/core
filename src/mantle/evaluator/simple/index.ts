@@ -24,9 +24,13 @@ export async function evalSimpleLayer(
   const features = layer.data ? await ctx.getAllFeatures(layer.data) : undefined;
   const appearances: Partial<LayerAppearanceTypes> = pick(layer, appearanceKeys);
   const timeIntervals = evalTimeInterval(features, layer.data?.time);
+  // Compute once per layer render — same appearances apply to every feature.
+  const layerHasExpressions = hasAnyExpression(appearances);
   return {
     layer: evalLayerAppearances(appearances, layer),
-    features: features?.map((f, i) => evalSimpleLayerFeature(layer, f, timeIntervals?.[i])),
+    features: features?.map((f, i) =>
+      evalSimpleLayerFeature(layer, f, timeIntervals?.[i], layerHasExpressions),
+    ),
   };
 }
 
@@ -34,12 +38,18 @@ export const evalSimpleLayerFeature = (
   layer: LayerSimple,
   feature: Feature,
   interval?: TimeInterval,
+  layerHasExpressions = true,
 ): ComputedFeature => {
   const appearances: Partial<LayerAppearanceTypes> = pick(layer, appearanceKeys);
   const nextFeature = evalJsonProperties(layer, feature);
+  // Clone and parse once per feature, shared across all expression evaluations.
+  // Skip entirely when the layer has no expressions — preserves the static-layer fast path.
+  const parsedFeature = layerHasExpressions
+    ? recursiveJSONParse(cloneDeep(nextFeature))
+    : undefined;
   return {
     ...nextFeature,
-    ...evalLayerAppearances(appearances, layer, nextFeature),
+    ...evalLayerAppearances(appearances, layer, nextFeature, parsedFeature),
     type: "computedFeature",
     interval,
   };
@@ -49,6 +59,7 @@ export function evalLayerAppearances(
   appearance: Partial<LayerAppearanceTypes>,
   layer: LayerSimple,
   feature?: Feature,
+  parsedFeature?: Feature,
 ): Partial<AppearanceTypes> {
   if (!feature) {
     if (!layer.id) {
@@ -63,20 +74,25 @@ export function evalLayerAppearances(
 
   return Object.fromEntries(
     Object.entries(appearance)
-      .map(([k, v]) => (v ? [k, recursiveValEval(v, layer, feature)] : undefined))
+      .map(([k, v]) => (v ? [k, recursiveValEval(v, layer, feature, parsedFeature)] : undefined))
       .filter((v): v is [keyof LayerAppearanceTypes, LayerAppearanceTypes] => !!v),
   );
 }
 
-function recursiveValEval(obj: any, layer: LayerSimple, feature?: Feature): any {
+function recursiveValEval(
+  obj: any,
+  layer: LayerSimple,
+  feature?: Feature,
+  parsedFeature?: Feature,
+): any {
   return Object.fromEntries(
     Object.entries(obj).map(([k, v]) => {
       // if v is an object itself and not a null, recurse deeper
       if (hasNonExpressionObject(v)) {
-        return [k, recursiveValEval(v, layer, feature)];
+        return [k, recursiveValEval(v, layer, feature, parsedFeature)];
       }
       // if v is not an object, apply the evalExpression function
-      return [k, evalExpression(v, layer, feature)];
+      return [k, evalExpression(v, layer, feature, parsedFeature)];
     }),
   );
 }
@@ -121,23 +137,30 @@ function hasNonExpressionObject(v: any): boolean {
   return typeof v === "object" && v && !("expression" in v) && !Array.isArray(v);
 }
 
+function hasAnyExpression(obj: any): boolean {
+  if (typeof obj !== "object" || !obj || Array.isArray(obj)) return false;
+  if ("expression" in obj) return true;
+  return Object.values(obj).some(v => hasAnyExpression(v));
+}
+
 export function evalExpression(
   expressionContainer: any,
   layer?: LayerSimple,
   feature?: Feature,
+  parsedFeature?: Feature,
 ): unknown | undefined {
   try {
     if (hasExpression(expressionContainer)) {
       const styleExpression = expressionContainer.expression;
-      const parsedFeature = recursiveJSONParse(cloneDeep(feature));
+      const resolved = parsedFeature ?? recursiveJSONParse(cloneDeep(feature));
       if (typeof styleExpression === "undefined") {
         return undefined;
       } else if (typeof styleExpression === "object" && styleExpression.conditions) {
-        return new ConditionalExpression(styleExpression, parsedFeature, layer?.defines).evaluate();
+        return new ConditionalExpression(styleExpression, resolved, layer?.defines).evaluate();
       } else if (typeof styleExpression === "boolean" || typeof styleExpression === "number") {
-        return new Expression(String(styleExpression), parsedFeature, layer?.defines).evaluate();
+        return new Expression(String(styleExpression), resolved, layer?.defines).evaluate();
       } else if (typeof styleExpression === "string") {
-        return new Expression(styleExpression, parsedFeature, layer?.defines).evaluate();
+        return new Expression(styleExpression, resolved, layer?.defines).evaluate();
       }
       return styleExpression;
     }
