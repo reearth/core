@@ -24,9 +24,13 @@ export async function evalSimpleLayer(
   const features = layer.data ? await ctx.getAllFeatures(layer.data) : undefined;
   const appearances: Partial<LayerAppearanceTypes> = pick(layer, appearanceKeys);
   const timeIntervals = evalTimeInterval(features, layer.data?.time);
+  // Compute once per layer render — same appearances apply to every feature.
+  const layerHasExpressions = hasAnyExpression(appearances);
   return {
     layer: evalLayerAppearances(appearances, layer),
-    features: features?.map((f, i) => evalSimpleLayerFeature(layer, f, timeIntervals?.[i])),
+    features: features?.map((f, i) =>
+      evalSimpleLayerFeature(layer, f, timeIntervals?.[i], layerHasExpressions),
+    ),
   };
 }
 
@@ -34,12 +38,15 @@ export const evalSimpleLayerFeature = (
   layer: LayerSimple,
   feature: Feature,
   interval?: TimeInterval,
+  layerHasExpressions = true,
 ): ComputedFeature => {
   const appearances: Partial<LayerAppearanceTypes> = pick(layer, appearanceKeys);
   const nextFeature = evalJsonProperties(layer, feature);
-  // Clone and parse once per feature, then share across all expression evaluations.
-  // Previously cloneDeep was called inside evalExpression — once per expression per feature.
-  const parsedFeature = recursiveJSONParse(cloneDeep(nextFeature));
+  // Clone and parse once per feature, shared across all expression evaluations.
+  // Skip entirely when the layer has no expressions — preserves the static-layer fast path.
+  const parsedFeature = layerHasExpressions
+    ? recursiveJSONParse(cloneDeep(nextFeature))
+    : undefined;
   return {
     ...nextFeature,
     ...evalLayerAppearances(appearances, layer, nextFeature, parsedFeature),
@@ -128,6 +135,12 @@ function hasExpression(e: any): e is ExpressionContainer {
 
 function hasNonExpressionObject(v: any): boolean {
   return typeof v === "object" && v && !("expression" in v) && !Array.isArray(v);
+}
+
+function hasAnyExpression(obj: any): boolean {
+  if (typeof obj !== "object" || !obj || Array.isArray(obj)) return false;
+  if ("expression" in obj) return true;
+  return Object.values(obj).some(v => hasAnyExpression(v));
 }
 
 export function evalExpression(
