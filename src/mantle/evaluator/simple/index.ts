@@ -44,6 +44,9 @@ export const evalSimpleLayerFeature = (
   const nextFeature = evalJsonProperties(layer, feature);
   // Clone and parse once per feature, shared across all expression evaluations.
   // Skip entirely when the layer has no expressions — preserves the static-layer fast path.
+  // Note: parsedFeature is a shared reference. Two appearance fields that read the same
+  // object-valued property will alias each other (not get independent copies). Safe because
+  // expressions read parsedFeature but never mutate it.
   const parsedFeature = layerHasExpressions
     ? recursiveJSONParse(cloneDeep(nextFeature))
     : undefined;
