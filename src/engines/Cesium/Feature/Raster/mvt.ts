@@ -1,7 +1,7 @@
+import { cloneDeep, isEqual } from "lodash-es";
 import { useMemo, useRef } from "react";
 
 import { MVTImageryProvider } from "@reearth/cesium-mvt-imagery-provider";
-import { cloneDeep, isEqual } from "lodash-es";
 
 import type { LayerSimple } from "../../../../mantle";
 import { extractSimpleLayer } from "../utils";
