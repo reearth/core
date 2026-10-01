@@ -26,18 +26,15 @@ const computedLayer = {
 // After P2a fix: extractSimpleLayer should return a stable reference when the
 // input layer hasn't changed, so useMemo can cache the provider.
 // ---------------------------------------------------------------------------
-describe("extractSimpleLayer reference stability — baseline", () => {
-  // Remove this test when P2a lands — expect(ref1).not.toBe(ref2) will fail once
-  // extractSimpleLayer returns a stable reference for unchanged input.
-  it("returns a NEW reference on every call (documents current broken behavior)", () => {
+describe("extractSimpleLayer reference stability — after P2 fix", () => {
+  it("returns the SAME reference on every call (stable after P2 fix)", () => {
     const ref1 = extractSimpleLayer(computedLayer);
     const ref2 = extractSimpleLayer(computedLayer);
 
-    // Functionally correct — same value
+    // Same value
     expect(ref1).toEqual(ref2);
 
-    // Identity is unstable — this is the bug
-    // useMemo sees currentLayer change every render → provider always rebuilt
-    expect(ref1).not.toBe(ref2);
+    // Same reference — extractSimpleLayer no longer clones, so identity is stable
+    expect(ref1).toBe(ref2);
   });
 });
