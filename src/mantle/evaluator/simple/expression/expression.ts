@@ -76,7 +76,7 @@ export class Expression {
 }
 
 export function replaceDefines(expression: string, defines: any): string {
-  if (typeof defines === "undefined") {
+  if (typeof defines === "undefined" || Object.keys(defines).length === 0) {
     return expression;
   }
   const definesKey = JSON.stringify(Object.entries(defines).sort());

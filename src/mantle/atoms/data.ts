@@ -37,14 +37,12 @@ export function dataAtom(cacheAtoms = globalDataFeaturesCache) {
     null,
     async (get, set, value: { data: Data; features: string[]; layerId: string }) => {
       const d = dataKey(value.layerId, value.data);
+      const deleteSet = new Set(value.features);
       Object.entries(
         groupBy(
           get(getAll)(value.layerId, value.data)
             ?.filter(f => f.length)
-            .map(
-              f =>
-                [rangeKey(f[0].range), f, f.filter(g => !value.features.includes(g.id))] as const,
-            )
+            .map(f => [rangeKey(f[0].range), f, f.filter(g => !deleteSet.has(g.id))] as const)
             .filter(f => f[1].length !== f[2].length),
           g => g[0],
         ),

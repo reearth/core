@@ -62,6 +62,8 @@ const f35k = Array.from({ length: 35_000 }, (_, i) => makeFeature(i));
 const e5 = makeLayer(5);
 const e10 = makeLayer(10);
 const e15 = makeLayer(15);
+// P3-2: layer with empty defines — replaceDefines previously serialized even empty objects
+const e10WithEmptyDefines = { ...makeLayer(10), defines: {} };
 
 const makeCtx = (features: Feature[]) => ({
   getAllFeatures: async (_d: unknown) => features,
@@ -87,6 +89,17 @@ describe("evalSimpleLayer — baseline throughput", () => {
   });
   bench("35k features × 10 expr", async () => {
     await evalSimpleLayer(e10, makeCtx(f35k));
+  });
+});
+
+// ---------------------------------------------------------------------------
+// P3-2: empty defines fast path
+// Measures evalSimpleLayer when layer.defines is {} — replaceDefines previously
+// ran JSON.stringify on every expression even when defines was empty.
+// ---------------------------------------------------------------------------
+describe("evalSimpleLayer — empty defines fast path (P3-2)", () => {
+  bench("10k features × 10 expr — defines: {}", async () => {
+    await evalSimpleLayer(e10WithEmptyDefines, makeCtx(f10k));
   });
 });
 
