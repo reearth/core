@@ -26,6 +26,7 @@
     "test": "vitest",
     "storybook": "storybook dev -p 6007",
     "build-storybook": "storybook build",
+    "bench": "vitest bench",
     "preversion": "pnpm test run",
     "version": "pnpm build",
     "sketch-typegen": "xstate typegen src/**/sketchMachine.ts"
