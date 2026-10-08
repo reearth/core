@@ -1,6 +1,6 @@
 {
   "name": "@reearth/core",
-  "version": "0.0.7-alpha.80",
+  "version": "0.0.7-alpha.81",
   "author": "Re:Earth contributors <community@reearth.io>",
   "license": "Apache-2.0",
   "description": "A library that abstracts a map engine as one common API.",
@@ -142,7 +142,10 @@
       "vite": "^7.3.6",
       "lodash-es": "^4.18.1"
     },
-    "onlyBuiltDependencies": ["esbuild", "protobufjs"]
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "protobufjs"
+    ]
   },
   "packageManager": "pnpm@10.23.0"
 }
