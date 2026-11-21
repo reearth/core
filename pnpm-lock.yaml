@@ -42,7 +42,7 @@ importers:
         version: 1.1.18(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       '@reearth/cesium-mvt-imagery-provider':
         specifier: 1.6.2
-        version: 1.6.2(cesium@1.145.0)
+        version: 1.6.2(cesium@1.147.0)
       '@reearth/spatial-id-sdk':
         specifier: 0.0.0
         version: 0.0.0
@@ -66,7 +66,7 @@ importers:
         version: 6.1.0(@types/react@19.3.0)(react@19.3.0)(xstate@5.33.2)
       cesium-dnd:
         specifier: 1.1.0
-        version: 1.1.0(cesium@1.145.0)
+        version: 1.1.0(cesium@1.147.0)
       csv-parse:
         specifier: ^6.1.0
         version: 6.2.1
@@ -129,7 +129,7 @@ importers:
         version: 17.6.1(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       resium:
         specifier: ^1.19.3
-        version: 1.26.0(cesium@1.145.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+        version: 1.26.0(cesium@1.147.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       suspend-react:
         specifier: 0.1.3
         version: 0.1.3(react@19.3.0)
@@ -231,8 +231,8 @@ importers:
         specifier: ^10.4.23
         version: 10.6.1(postcss@8.5.28)
       cesium:
-        specifier: ^1.137.0
-        version: 1.145.0
+        specifier: ^1.147.0
+        version: 1.147.0
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -277,7 +277,7 @@ importers:
         version: 7.3.6(@types/node@25.9.7)(jiti@2.7.0)(lightningcss@1.32.0)
       vite-plugin-cesium:
         specifier: 1.2.23
-        version: 1.2.23(cesium@1.145.0)(rollup@4.63.3)(vite@7.3.6(@types/node@25.9.7)(jiti@2.7.0)(lightningcss@1.32.0))
+        version: 1.2.23(cesium@1.147.0)(rollup@4.63.3)(vite@7.3.6(@types/node@25.9.7)(jiti@2.7.0)(lightningcss@1.32.0))
       vite-plugin-dts:
         specifier: ^4.5.4
         version: 4.5.4(@types/node@25.9.7)(rollup@4.63.3)(typescript@5.9.3)(vite@7.3.6(@types/node@25.9.7)(jiti@2.7.0)(lightningcss@1.32.0))
@@ -430,16 +430,24 @@ packages:
     resolution: {integrity: sha512-ctxtJ/eA+t+6q2++vj5j7FYX3nRu311q1wfYH3xjlLOsczhlhxAg2FWNUXhpGvAw3BWo1xBcvOV6/YLc2r5FJw==}
     hasBin: true
 
-  '@cesium/engine@26.3.0':
-    resolution: {integrity: sha512-jtgOewm/IZoypmqpbeTlYhMOKhQg+XPwUXoYat84vhIU8l8SfVSEat4Lc/Y4Fb7ypi3z1YmElKjVYvoI5CH6Pw==}
-    engines: {node: '>=22.0.0'}
+  '@cesium/core@0.1.1':
+    resolution: {integrity: sha512-2twC6bAYWdrJ4YVS2UPCpgkE7EZWHl+GVuh5n9IT6gVL9W9OYPas29Vh+wrUVI/9Hs8TeiNtis+Du2U9b+ce6A==}
+    engines: {node: '>=22.17.0'}
+
+  '@cesium/engine@26.5.0':
+    resolution: {integrity: sha512-vpMuIOQ7QXNVrVTCCPWQ9y0zyfR+lhKLUOWt8XRCrDibtsASVpXGRFKQEdONf2D2EznIAQZ09sGOC8LwhvOeIQ==}
+    engines: {node: '>=22.17.0'}
+
+  '@cesium/gltf@0.1.1':
+    resolution: {integrity: sha512-tACM+dBXm+hXU4iyMynEK11ymce6GqUaB8TjF7jbtqBfxVYh45C2zBjNnv3ElpwhlwjLjwbc25zKZrO8oGYegw==}
+    engines: {node: '>=22.17.0'}
 
   '@cesium/wasm-splats@0.1.0-alpha.2':
     resolution: {integrity: sha512-t9pMkknv31hhIbLpMa8yPvmqfpvs5UkUjgqlQv9SeO8VerCXOYnyP8/486BDaFrztM0A7FMbRjsXtNeKvqQghA==}
 
-  '@cesium/widgets@16.2.0':
-    resolution: {integrity: sha512-cxYw8t4GVJUVSNCN+yDXqB7MqxLme1mGWT4W3pYQXrlswdIBey9Q+rf5cVZysd0PUGcrLXFtNRfbScOqQe78BQ==}
-    engines: {node: '>=22.0.0'}
+  '@cesium/widgets@16.3.1':
+    resolution: {integrity: sha512-eyAGPYYL4v/WeLasmphRwxFcCl/qeTcRhncbBlOzMTSTLjgjZSea0IcEDCKC2ip/mHPeGe887X84xi1SV8mcEQ==}
+    engines: {node: '>=22.17.0'}
 
   '@chromatic-com/storybook@5.3.1':
     resolution: {integrity: sha512-eUcbR9CddVmKAnjOiBCOz5rNdT096jiXIjR+qaWbUuTlgRdpc9yjTrk4/hiPAAykZrPYVNJN11p6rJgW9KNpKg==}
@@ -3236,9 +3244,9 @@ packages:
     peerDependencies:
       cesium: '*'
 
-  cesium@1.145.0:
-    resolution: {integrity: sha512-6Azix8b5LPpoVSx8XQ6zPztpluJVmq+CEO3W2rOWxtc6bri6Nc9MvCYhKmTW1LAEwfisV7yzNgfulCXw9842+g==}
-    engines: {node: '>=22.0.0'}
+  cesium@1.147.0:
+    resolution: {integrity: sha512-gY5TF0rSyIMtnSIFHUuiHnrCuhdKaHUzLWFcjxytsdheKfKtYYOWicIWMypGjwYfnmJrgPgNF7HNjO9SK/JIkw==}
+    engines: {node: '>=22.17.0'}
 
   chai@5.3.3:
     resolution: {integrity: sha512-4zNhdJD/iOjSH0A05ea+Ke6MU5mmpQcbQsSOkgdaUMJ9zTlDTD/GYlwohmIE2u0gaxHYiVHEn1Fw9mZ/ktJWgw==}
@@ -4522,8 +4530,8 @@ packages:
   kolorist@1.8.0:
     resolution: {integrity: sha512-Y+60/zizpJ3HRH8DCss+q95yr6145JXZo46OTpFvDZWLfRCE4qChOyk1b26nMaNpfHHgxagk9dXT5OP0Tfe+dQ==}
 
-  ktx-parse@1.1.0:
-    resolution: {integrity: sha512-mKp3y+FaYgR7mXWAbyyzpa/r1zDWeaunH+INJO4fou3hb45XuNSwar+7llrRyvpMWafxSIi99RNFJ05MHedaJQ==}
+  ktx-parse@2.0.0:
+    resolution: {integrity: sha512-PW38i6SBZagE7c4yCYru636ICCkhJ8FNjOzAdjGkC65BZ0gElQJvFenSGc62SHFj5Fg0ft+U38PPhMZsWYQLCg==}
 
   lerc@2.0.0:
     resolution: {integrity: sha512-7qo1Mq8ZNmaR4USHHm615nEW2lPeeWJ3bTyoqFbd35DLx0LUH7C6ptt5FDCTAlbIzs3+WKrk5SkJvw8AFDE2hg==}
@@ -5997,11 +6005,12 @@ packages:
   xstate@4.38.3:
     resolution: {integrity: sha512-SH7nAaaPQx57dx6qvfcIgqKRXIh4L0A1iYEqim4s1u7c9VoCgzZc+63FY90AKU4ZzOC2cfJzTnpO4zK7fCUzzw==}
 
-  xstate@5.0.0-beta.54:
-    resolution: {integrity: sha512-BTnCPBQ2iTKe4uCnHEe1hNx6VTbXU+5mQGybSQHOjTLiBi4Ryi+tL9T6N1tmqagvM8rfl4XRfvndogfWCWcdpw==}
-
   xstate@5.33.2:
     resolution: {integrity: sha512-8tC7yXgeCvpT8gKEeEje6ikJJG1wpnoLiXe+HfECW8m10ubMd3QxKOwWA8KxPJVBcLwfdRoMKYxIBGYKmo37/A==}
+
+  xstate@6.0.0-beta.4:
+    resolution: {integrity: sha512-sGFj6r5YOVqYepCtv1VVksodsFYMhAWKAvRGiK2/6sTJh9ZOZV8K27FESE+tMvpWE2tDRHsKHUbxny3adn/ZcA==}
+    hasBin: true
 
   yallist@3.1.1:
     resolution: {integrity: sha512-a4UGQaWPH59mOXUYnAG2ewncQS4i4F43Tv3JoAM+s2VDAmS9NsK8GpDMLrCHPksFT7h3K6TOoUNn2pb7RoXx4g==}
@@ -6171,8 +6180,16 @@ snapshots:
     dependencies:
       css-tree: 3.2.1
 
-  '@cesium/engine@26.3.0':
+  '@cesium/core@0.1.1':
     dependencies:
+      earcut: 3.0.2
+      mersenne-twister: 1.1.0
+      urijs: 1.19.11
+
+  '@cesium/engine@26.5.0':
+    dependencies:
+      '@cesium/core': 0.1.1
+      '@cesium/gltf': 0.1.1
       '@cesium/wasm-splats': 0.1.0-alpha.2
       '@spz-loader/core': 0.3.1
       '@tweenjs/tween.js': 25.0.0
@@ -6181,11 +6198,10 @@ snapshots:
       bitmap-sdf: 1.0.4
       dompurify: 3.4.15
       draco3d: 1.5.7
-      earcut: 3.0.2
       grapheme-splitter: 1.0.4
       jsep: 1.4.0
       kdbush: 4.1.0
-      ktx-parse: 1.1.0
+      ktx-parse: 2.0.0
       lerc: 2.0.0
       mersenne-twister: 1.1.0
       meshoptimizer: 1.2.0
@@ -6195,11 +6211,16 @@ snapshots:
       topojson-client: 3.1.0
       urijs: 1.19.11
 
+  '@cesium/gltf@0.1.1':
+    dependencies:
+      '@cesium/core': 0.1.1
+
   '@cesium/wasm-splats@0.1.0-alpha.2': {}
 
-  '@cesium/widgets@16.2.0':
+  '@cesium/widgets@16.3.1':
     dependencies:
-      '@cesium/engine': 26.3.0
+      '@cesium/core': 0.1.1
+      '@cesium/engine': 26.5.0
       nosleep.js: 0.12.0
 
   '@chromatic-com/storybook@5.3.1(storybook@10.6.0(@types/react@19.3.0)(prettier@3.9.6)(react@19.3.0))':
@@ -7002,14 +7023,14 @@ snapshots:
 
   '@react-dnd/shallowequal@4.0.2': {}
 
-  '@reearth/cesium-mvt-imagery-provider@1.6.2(cesium@1.145.0)':
+  '@reearth/cesium-mvt-imagery-provider@1.6.2(cesium@1.147.0)':
     dependencies:
       '@mapbox/vector-tile': 1.3.1
       '@turf/turf': 6.5.0
       '@types/jsonpath-plus': 5.0.5
       '@types/lodash-es': 4.17.12
       '@types/offscreencanvas': 2019.7.3
-      cesium: 1.145.0
+      cesium: 1.147.0
       jsonpath-plus: 10.3.0
       lodash-es: 4.18.1
       lru-cache: 10.2.0
@@ -9921,7 +9942,7 @@ snapshots:
       isomorphic-fetch: 3.0.0
       prettier: 2.8.8
       xstate: 4.38.3
-      xstate-beta: xstate@5.0.0-beta.54
+      xstate-beta: xstate@6.0.0-beta.4
     transitivePeerDependencies:
       - encoding
       - supports-color
@@ -10185,14 +10206,16 @@ snapshots:
 
   caniuse-lite@1.0.30001810: {}
 
-  cesium-dnd@1.1.0(cesium@1.145.0):
+  cesium-dnd@1.1.0(cesium@1.147.0):
     dependencies:
-      cesium: 1.145.0
+      cesium: 1.147.0
 
-  cesium@1.145.0:
+  cesium@1.147.0:
     dependencies:
-      '@cesium/engine': 26.3.0
-      '@cesium/widgets': 16.2.0
+      '@cesium/core': 0.1.1
+      '@cesium/engine': 26.5.0
+      '@cesium/gltf': 0.1.1
+      '@cesium/widgets': 16.3.1
       protobufjs: 8.8.0
 
   chai@5.3.3:
@@ -11646,7 +11669,7 @@ snapshots:
 
   kolorist@1.8.0: {}
 
-  ktx-parse@1.1.0: {}
+  ktx-parse@2.0.0: {}
 
   lerc@2.0.0: {}
 
@@ -12352,9 +12375,9 @@ snapshots:
 
   require-from-string@2.0.2: {}
 
-  resium@1.26.0(cesium@1.145.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0):
+  resium@1.26.0(cesium@1.147.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0):
     dependencies:
-      cesium: 1.145.0
+      cesium: 1.147.0
       react: 19.3.0
       react-dom: 19.3.0(react@19.3.0)
 
@@ -12990,9 +13013,9 @@ snapshots:
 
   uuid@13.0.2: {}
 
-  vite-plugin-cesium@1.2.23(cesium@1.145.0)(rollup@4.63.3)(vite@7.3.6(@types/node@25.9.7)(jiti@2.7.0)(lightningcss@1.32.0)):
+  vite-plugin-cesium@1.2.23(cesium@1.147.0)(rollup@4.63.3)(vite@7.3.6(@types/node@25.9.7)(jiti@2.7.0)(lightningcss@1.32.0)):
     dependencies:
-      cesium: 1.145.0
+      cesium: 1.147.0
       fs-extra: 9.1.0
       rollup-plugin-external-globals: 0.6.1(rollup@4.63.3)
       serve-static: 1.16.3
@@ -13184,9 +13207,9 @@ snapshots:
 
   xstate@4.38.3: {}
 
-  xstate@5.0.0-beta.54: {}
-
   xstate@5.33.2: {}
+
+  xstate@6.0.0-beta.4: {}
 
   yallist@3.1.1: {}
 
