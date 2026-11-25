@@ -35,7 +35,7 @@
     "node": ">=20"
   },
   "peerDependencies": {
-    "cesium": "^1.137.0",
+    "cesium": "^1.147.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
@@ -114,7 +114,7 @@
     "@vitejs/plugin-react": "^5.2.0",
     "@xstate/cli": "0.5.17",
     "autoprefixer": "^10.6.2",
-    "cesium": "^1.137.0",
+    "cesium": "^1.147.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "eslint": "8.57.0",
