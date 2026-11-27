@@ -58,7 +58,7 @@
     "@ungap/event-target": "0.2.4",
     "@xstate/react": "^6.1.0",
     "cesium-dnd": "1.1.0",
-    "csv-parse": "^6.1.0",
+    "csv-parse": "^7.0.0",
     "d3": "^7.9.2",
     "fast-xml-parser": "^5.12.1",
     "framer-motion": "^12.29.2",
