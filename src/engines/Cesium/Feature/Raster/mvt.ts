@@ -1,7 +1,9 @@
-import { useMemo } from "react";
+import { cloneDeep, isEqual } from "lodash-es";
+import { useMemo, useRef } from "react";
 
 import { MVTImageryProvider } from "@reearth/cesium-mvt-imagery-provider";
 
+import type { LayerSimple } from "../../../../mantle";
 import { extractSimpleLayer } from "../utils";
 
 import { useData, useImageryProvider } from "./hooks";
@@ -16,7 +18,16 @@ export const useMVT = ({
   const { show = true, minimumLevel, maximumLevel, credit } = property ?? {};
   const { type, url, layers } = useData(layer);
 
-  const currentLayer = extractSimpleLayer(layer) || undefined;
+  const rawLayer = extractSimpleLayer(layer);
+  // Proxy-strip (required by MVTImageryProvider) and stabilize the reference
+  // so useMemo only recomputes when layer content actually changes.
+  const currentLayerRef = useRef<LayerSimple | undefined>(undefined);
+  if (!rawLayer) {
+    currentLayerRef.current = undefined;
+  } else if (!isEqual(currentLayerRef.current, rawLayer)) {
+    currentLayerRef.current = cloneDeep(rawLayer);
+  }
+  const currentLayer = currentLayerRef.current;
   const imageryProvider = useMemo(() => {
     if (!isVisible || !show || !url || !layers || type !== "mvt") return;
     return new MVTImageryProvider({
